@@ -1,6 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 import os
+from chess import ChessGame
 
 class GridApp(tk.Tk):
     def __init__(self):
