@@ -1,135 +1,140 @@
 import tkinter as tk
-from PIL import Image, ImageTk
+from board import Board
 import os
-from chess import ChessGame
+from PIL import Image, ImageTk
 
-class GridApp(tk.Tk):
-    def __init__(self):
-        super().__init__()
-        self.title("Chess Piece Placement")
-
-        self.pieces = {}  # Cache for loaded piece images
-        self.selected_piece = None  # Currently selected piece
-
-        # Entry for width and height with labels
-        self.setup_inputs()
-
-        self.grid_frame = tk.Frame(self)  # Frame to hold the grid
-        self.piece_selection_frame = None  # Initialize frame for piece selection buttons
-
-        # Load and display piece icons initially
-        self.load_piece_icons()
-
-        # Default grid generation placeholder
-        self.grid_frame.grid(row=3, column=0, columnspan=12)
+class BoardGUI:
+    def __init__(self, root, board):
+        # Set initial values and event listeners
+        self.root = root
+        self.root.title("Custom Chess GUI - Mason Liebe")
+        self.board = board
         
-        # Initialize mouse event handling helpers
-        self.dragging = False  # Track whether a drag is in progress
-        self.dragged_piece = None  # The piece being dragged
-        self.dragged_image = None  # The canvas image item being dragged
+        # Create the board canvas and event listeners
+        self.board_canvas = tk.Canvas(self.root, width=400, height=400)
+        self.board_canvas.pack(side = tk.LEFT)
+        self.board_canvas.bind("<Button-1>", self.on_canvas_click)
 
+        # Store for the image references to prevent garbage collection        
+        self.image_refs = []
 
-        self.generate_grid()
+        # Draw the board
+        self.draw_board()
+        self.add_buttons()
+        
+    def draw_board(self):
+        self.board_canvas.delete("all")  # Clear the canvas before redrawing
+        self.image_refs = []  # Clear previous image references
 
-    def setup_inputs(self):
-        self.entry_width = tk.Entry(self)
-        self.entry_height = tk.Entry(self)
-        self.label_width = tk.Label(self, text="Width:")
-        self.label_height = tk.Label(self, text="Height:")
-        self.generate_button = tk.Button(self, text="Generate Grid", command=self.generate_grid)
+        for row in range(8):
+            for col in range(8):
+                x1 = col * 50
+                y1 = row * 50
+                x2 = x1 + 50
+                y2 = y1 + 50
+                color = "white" if (row + col) % 2 == 0 else "black"
+                self.board_canvas.create_rectangle(x1, y1, x2, y2, fill=color)
+        
+        for row in range(8):
+            for col in range(8):
+                piece = self.board.get_board()[row][col]
+                if piece != 0:
+                    self.draw_piece(piece, row, col)
 
-        self.label_width.grid(row=0, column=0, padx=10, pady=10)
-        self.entry_width.grid(row=0, column=1, padx=10, pady=10)
-        self.label_height.grid(row=1, column=0, padx=10, pady=10)
-        self.entry_height.grid(row=1, column=1, padx=10, pady=10)
-        self.generate_button.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
+        # Add more code to draw the rest of the board
+    
+    def draw_piece(self, piece_number, row, col):
+        fileDict = {1: "w_pawn", 2: "b_pawn", 3: "w_knight", 4: "b_knight", 5: "w_bishop", 6: "b_bishop", 7: "w_rook", 8: "b_rook", 9: "w_queen", 10: "b_queen", 11: "w_king", 12: "b_king"}
 
-    def load_piece_icons(self):
-        if self.piece_selection_frame:
-            self.piece_selection_frame.destroy()  # Remove the old frame and its widgets
-        self.piece_selection_frame = tk.Frame(self)  # Create a new frame for piece selection buttons
-        self.piece_selection_frame.grid(row=4, column=0, columnspan=12, pady=(10, 0))  # Adjust columnspan as needed
+        piece_name = fileDict[piece_number]
+        path = f"assets/{piece_name}.png"
+        # Open the image with PIL
+        pil_image = Image.open(path)
+        # Resize the image
+        pil_image = pil_image.resize((40, 40), Image.Resampling.LANCZOS)
+        # Convert the PIL image to a PhotoImage
+        image = ImageTk.PhotoImage(pil_image)
+        
+        # Adjusting the position for the image to be centered in the square
+        self.board_canvas.create_image(col * 50 + 26, row * 50 + 25, anchor="center", image=image)
+        
+        # Keep a reference to the image
+        self.image_refs.append(image)
+    
+    def add_buttons(self):
+        # Create a frame to hold the buttons
+        button_frame = tk.Frame(self.root)
+        button_frame.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Reset button
+        reset_button = tk.Button(button_frame, text="Reset Board", command=self.reset_board)
+        reset_button.pack(pady=10)
+        
+        # Clear button
+        clear_button = tk.Button(button_frame, text="Clear Board", command=self.clear_board)
+        clear_button.pack(pady=10)
+    
+    def reset_board(self):
+        # Set the board state to the initial configuration and redraw the board
+        initial_state = [[8, 4, 6, 10, 12, 6, 4, 8],
+                         [2, 2, 2,  2,  2, 2, 2, 2],
+                         [0, 0, 0,  0,  0, 0, 0, 0],
+                         [0, 0, 0,  0,  0, 0, 0, 0],
+                         [0, 0, 0,  0,  0, 0, 0, 0],
+                         [0, 0, 0,  0,  0, 0, 0, 0],
+                         [1, 1, 1,  1,  1, 1, 1, 1],
+                         [7, 3, 5,  9, 11, 5, 3, 7]]
+        self.board.set_board(initial_state)
+        self.draw_board()
+    
+    def clear_board(self):
+        # Clear the board except for the kings
+        clear_state = [[0]*8 for _ in range(8)]
+        clear_state[0][4] = 12  # White King
+        clear_state[7][4] = 6   # Black King
+        self.board.set_board(clear_state)
+        self.draw_board()
 
-        pieces = ["b_bishop", "w_bishop", "b_knight", "w_knight", "b_rook", "w_rook", "b_pawn", "w_pawn", "b_queen", "w_queen", "b_king", "w_king"]
-        assets_folder = "assets"
-        for i, piece_name in enumerate(pieces):
-            path = os.path.join(assets_folder, f"{piece_name}.png")
-            image = Image.open(path)
-            image = image.resize((50, 50), Image.Resampling.LANCZOS)
-            self.pieces[piece_name] = ImageTk.PhotoImage(image)
+    def on_canvas_click(self, event):
+        col = event.x // 50  # Calculate column from x coordinate
+        row = event.y // 50  # Calculate row from y coordinate
+        
+        piece = self.board.get_board()[row][col]  # Get the piece at the click location
+        if piece != 0:  # If there is a piece at the click location
+            valid_moves = piece.get_valid_moves(self.board)  # Get valid moves for the piece
+            
+            self.highlight_moves(valid_moves)  # Highlight valid moves
+    
+    def highlight_moves(self, moves):
+        for row, col in moves:  # Loop through each valid move
+            x1 = col * 50
+            y1 = row * 50
+            x2 = x1 + 50
+            y2 = y1 + 50
+            self.board_canvas.create_rectangle(x1, y1, x2, y2, fill="green", outline="")
+            # Redraw the piece on top if needed
+            piece = self.board.get_board()[row][col]
+            if piece != 0:
+                self.draw_piece(piece, row, col)
 
-            button = tk.Button(self.piece_selection_frame, image=self.pieces[piece_name], bg='white', command=lambda name=piece_name: self.select_piece(name))
-            button.grid(row=i % 2, column=i // 2, padx=5, pady=5)
-
-    def select_piece(self, name):
-        self.selected_piece = name
-
-    def generate_grid(self):
-        try:
-            width = int(self.entry_width.get())
-            height = int(self.entry_height.get())
-            if width <= 0 or height <= 0:
-                raise ValueError("Dimensions must be positive integers")
-        except ValueError as e:
-            print("Error:", e)
-            return
-
-        # Clear previous grid
-        for widget in self.grid_frame.winfo_children():
-            widget.destroy()
-
-        self.squares = {}  # Store Canvas references to update them later
-
-        # Generate new grid based on width and height
-        for row in range(height):
-            for col in range(width):
-                canvas = tk.Canvas(self.grid_frame, width=60, height=60, borderwidth=1, highlightthickness=0)
-                color = "light gray" if (row + col) % 2 == 0 else "black"
-                canvas.create_rectangle(0, 0, 60, 60, fill=color, outline=color)
-                canvas.grid(row=row, column=col, sticky="nsew")
-                canvas.bind("<Button-1>", lambda event, r=row, c=col: self.place_piece(r, c))
-                self.squares[(row, col)] = canvas
-
-        # Reload piece icons to adjust their position based on the new grid
-        self.load_piece_icons()
-
-    def place_piece(self, row, col, piece_name = None):
-        piece_name = piece_name or self.selected_piece
-        if piece_name and (row, col) in self.squares:
-            canvas = self.squares[(row, col)]
-            canvas.delete("all")
-            color = "light gray" if (row + col) % 2 == 0 else "black"
-            canvas.create_rectangle(0, 0, 60, 60, fill=color, outline=color)
-            canvas.create_image(30, 30, image=self.pieces[self.selected_piece])  # Place piece at center
-            canvas.bind("<ButtonPress-1>", lambda event, p=piece_name, r=row, c=col: self.start_drag(event, p, r, c))
-            canvas.bind("<B1-Motion>", self.do_drag)
-            canvas.bind("<ButtonRelease-1>", self.end_drag)
-
-    def start_drag(self, event, piece, row, col):
-        if not self.dragging and piece:
-            self.dragging = True
-            self.dragged_piece = piece
-            self.canvas.delete("dragged")  # Remove any existing dragged piece visuals
-            self.dragged_image = self.canvas.create_image(event.x, event.y, image=self.pieces[piece], tags=("dragged",))
-            self.current_row, self.current_col = row, col  # Store the initial position
-
-    def do_drag(self, event):
-        if self.dragging and self.dragged_image:
-            # Update the dragged image position to follow the mouse cursor
-            self.canvas.coords(self.dragged_image, event.x, event.y)
-
-    def end_drag(self, event):
-        if self.dragging:
-            self.dragging = False
-            target_row, target_col = self.calculate_target_square(event.x, event.y)
-            if (target_row, target_col) in self.squares:
-                # Move the piece in the backend model if needed, then visually
-                self.place_piece(target_row, target_col, self.dragged_piece)
-            self.canvas.delete("dragged")  # Remove the dragged piece visual
-            self.dragged_piece = None
-            self.dragged_image = None
+            
+    def run(self):
+        self.root.mainloop()
 
 
 if __name__ == "__main__":
-    app = GridApp()
-    app.mainloop()
+    board_state = [[8, 4, 6, 10, 12, 6, 4, 8],
+                   [2, 2, 2,  2,  2, 2, 2, 2],
+                   [0, 0, 0,  0,  0, 0, 0, 0],
+                   [0, 0, 0,  0,  0, 0, 0, 0],
+                   [0, 0, 0,  0,  0, 0, 0, 0],
+                   [0, 0, 0,  0,  0, 0, 0, 0],
+                   [1, 1, 1,  1,  1, 1, 1, 1],
+                   [7, 3, 5,  9, 11, 5, 3, 7]]
+    
+    board = Board(8, 8, board_state)
+    
+    # Create the root window
+    root = tk.Tk()
+    board_gui = BoardGUI(root, board)
+    board_gui.run()
