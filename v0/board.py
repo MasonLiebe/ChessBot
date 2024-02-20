@@ -1,4 +1,4 @@
-from pieces import Piece, Pawn, Knight, Bishop, Rook, Queen, King, CustomPiece1, CustomPiece2, CustomPiece3, Duck, Empty
+from v1.pieces import Piece, Pawn, Knight, Bishop, Rook, Queen, King, CustomPiece1, CustomPiece2, CustomPiece3, Duck, Empty
 
 class Board:
     # Class representing the chess game and board
@@ -79,6 +79,9 @@ class Board:
                         self.board_pieces[i][j] = CustomPiece3(i, j, "black", self)
                     case 19:
                         self.board_pieces[i][j] = Duck(i, j, "yellow", self)
+    
+    def get_board_pieces(self):
+        return self.board_pieces
         
     
     def get_black_pieces(self):

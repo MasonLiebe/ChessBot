@@ -1,452 +1,275 @@
+import copy
+
 
 class Piece:
-    def __init__(self, row, col, color, board):
-        self.color = color
-        self.row = row
-        self.col = col
-        self.Type = None
-    
-    def get_color(self):
-        return self.color
-    
-    def get_row(self):
-        return self.row
-    
-    def get_col(self):
-        return self.col
-    
-    def is_capturable(self, piece, selfCapture = False):
-        # @param piece: the piece that is attempting to capture this piece
-        # @param selfCapture: a boolean representing whether selfCapture is enabled
-        # @return: a boolean representing whether the piece can be captured
+    def __init__(self, color, position):
+        self.color = color  # 'white' or 'black'
+        self.position = position  # Position as a tuple (row, col)
 
-        if (self.color == piece.get_color() and not selfCapture) or self.get_color() == "yellow":
-            return False
-        return True
-
-    def is_empty(self):
-        return self.Type == "Empty"
-
-    def execute_move(self, row, col):
-        # @param row: the row the piece will move to
-        # @param col: the column the piece will move to
-        # @return: None
-        
-        self.row = row
-        self.col = col
-        return
+    def possible_moves(self, game):
+        """Returns a list of possible moves for this piece.
+        To be implemented by each specific piece type."""
+        raise NotImplementedError("This method should be overridden by subclasses")
+    
+    def king_in_check(self, game, move):
+        """Returns True if the move puts the king in check, False otherwise."""
+        # Make the move on a deep copy of the game
+        game_copy = copy.deepcopy(game)
+        start_pos, end_pos = move
+        piece = game_copy.board[start_pos[0]][start_pos[1]]
+        game_copy.board[end_pos[0]][end_pos[1]] = piece
+        game_copy.board[start_pos[0]][start_pos[1]] = Empty('', start_pos)
+        piece.position = end_pos
+        # Check if the king is in check
+        in_check = game_copy.is_in_check()
+        # Undo the move
+        game_copy.board[start_pos[0]][start_pos[1]] = piece
+        game_copy.board[end_pos[0]][end_pos[1]] = Empty('', end_pos)
+        piece.position = start_pos
+        return in_check
 
 class Empty(Piece):
-    def __init__(self, row, col, color, board):
-        super().__init__(row, col, color, board)
-        self.Type = "Empty"
-    
-    def spaces_attacking(self, board):
-        return []
-    
-    def valid_moves(self, board):
+
+    def __init__(self, color, position):
+        super().__init__(color, position)
+        self.color = None
+        self.display = "--"  # A string to display when printing the board
+
+    def possible_moves(self, game):
         return []
 
-# Individual Piece Classes Below
 class Pawn(Piece):
-    def __init__(self, row, col, color, board):
-        super().__init__(row, col, color, board)
-        self.Type = "Pawn"
-        self.attacking = self.squares_attacking(board)
+    def __init__(self, color, position):
+        super().__init__(color, position)
+        self.has_moved = False # A flag to keep track of whether the pawn has moved
+        self.display = self.color[0] + "P"
+    
+    def attacked_positions(self, game):
+        # returns list of attacked positions for the pawn as tuples
+        attacked_positions = []
+        dir = 1 if self.color == "black" else -1
+        if self.position[1] > 0:
+            attacked_positions.append((self.position[0] + dir, self.position[1] - 1))
+        if self.position[1] < 7:
+            attacked_positions.append((self.position[0] + dir, self.position[1] + 1))
+        return attacked_positions
+    
+    def possible_moves(self, game):
+        # returns list of possible moves for the pawn as tuples
+        possible_moves = []
+        dir = 1 if self.color == "black" else -1
 
-    def squares_attacking(self, board):
-        # @return: a list of tuples representing the spaces the piece is attacking
-        if self.color == "white":
-            return [(self.row - 1, self.col - 1), (self.row - 1, self.col + 1)]
-        else:
-            return [(self.row + 1, self.col - 1), (self.row + 1, self.col + 1)]
+        # check if the pawn can move forward 1 or 2 squares
+        if game.board[self.position[0] + dir][self.position[1]].color is None:
+            possible_moves.append((self.position[0] + dir, self.position[1]))
+            if not self.has_moved and game.board[self.position[0] + 2*dir][self.position[1]].color is None:
+                possible_moves.append((self.position[0] + 2*dir, self.position[1]))
         
-    def get_valid_moves(self, board, enPassant = None, overwrite = False, selfCapture = False, castlingState = (True, True, True, True)):
-        # @param board: the board object representing the current board state
-        # @param enPassant: the current enPassant state as a tuple (row, col)
-        # @param overwrite: a boolean representing whether the move is an overwrite
-        # @param selfCapture: a boolean representing whether the move is a selfCapture
-        # @param castlingState: a tuple representing the castling state of the board
-        # @return: a list of tuples representing the valid moves for the piece
+        # check if the pawn can capture diagonally
+        if self.position[1] > 0 and game.board[self.position[0] + dir][self.position[1] - 1].color  is not None and game.board[self.position[0] + dir][self.position[1] - 1].color != self.color:
+            possible_moves.append((self.position[0] + dir, self.position[1] - 1))
+        if self.position[1] < 7 and game.board[self.position[0] + dir][self.position[1] + 1].color  is not None and game.board[self.position[0] + dir][self.position[1] + 1].color != self.color:
+            possible_moves.append((self.position[0] + dir, self.position[1] + 1))
 
-        validMoves = []
-        # check if pawn has moved based on rank based on color for 2-square jump
-        if self.color == "white":
-            if self.row == board.get_rows() - 2:
-                if board.get_board()[self.row - 1][self.col] == 0 and board.get_board()[self.row - 2][self.col] == 0:
-                    validMoves.append((self.row - 2, self.col))
-        else:
-            if self.row == 1:
-                if board.get_board()[self.row + 1][self.col] == 0 and board.get_board()[self.row + 2][self.col] == 0:
-                    validMoves.append((self.row + 2, self.col))
+        # check if the pawn can capture en passant
+        if game.en_passant_target == (self.position[0] + dir, self.position[1] - 1):
+            possible_moves.append((self.position[0] + dir, self.position[1] - 1))
+
+        # remove moves that would put the king in check
+        possible_moves = [move for move in possible_moves if not self.king_in_check(game, (self.position, move))]
+        print(possible_moves)
         
-        # check if pawn can move forward one square
-        if self.color == "white":
-            if self.row > 0 and board.get_board()[self.row - 1][self.col] == 0:
-                validMoves.append((self.row - 1, self.col))
-        else:
-            if self.row < board.get_rows() - 1 and board.get_board()[self.row + 1][self.col] == 0:
-                validMoves.append((self.row + 1, self.col))
-        
-        # check if pawn can capture
-        for move in self.attacking:
-            if move[0] >= 0 and move[0] < board.get_rows() and move[1] >= 0 and move[1] < board.get_columns():
-                if board.get_pieces()[move[0]][move[1]].is_capturable(self, selfCapture):
-                    validMoves.append(move)
-        return validMoves
+        return possible_moves
 
 
 class Knight(Piece):
-    def __init__(self, color, row, col, board):
-        super().__init__(color, row, col, board)
-        self.Type = "Knight"
-        self.attacking = self.squares_attacking(board)
+    def __init__(self, color, position):
+        super().__init__(color, position)
+        self.display = self.color[0] + "N"
+    
+    def attacked_positions(self, game):
+        # returns list of attacked positions for the knight as tuples
+        attacked_positions = []
+        for dr, dc in [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)]:
+            r, c = self.position[0] + dr, self.position[1] + dc
+            if 0 <= r < 8 and 0 <= c < 8:
+                attacked_positions.append((r, c))
+        return attacked_positions
 
-    def squares_attacking(self, board):
-        # @return: a list of tuples representing the spaces the piece is attacking
-        validMoves = []
-        # check if knight can move to each of the 8 possible squares
-        for i in range(-2, 3):
-            for j in range(-2, 3):
-                if abs(i) + abs(j) == 3 and self.row + i >= 0 and self.row + i < board.get_rows() and self.col + j >= 0 and self.col + j < board.get_columns():
-                    validMoves.append((self.row + i, self.col + j))
-        return validMoves
+    def possible_moves(self, game):
+        # returns list of possible moves for the knight as tuples
+        possible_moves = []
 
-    def get_valid_moves(self, board, enPassant = None, overwrite = False, selfCapture = False, castlingState = (True, True, True, True)):
-        # @param board: the current board state as integer array
-        # @param enPassant: the current enPassant state as a tuple (row, col)
-        # @param overwrite: a boolean representing whether the move is an overwrite
-        # @param selfCapture: a boolean representing whether the move is a selfCapture
-        # @param castlingState: a tuple representing the castling state of the board
-        # @return: a list of tuples representing the valid moves for the piece
+        for dr, dc in [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)]:
+            r, c = self.position[0] + dr, self.position[1] + dc
+            if 0 <= r < 8 and 0 <= c < 8 and game.board[r][c].color != self.color:
+                possible_moves.append((r, c))
+
+        # remove moves that would put the king in check
+        possible_moves = [move for move in possible_moves if not self.king_in_check(game, (self.position, move))]
         
-        validMoves = []
-        for move in self.attacking:
-            if board.get_pieces()[move[0]][move[1]].Type == "Empty" or board.get_pieces()[move[0]][move[1]].is_capturable(self, selfCapture):
-                validMoves.append(move)
-        return validMoves
+        return possible_moves
 
 
 class Bishop(Piece):
-    def __init__(self, color, row, col, board):
-        super().__init__(color, row, col, board)
-        self.Type = "Bishop"
-        self.attacking = self.squares_attacking(board)
+    def __init__(self, color, position):
+        super().__init__(color, position)
+        self.display = self.color[0] + "B"
     
-    def squares_attacking(self, board):
-        # @return: a list of tuples representing the spaces the piece is attacking
-        validMoves = []
-        # find moves going up to the right
-        for i in range(1, min(self.row, board.get_columns() - self.col)):
-            if board.get_pieces()[self.row - i][self.col + i].Type != "Empty":
-                validMoves.append((self.row - i, self.col + i))
-                print(self.row - i, self.col + i)
-                break
-            else:
-                # no piece encountered, add move
-                print('no piece found', self.row - i, self.col + i)
-                validMoves.append((self.row - i, self.col + i))
+    def attacked_positions(self, game):
+        # returns list of attacked positions for the bishop as tuples
+        attacked_positions = []
 
-        # find moves going up to the left
-        for i in range(1, min(self.row, self.col) + 1):
-            if board.get_pieces()[self.row - i][self.col - i].Type != "Empty":
-                validMoves.append((self.row - i, self.col - i))
-                break
-            else:
-                # no piece encountered, add move
-                validMoves.append((self.row - i, self.col - i))
-        
-        # find moves going down to the right
-        if self.row < board.get_rows() - 1 and self.col < board.get_columns() - 1:
-            for i in range(1, min(board.get_rows() - self.row, board.get_columns() - self.col)):
-                if board.get_pieces()[self.row + i][self.col + i].Type != "Empty":
-                    validMoves.append((self.row + i, self.col + i))
+        for dr, dc in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
+            r, c = self.position[0] + dr, self.position[1] + dc
+            while 0 <= r < 8 and 0 <= c < 8:
+                attacked_positions.append((r, c))
+                if game.board[r][c].color is not None:
                     break
-                else:
-                    # no piece encountered, add move
-                    validMoves.append((self.row + i, self.col + i))
-        
-        # find moves going down to the left
-        if self.row < board.get_rows() - 1 and self.col > 0:
-            for i in range(1, min(board.get_rows() - self.row, self.col) + 1):
-                if board.get_pieces()[self.row + i][self.col - i].Type != "Empty":
-                    validMoves.append((self.row + i, self.col - i))
+                r, c = r + dr, c + dc
+        return attacked_positions
+
+    def possible_moves(self, game):
+        # returns list of possible moves for the bishop as tuples
+        possible_moves = []
+
+        for dr, dc in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
+            r, c = self.position[0] + dr, self.position[1] + dc
+            while 0 <= r < 8 and 0 <= c < 8:
+                if game.board[r][c].color == self.color:
                     break
-                else:
-                    # no piece encountered, add move
-                    validMoves.append((self.row + i, self.col - i))
-            
-        return validMoves
-
-    def get_valid_moves(self, board, enPassant = None, overwrite = False, selfCapture = False, castlingState = (True, True, True, True)):
-        # @param board: the current board state as integer array
-        # @param enPassant: the current enPassant state as a tuple (row, col)
-        # @param overwrite: a boolean representing whether the move is an overwrite
-        # @param selfCapture: a boolean representing whether the move is a selfCapture
-        # @param castlingState: a tuple representing the castling state of the board
-        # @return: a list of tuples representing the valid moves for the piece
-
-        validMoves = []
-        for move in self.attacking:
-            if board.get_pieces()[move[0]][move[1]].Type == "Empty" or board.get_pieces()[move[0]][move[1]].is_capturable(self, selfCapture):
-                validMoves.append(move)
+                possible_moves.append((r, c))
+                if game.board[r][c].color is not None:
+                    break
+                r, c = r + dr, c + dc
         
-        return validMoves
-            
+        # remove moves that would put the king in check
+        possible_moves = [move for move in possible_moves if not self.king_in_check(game, (self.position, move))]
+        
+        return possible_moves
 
 class Rook(Piece):
-    def __init__(self, color, row, col, board):
-        super().__init__(color, row, col, board)
-        self.Type = "Rook"
-        self.attacking = self.squares_attacking(board)
+    def __init__(self, color, position):
+        super().__init__(color, position)
+        self.display = self.color[0] + "R"
     
-    def squares_attacking(self, board):
-        # @return: a list of tuples representing the spaces the piece is attacking
-        validMoves = []
-        # find moves going up
-        for i in range(1, self.row + 1):
-            if board.get_pieces()[self.row - i][self.col].Type != "Empty":
-                validMoves.append((self.row - i, self.col))
-                break
-            else:
-                # no piece encountered, add move
-                validMoves.append((self.row - i, self.col))
-        
-        # find moves going down
-        for i in range(1, board.get_rows() - self.row):
-            if board.get_pieces()[self.row + i][self.col].Type != "Empty":
-                validMoves.append((self.row + i, self.col))
-                break
-            else:
-                # no piece encountered, add move
-                validMoves.append((self.row + i, self.col))
-        
-        # find moves going right
-        for i in range(1, board.get_columns() - self.col):
-            if board.get_pieces()[self.row][self.col + i].Type != "Empty":
-                validMoves.append((self.row, self.col + i))
-                break
-            else:
-                # no piece encountered, add move
-                validMoves.append((self.row, self.col + i))
-        
-        # find moves going left
-        for i in range(1, self.col + 1):
-            if board.get_pieces()[self.row][self.col - i].Type != "Empty":
-                validMoves.append((self.row, self.col - i))
-                break
-            else:
-                # no piece encountered, add move
-                validMoves.append((self.row, self.col - i))
-        
-        return validMoves
+    def attacked_positions(self, game):
+        # returns list of attacked positions for the rook as tuples
+        attacked_positions = []
 
-    def get_valid_moves(self, board, enPassant = None, overwrite = False, selfCapture = False, castlingState = (True, True, True, True)):
-        # @param board: the current board state as integer array
-        # @param enPassant: the current enPassant state as a tuple (row, col)
-        # @param overwrite: a boolean representing whether the move is an overwrite
-        # @param selfCapture: a boolean representing whether the move is a selfCapture
-        # @param castlingState: a tuple representing the castling state of the board
-        # @return: a list of tuples representing the valid moves for the piece
+        for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            r, c = self.position[0] + dr, self.position[1] + dc
+            while 0 <= r < 8 and 0 <= c < 8:
+                attacked_positions.append((r, c))
+                if game.board[r][c].color is not None:
+                    break
+                r, c = r + dr, c + dc
+        return attacked_positions
 
-        validMoves = []
-        for move in self.attacking:
-            if board.get_pieces()[move[0]][move[1]].Type == "Empty" or board.get_pieces()[move[0]][move[1]].is_capturable(self, selfCapture):
-                validMoves.append(move)
+    def possible_moves(self, game):
+        # returns list of possible moves for the rook as tuples
+        possible_moves = []
+
+        for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            r, c = self.position[0] + dr, self.position[1] + dc
+            while 0 <= r < 8 and 0 <= c < 8:
+                if game.board[r][c].color == self.color:
+                    break
+                possible_moves.append((r, c))
+                if game.board[r][c].color is not None:
+                    break
+                r, c = r + dr, c + dc
         
-        return validMoves
+        # remove moves that would put the king in check
+        possible_moves = [move for move in possible_moves if not self.king_in_check(game, (self.position, move))]
 
+        return possible_moves
 
 class Queen(Piece):
-    def __init__(self, color, row, col, board):
-        super().__init__(color, row, col, board)
-        self.Type = "Queen"
-        self.attacking = self.squares_attacking(board)
+    def __init__(self, color, position):
+        super().__init__(color, position)
+        self.display = self.color[0] + "Q"
     
-    def squares_attacking(self, board):
-        # @return: a list of tuples representing the spaces the piece is attacking
-        validMoves = []
-        # find moves going up to the right
-        for i in range(1, min(self.row, board.get_columns() - self.col)):
-            if board.get_pieces()[self.row - i][self.col + i].Type != "Empty":
-                validMoves.append((self.row - i, self.col + i))
-                break
-            else:
-                # no piece encountered, add move
-                validMoves.append((self.row - i, self.col + i))
+    def attacked_positions(self, game):
+        # returns list of attacked positions for the queen as tuples
+        attacked_positions = []
 
-        # find moves going up to the left
-        for i in range(1, min(self.row, self.col) + 1):
-            if board.get_pieces()[self.row - i][self.col - i].Type != "Empty":
-                validMoves.append((self.row - i, self.col - i))
-                break
-            else:
-                # no piece encountered, add move
-                validMoves.append((self.row - i, self.col - i))
-        
-        # find moves going down to the right
-        if self.row < board.get_rows() - 1 and self.col < board.get_columns() - 1:
-            for i in range(1, min(board.get_rows() - self.row, board.get_columns() - self.col)):
-                if board.get_pieces()[self.row + i][self.col + i].Type != "Empty":
-                    validMoves.append((self.row + i, self.col + i))
+        for dr, dc in [(-1, -1), (-1, 1), (1, -1), (1, 1), (-1, 0), (1, 0), (0, -1), (0, 1)]:
+            r, c = self.position[0] + dr, self.position[1] + dc
+            while 0 <= r < 8 and 0 <= c < 8:
+                attacked_positions.append((r, c))
+                if game.board[r][c].color is not None:
                     break
-                else:
-                    # no piece encountered, add move
-                    validMoves.append((self.row + i, self.col + i))
-        
-        # find moves going down to the left
-        if self.row < board.get_rows() - 1 and self.col > 0:
-            for i in range(1, min(board.get_rows() - self.row, self.col) + 1):
-                if board.get_pieces()[self.row + i][self.col - i].Type != "Empty":
-                    validMoves.append((self.row + i, self.col - i))
+                r, c = r + dr, c + dc
+        return attacked_positions
+
+    def possible_moves(self, game):
+        # returns list of possible moves for the queen as tuples
+        possible_moves = []
+
+        for dr, dc in [(-1, -1), (-1, 1), (1, -1), (1, 1), (-1, 0), (1, 0), (0, -1), (0, 1)]:
+            r, c = self.position[0] + dr, self.position[1] + dc
+            while 0 <= r < 8 and 0 <= c < 8:
+                if game.board[r][c].color == self.color:
                     break
-                else:
-                    # no piece encountered, add move
-                    validMoves.append((self.row + i, self.col - i))
-        
-        # find moves going up
-        for i in range(1, self.row + 1):
-            if board.get_pieces()[self.row - i][self.col].Type != "Empty":
-                validMoves.append((self.row - i, self.col))
-                break
-            else:
-                # no piece encountered, add move
-                validMoves.append((self.row - i, self.col))
+                possible_moves.append((r, c))
+                if game.board[r][c].color is not None:
+                    break
+                r, c = r + dr, c + dc
 
-        # find moves going down
-        for i in range(1, board.get_rows() - self.row):
-            if board.get_pieces()[self.row + i][self.col].Type != "Empty":
-                validMoves.append((self.row + i, self.col))
-                break
-            else:
-                # no piece encountered, add move
-                validMoves.append((self.row + i, self.col))
-        
-        # find moves going right
-        for i in range(1, board.get_columns() - self.col):
-            if board.get_pieces()[self.row][self.col + i].Type != "Empty":
-                validMoves.append((self.row, self.col + i))
-                break
-            else:
-                # no piece encountered, add move
-                validMoves.append((self.row, self.col + i))
+        # remove moves that would put the king in check
+        possible_moves = [move for move in possible_moves if not self.king_in_check(game, (self.position, move))]
 
-        # find moves going left
-        for i in range(1, self.col + 1):
-            if board.get_pieces()[self.row][self.col - i].Type != "Empty":
-                print("piece encountered at", self.row, self.col - i)
-                validMoves.append((self.row, self.col - i))
-                break
-            else:
-                # no piece encountered, add move
-                validMoves.append((self.row, self.col - i))
-        
-        return validMoves
-
-    def get_valid_moves(self, board, enPassant = None, overwrite = False, selfCapture = False, castlingState = (True, True, True, True)):
-        # @param board: the current board state as integer array
-        # @param enPassant: the current enPassant state as a tuple (row, col)
-        # @param overwrite: a boolean representing whether the move is an overwrite
-        # @param selfCapture: a boolean representing whether the move is a selfCapture
-        # @param castlingState: a tuple representing the castling state of the board
-        # @return: a list of tuples representing the valid moves for the piece
-
-        validMoves = []
-        for move in self.attacking:
-            if board.get_pieces()[move[0]][move[1]].Type == "Empty" or board.get_pieces()[move[0]][move[1]].is_capturable(self, selfCapture):
-                validMoves.append(move)
-
-        return validMoves
-
+        return possible_moves
 
 class King(Piece):
-    def __init__(self, color, row, col, board):
-        super().__init__(color, row, col, board)
-        self.Type = "King"
-        self.attacking = self.squares_attacking(board)
+    def __init__(self, color, position):
+        super().__init__(color, position)
+        self.display = self.color[0] + "K"
     
-    def squares_attacking(self, board):
-        # @return: a list of tuples representing the spaces the piece is attacking
-        validMoves = []
-        # check if king can move to each of the 8 possible squares
-        for i in range(-1, 2):
-            for j in range(-1, 2):
-                if i != 0 or j != 0:
-                    if self.row + i >= 0 and self.row + i < board.get_rows() and self.col + j >= 0 and self.col + j < board.get_columns():
-                        validMoves.append((self.row + i, self.col + j))
-        return validMoves
+    def attacked_positions(self, game):
+        # returns list of attacked positions for the king as tuples
+        attacked_positions = []
 
-    def get_valid_moves(self, board, enPassant = None, overwrite = False, selfCapture = False, castlingState = (True, True, True, True)):
-        # @param board: the current board state as integer array
-        # @param enPassant: the current enPassant state as a tuple (row, col)
-        # @param overwrite: a boolean representing whether the move is an overwrite
-        # @param selfCapture: a boolean representing whether the move is a selfCapture
-        # @param castlingState: a tuple representing the castling state of the board
-        # @return: a list of tuples representing the valid moves for the piece
+        for dr in [-1, 0, 1]:
+            for dc in [-1, 0, 1]:
+                if dr == 0 and dc == 0:
+                    continue
+                r, c = self.position[0] + dr, self.position[1] + dc
+                if 0 <= r < 8 and 0 <= c < 8:
+                    attacked_positions.append((r, c))
+        return attacked_positions
 
-        validMoves = []
-        # check if king can move to each of the 8 possible squares
-        for i in range(-1, 2):
-            for j in range(-1, 2):
-                if i != 0 or j != 0:
-                    if self.row + i >= 0 and self.row + i < board.get_rows() and self.col + j >= 0 and self.col + j < board.get_columns():
-                        if (board.get_pieces()[self.row + i][self.col + j].Type == "Empty" or board.get_pieces()[self.row + i][self.col + j].is_capturable(self, selfCapture)) and not board.space_under_attack(self.row + i, self.col + j, self.color):
-                            validMoves.append((self.row + i, self.col + j))
+    def possible_moves(self, game):
+        # returns possible moves for the king as tuples
+        possible_moves = []
+
+        for dr in [-1, 0, 1]:
+            for dc in [-1, 0, 1]:
+                if dr == 0 and dc == 0:
+                    continue
+                r, c = self.position[0] + dr, self.position[1] + dc
+                if 0 <= r < 8 and 0 <= c < 8 and game.board[r][c].color != self.color:
+                    possible_moves.append((r, c))
         
-        # check if castling is possible
-        if self.color == 'white':
-            if castlingState[0] and board.get_pieces()[7][1].Type == "Empty" and board.get_pieces()[7][2].Type == "Empty" and board.get_pieces()[7][3].Type == "Empty" and not board.space_under_attack(7, 2, self.color) and not board.space_under_attack(7, 3, self.color):
-                validMoves.append((7, 2))
-            if castlingState[1] and board.get_pieces()[7][5].Type == "Empty" and board.get_pieces()[7][6].Type == "Empty" and not board.space_under_attack(7, 5, self.color) and not board.space_under_attack(7, 6, self.color):
-                validMoves.append((7, 6))
+        # check if the king can castle
+        if self.color == "white":
+            if game.castle_rights["white"]["king_side"] and game.board[7][5].color is None and game.board[7][6].color is None:
+                if not game.king_in_check(game, (self.position, (7, 5))) and not game.king_in_check(game, (self.position, (7, 6))):
+                    possible_moves.append((7, 6))
+            if game.castle_rights["white"]["queen_side"] and game.board[7][1].color is None and game.board[7][2].color is None and game.board[7][3].color is None:
+                if not game.king_in_check(game, (self.position, (7, 2))) and not game.king_in_check(game, (self.position, (7, 3))):
+                    possible_moves.append((7, 2))
         else:
-            if castlingState[2] and board.get_pieces()[0][1].Type == "Empty" and board.get_pieces()[0][2].Type == "Empty" and board.get_pieces()[0][3].Type == "Empty" and not board.space_under_attack(0, 2, self.color) and not board.space_under_attack(0, 3, self.color):
-                validMoves.append((0, 2))
-            if castlingState[3] and board.get_pieces()[0][5].Type == "Empty" and board.get_pieces()[0][6].Type == "Empty" and not board.space_under_attack(0, 5, self.color) and not board.space_under_attack(0, 6, self.color):
-                validMoves.append((0, 6))
-        
-        return validMoves
+            if game.castle_rights["black"]["king_side"] and game.board[0][5].color is None and game.board[0][6].color is None:
+                if not game.king_in_check(game, (self.position, (0, 5))) and not game.king_in_check(game, (self.position, (0, 6))):
+                    possible_moves.append((0, 6))
+            if game.castle_rights["black"]["queen_side"] and game.board[0][1].color is None and game.board[0][2].color is None and game.board[0][3].color is None:
+                if not game.king_in_check(game, (self.position, (0, 2))) and not game.king_in_check(game, (self.position, (0, 3))):
+                    possible_moves.append((0, 2))
 
+        # remove moves that would put the king in check
+        possible_moves = [move for move in possible_moves if not self.king_in_check(game, (self.position, move))]
 
-    def is_in_check(self, board):
-        if board.space_under_attack(self.row, self.col, self.color):
-            return True
+        return possible_moves
 
-
-class Duck(Piece):
-    def __init__(self, color, row, col):
-        super().__init__(color, row, col)
-        self.Type = "Duck"
-
-    def move(self):
-        pass
-
-    def get_valid_moves(self, board, enPassant = None, overwrite = False, selfCapture = False, castlingState = (True, True, True, True)):
-        pass
-
-    def capture(self):
-        pass
-
-class CustomPiece1(Piece):
-    def __init__(self, color, row, col):
-        super().__init__(color, row, col)
-        self.Type = "CustomPiece1"
-
-    def get_valid_moves(self, board, enPassant = None, overwrite = False, selfCapture = False, castlingState = (True, True, True, True)):
-        pass
-
-class CustomPiece2(Piece):
-    def __init__(self, color, row, col):
-        super().__init__(color, row, col)
-        self.Type = "CustomPiece2"
-
-    def get_valid_moves(self, board, enPassant = None, overwrite = False, selfCapture = False, castlingState = (True, True, True, True)):
-        pass
-
-class CustomPiece3(Piece):
-    def __init__(self, color, row, col):
-        super().__init__(color, row, col)
-        self.Type = "CustomPiece3"
-
-    def get_valid_moves(self, board, enPassant = None, overwrite = False, selfCapture = False, castlingState = (True, True, True, True)):
-        pass

@@ -1,5 +1,6 @@
 import tkinter as tk
-from board import Board
+from main import Board
+from v1.pieces import Empty, Pawn, Knight, Bishop, Rook, Queen, King, Piece
 import os
 from PIL import Image, ImageTk
 
@@ -9,6 +10,9 @@ class BoardGUI:
         self.root = root
         self.root.title("Custom Chess GUI - Mason Liebe")
         self.board = board
+        self.white = True # White is the player who moves first
+        self.selected_piece = None  # Track the selected piece (row, col)
+        self.valid_moves = []  # Track valid moves for the selected piece
         
         # Create the board canvas and event listeners
         self.board_canvas = tk.Canvas(self.root, width=400, height=400)
@@ -89,21 +93,44 @@ class BoardGUI:
     
     def clear_board(self):
         # Clear the board except for the kings
-        clear_state = [[0]*8 for _ in range(8)]
-        clear_state[0][4] = 12  # White King
-        clear_state[7][4] = 6   # Black King
-        self.board.set_board(clear_state)
+        empty_state = [[0, 0, 0, 0, 12, 0, 0, 0],
+                       [0, 0, 0, 0,  0, 0, 0, 0],
+                       [0, 0, 0, 0,  0, 0, 0, 0],
+                       [0, 0, 0, 0,  0, 0, 0, 0],
+                       [0, 0, 0, 0,  0, 0, 0, 0],
+                       [0, 0, 0, 0,  0, 0, 0, 0],
+                       [0, 0, 0, 0,  0, 0, 0, 0],
+                       [0, 0, 0, 0, 11, 0, 0, 0]]
+        self.board.set_board(empty_state)
         self.draw_board()
 
     def on_canvas_click(self, event):
-        col = event.x // 50  # Calculate column from x coordinate
-        row = event.y // 50  # Calculate row from y coordinate
-        
-        piece = self.board.get_board()[row][col]  # Get the piece at the click location
-        if piece != 0:  # If there is a piece at the click location
-            valid_moves = piece.get_valid_moves(self.board)  # Get valid moves for the piece
-            
-            self.highlight_moves(valid_moves)  # Highlight valid moves
+        col = event.x // 50
+        row = event.y // 50
+
+        selected_piece = self.board.board_pieces[row][col]
+        if (row, col) in self.valid_moves:  # If a valid move square is clicked
+            self.move_piece(selected_piece, row, col)
+            self.selected_piece = None
+            self.valid_moves = []
+        elif not selected_piece.is_empty():  # Check if the selected square is not empty
+            self.selected_piece = selected_piece
+            self.valid_moves = selected_piece.get_valid_moves(self.board)
+            self.draw_board()
+            self.highlight_moves(self.valid_moves)
+
+    def move_piece(self, piece, to_row, to_col):
+        if self.selected_piece:
+            from_row, from_col = self.selected_piece.row, self.selected_piece.col
+            # Update board state and pieces array
+            self.board.board_state[from_row][from_col] = 0  # Set the original square to empty
+            self.board.board_pieces[from_row][from_col] = Empty(from_row, from_col, "yellow", self.board)
+            self.board.board_state[to_row][to_col] = piece.piece_number
+            self.board.board_pieces[to_row][to_col] = piece
+            piece.move(to_row, to_col)  # Update piece's position
+
+            self.draw_board()  # Redraw the board to reflect the move
+
     
     def highlight_moves(self, moves):
         for row, col in moves:  # Loop through each valid move
@@ -111,11 +138,12 @@ class BoardGUI:
             y1 = row * 50
             x2 = x1 + 50
             y2 = y1 + 50
-            self.board_canvas.create_rectangle(x1, y1, x2, y2, fill="green", outline="")
+            self.board_canvas.create_rectangle(x1, y1, x2, y2, fill="", outline="green", width=3)
             # Redraw the piece on top if needed
-            piece = self.board.get_board()[row][col]
-            if piece != 0:
-                self.draw_piece(piece, row, col)
+            piece = self.board.get_board_pieces()[row][col]
+            piece_number = self.board.get_board()[row][col]
+            if piece_number != 0:
+                self.draw_piece(piece_number, row, col)
 
             
     def run(self):

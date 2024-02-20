@@ -1,5 +1,5 @@
-from board import Board
-from pieces import Piece, Pawn, Knight, Bishop, Rook, Queen, King, CustomPiece1, CustomPiece2, CustomPiece3, Duck
+from main import Board
+from v1.pieces import Piece, Pawn, Knight, Bishop, Rook, Queen, King, CustomPiece1, CustomPiece2, CustomPiece3, Duck
 
 class ChessGame():
     # Custom Chess Game
