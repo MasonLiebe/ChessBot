@@ -27,6 +27,10 @@ class Piece:
         game_copy.board[end_pos[0]][end_pos[1]] = Empty('', end_pos)
         piece.position = start_pos
         return in_check
+    
+    def is_empty(self):
+        # returns true if the type of the piece is Empty
+        return isinstance(self, Empty)
 
 class Empty(Piece):
 
