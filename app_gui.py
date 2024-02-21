@@ -38,7 +38,10 @@ class ChessGui:
             path = f'./assets/pieces/{piece}.png'
             img = Image.open(path)
             # Resize the image to 75x75 pixels using the LANCZOS filter
-            img = img.resize((75, 75), Image.LANCZOS)
+            img = img.resize((100, 100), Image.LANCZOS)
+            if img.mode != 'RGBA':
+                img = img.convert('RGBA')
+
             self.piece_images[piece] = ImageTk.PhotoImage(img)
 
 
@@ -61,9 +64,9 @@ class ChessGui:
             for col in range(8):
                 piece = self.game.board[row][col]
                 if not piece.is_empty():
-                    piece_image = self.piece_images.get(f"{piece.color[0]}_{piece.__class__.__name__.lower()}")
+                    piece_image = self.piece_images.get(f"{piece.color}-{piece.__class__.__name__.lower()}")
                     if piece_image:
-                        x = col * 100 + 52  # Center of the square
+                        x = col * 100 + 50  # Center of the square
                         y = row * 100 + 50
                         # Adjust for the 75x75 image size to ensure proper centering
                         self.canvas.create_image(x, y, image=piece_image, anchor="center")
