@@ -77,7 +77,6 @@ class Pawn(Piece):
 
         # remove moves that would put the king in check
         possible_moves = [move for move in possible_moves if not self.king_in_check(game, (self.position, move))]
-        print(possible_moves)
         
         return possible_moves
 

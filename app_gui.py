@@ -10,6 +10,9 @@ class ChessGui:
         self.game = game
         self.root = tk.Tk()
         self.root.title("Chess Game by Mason Liebe")
+        
+        # FOR TESTING PURPOSES
+        self.computer_opponent = True
 
         # Create chessboard canvas
         self.canvas = tk.Canvas(self.root, width=800, height=800)
@@ -24,11 +27,15 @@ class ChessGui:
 
         # Button for resetting the game
         self.reset_button = tk.Button(self.root, text="Reset Game", command=self.reset_game)
-        self.reset_button.grid(row=0, column=2, columnspan=2)  # Adjusted for layout
+        self.reset_button.grid(row=0, column=2, rowspan= 10, columnspan=2)  # Adjusted for layout
+
+        # Button for getting computer move
+        self.computer_move_button = tk.Button(self.root, text="Computer Move", command=self.get_computer_move)
+        self.computer_move_button.grid(row=1, column=2, columnspan=10)  # Adjusted for layout
 
         # Turn indicator label
         self.turn_indicator = tk.Label(self.root, text="White to move", font=("Arial", 16))
-        self.turn_indicator.grid(row=0, column=2, sticky="nw", padx=20)
+        self.turn_indicator.grid(row=3, column=2, sticky="nw", padx=20)
 
 
     def load_piece_images(self):
@@ -153,6 +160,17 @@ class ChessGui:
         tk.Button(self.start_menu, text="Play Against Computer", command=self.start_computer_game).pack(fill="x", padx=50, pady=10)
         tk.Button(self.start_menu, text="1v1 Human Players", command=self.start_human_game).pack(fill="x", padx=50, pady=10)
 
+    def get_computer_move(self):
+        if self.game.current_player == "black":
+            print("executing_minimax")
+            eval, move = self.game.minimax(3, float('-inf'), float('inf'), True)
+            print(eval)
+            if move:
+                self.move_piece(move[0], move[1])
+            else:
+                messagebox.showinfo("Game Over", "Checkmate! You win!")
+                self.reset_game()
+
     def start_computer_game(self):
         self.start_menu.destroy()  # Close the start menu
         self.setup_game()
@@ -163,9 +181,7 @@ class ChessGui:
 
     def setup_game(self, computer_opponent=False):
         # Set up the game for playing against a computer or another human
-        # This could involve initializing game variables, setting up the board, etc.
-        # For example:
-        self.game.reset_game()  # Assuming reset_game() sets the board to its initial state
+        self.game.reset_game() # Reset the game state to the initial state
         self.computer_opponent = computer_opponent
         self.update_board()  # Draw or redraw the board
 

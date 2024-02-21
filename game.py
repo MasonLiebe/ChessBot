@@ -1,3 +1,4 @@
+import copy
 from pieces import Piece, Empty, Pawn, Rook, Knight, Bishop, Queen, King
 import bot_configs
 
@@ -78,14 +79,10 @@ class Game:
                 if end_pos == self.en_passant_target:
                     self.board[end_pos[0] + (1 if moving_piece.color == 'white' else -1)][end_pos[1]] = Empty('', (end_pos[0] + (1 if moving_piece.color == 'white' else -1), end_pos[1]))
 
-                    print("you took en passant")
-                    print("set board square {} to empty".format((end_pos[0] + (1 if moving_piece.color == 'black' else -1), end_pos[1])))
-                
                 self.en_passant_target = None  # Reset the en passant target
                 # check if pawn moved 2 squares for en passant
                 if abs(start_pos[0] - end_pos[0]) == 2:
                     self.en_passant_target = (start_pos[0] + (end_pos[0] - start_pos[0]) // 2, start_pos[1])
-                    print('en passant target:', self.en_passant_target)
             else:
                 self.en_passant_target = None
                 
@@ -223,20 +220,47 @@ class Game:
                 break
     
     # IMPLEMENTATION OF COMPUTER PLAYER BELOW
+    
+    def play_bot(self):
+        """Starts the game loop and handles user input."""
+        while True:
+            self.display()
+            if self.current_player == "white":
+                print(f"{self.current_player}'s turn.")
+                print('Enter start position (row, col):')
+                start_pos = tuple(map(int, input().split(',')))
+                print('Enter end position (row, col):')
+                end_pos = tuple(map(int, input().split(',')))
+                did_move = self.move_piece(start_pos, end_pos)
+            else:
+                print(f"{self.current_player}'s turn.")
+                move = self.minimax(3, float('-inf'), float('inf'), True)[1]
+                print(f"Bot move: {move}")
+                did_move = self.move_piece(*move)
+            
+            if not did_move:
+                print("Illegal move!")
+                continue
+            
+            self.current_player = "black" if self.current_player == "white" else "white"
+            game_state = self.check_status()
+            print(game_state)
+            if game_state not in ("Normal", "Check!"):
+                break
         
     def minimax(self, depth, alpha, beta, maximizing_player):
         """Returns the best move for the current player using the minimax algorithm."""
         # check game end states
         if depth == 0 or self.check_status() in ["Checkmate!", "Stalemate!"]:
-            return self.evaluate_board()
+            return (self.evaluate_board(), None)
         
         if depth == 0:
-            return self.evaluate_board()
+            return (self.evaluate_board(), None)
         
         if maximizing_player:
             max_eval = float('-inf')
             for move in self.get_all_possible_moves():
-                test_game = self.copy()
+                test_game = copy.deepcopy(self)
                 test_game.move_piece(*move)
                 eval = test_game.minimax(depth - 1, alpha, beta, False)[0]
                 max_eval = max(max_eval, eval)
@@ -245,21 +269,20 @@ class Game:
                 alpha = max(alpha, eval)
                 if beta <= alpha:
                     break
-            return max_eval, best_move
+            return (max_eval, best_move)
         else:
             min_eval = float('inf')
             for move in self.get_all_possible_moves():
-                test_game = self.copy()
+                test_game = copy.deepcopy(self)
                 test_game.move_piece(*move)
                 eval = test_game.minimax(depth - 1, alpha, beta, True)[0]
-                test_game.undo_move(move)
                 min_eval = min(min_eval, eval)
                 if min_eval == eval:
                     best_move = move
                 beta = min(beta, eval)
                 if beta <= alpha:
                     break
-            return min_eval, best_move
+            return (min_eval, best_move)
         
     def evaluate_board(self):
         """Returns a score for the current board position."""
@@ -274,14 +297,45 @@ class Game:
                 return 0
         
         # calculate the score if the game is not over
-        score = 0
+        
+        # compute material score
+        material_score = 0
         for row in self.board:
             for piece in row:
+                if piece.is_empty():
+                    continue
                 if piece.color == "white":
-                    score += piece.value
+                    material_score += piece_values[type(piece).__name__]
                 else:
-                    score -= piece.value
-        return score
+                    material_score -= piece_values[type(piece).__name__]
+        
+        # compute piece location scores
+        location_score = 0
+        for row in range(8):
+            for col in range(8):
+                piece = self.board[row][col]
+                if not piece.is_empty():
+                    if piece.color == "white":
+                        location_score += location_scores[type(piece).__name__][row][col]
+                    else:
+                        location_score -= location_scores[type(piece).__name__][7 - row][7-col]
+                    # add king safety score
+                    if isinstance(piece, King):
+                        location_score += len(self.get_attacked_positions(piece.color)) * bot_configs.evaluation_params['king_safety_weight']
+        
+        # compute piece mobility score
+        # Was removed for performance reasons - value added was minimal
+        # mobility_score = 0
+        # for row in range(8):
+        #     for col in range(8):
+        #         piece = self.board[row][col]
+        #         if not piece.is_empty():
+        #             if piece.color == "white":
+        #                 mobility_score += len(piece.possible_moves(self))
+        #             else:
+        #                 mobility_score -= len(piece.possible_moves(self))
+
+        return material_score * bot_configs.evaluation_params['material_weight'] + location_score * bot_configs.evaluation_params['location_weight']
 
     def get_all_possible_moves(self):
         """Returns a list of all possible moves for the current player"""
@@ -292,4 +346,12 @@ class Game:
                     for move in self.board[row][col].possible_moves(self):
                         moves.append(((row, col), move))
         return moves
+    
+
+# # test playing against a bot
+# if __name__ == "__main__":
+#     game = Game()
+#     game.play_bot()
+#     game.display()
+#     print(game.check_status())
 
