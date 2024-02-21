@@ -143,7 +143,34 @@ class ChessGui:
         text = "White to move" if self.game.current_player == "white" else "Black to move"
         self.turn_indicator.config(text=text)
 
+    def show_start_menu(self):
+        self.start_menu = tk.Toplevel(self.root)
+        self.start_menu.title("Chess Game - Start Menu")
+        self.start_menu.geometry("300x200")  # Adjust size as needed
+
+        tk.Label(self.start_menu, text="Choose Game Mode:", font=("Arial", 14)).pack(pady=20)
+
+        tk.Button(self.start_menu, text="Play Against Computer", command=self.start_computer_game).pack(fill="x", padx=50, pady=10)
+        tk.Button(self.start_menu, text="1v1 Human Players", command=self.start_human_game).pack(fill="x", padx=50, pady=10)
+
+    def start_computer_game(self):
+        self.start_menu.destroy()  # Close the start menu
+        self.setup_game()
+
+    def start_human_game(self):
+        self.start_menu.destroy()  # Close the start menu
+        self.setup_game()
+
+    def setup_game(self, computer_opponent=False):
+        # Set up the game for playing against a computer or another human
+        # This could involve initializing game variables, setting up the board, etc.
+        # For example:
+        self.game.reset_game()  # Assuming reset_game() sets the board to its initial state
+        self.computer_opponent = computer_opponent
+        self.update_board()  # Draw or redraw the board
+
     def run(self):
+        self.show_start_menu()
         self.root.mainloop()
         if name == "main":
             game = Game() # Initialize your game class here

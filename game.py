@@ -108,7 +108,7 @@ class Game:
                 self.castle_rights[moving_piece.color]["queen_side"] = False
             if isinstance(moving_piece, Rook):
                 if start_pos == (0, 0):
-                    start_pos["black"]["queen_side"] = False
+                    self.castle_rights["black"]["queen_side"] = False
                 elif start_pos == (0, 7):
                     self.castle_rights["black"]["king_side"] = False
                 elif start_pos == (7, 0):
@@ -260,6 +260,8 @@ class Game:
                     for move in self.board[row][col].possible_moves(self):
                         moves.append(((row, col), move))
         return moves
+
+    
 
     
 # if __name__ == "__main__":
