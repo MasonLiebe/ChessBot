@@ -70,14 +70,19 @@ class Pawn(Piece):
                 possible_moves.append((self.position[0] + 2*dir, self.position[1]))
         
         # check if the pawn can capture diagonally
-        if self.position[1] > 0 and game.board[self.position[0] + dir][self.position[1] - 1].color  is not None and game.board[self.position[0] + dir][self.position[1] - 1].color != self.color:
-            possible_moves.append((self.position[0] + dir, self.position[1] - 1))
-        if self.position[1] < 7 and game.board[self.position[0] + dir][self.position[1] + 1].color  is not None and game.board[self.position[0] + dir][self.position[1] + 1].color != self.color:
-            possible_moves.append((self.position[0] + dir, self.position[1] + 1))
+        opponent_color = "black" if self.color == "white" else "white"
+        for position in self.attacked_positions(game):
+            if game.board[position[0]][position[1]].color == opponent_color or position == game.en_passant_target:
+                possible_moves.append(position)
 
-        # check if the pawn can capture en passant
-        if game.en_passant_target == (self.position[0] + dir, self.position[1] - 1):
-            possible_moves.append((self.position[0] + dir, self.position[1] - 1))
+        # if self.position[1] > 0 and game.board[self.position[0] + dir][self.position[1] - 1].color  is not None and game.board[self.position[0] + dir][self.position[1] - 1].color != self.color:
+        #     possible_moves.append((self.position[0] + dir, self.position[1] - 1))
+        # if self.position[1] < 7 and game.board[self.position[0] + dir][self.position[1] + 1].color  is not None and game.board[self.position[0] + dir][self.position[1] + 1].color != self.color:
+        #     possible_moves.append((self.position[0] + dir, self.position[1] + 1))
+
+        # # check if the pawn can capture en passant
+        # if game.en_passant_target == (self.position[0] + dir, self.position[1] - 1):
+        #     possible_moves.append((self.position[0] + dir, self.position[1] - 1))
 
         # remove moves that would put the king in check
         possible_moves = [move for move in possible_moves if not self.king_in_check(game, (self.position, move))]

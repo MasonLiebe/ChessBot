@@ -43,11 +43,18 @@ class Game:
 
         return board
 
+    def reset_game(self):
+        # resets to the standard initial game state
+        self.board = self.setup_board()
+        self.current_player = "white"
+        self.en_passant_target = None
+        self.castle_rights = {"white": {"king_side": True, "queen_side": True},
+                              "black": {"king_side": True, "queen_side": True}}
+
     def move_piece(self, start_pos, end_pos):
         """Moves a piece from start_pos to end_pos if the move is legal.
         start_pos and end_pos should be tuples like (row, col)."""
         if self.is_move_legal(start_pos, end_pos):
-            self.en_passant_target = None  # Reset the en passant target
 
             moving_piece = self.board[start_pos[0]][start_pos[1]]
             captured_piece = self.board[end_pos[0]][end_pos[1]] 
@@ -57,17 +64,30 @@ class Game:
             self.board[start_pos[0]][start_pos[1]] = Empty('', start_pos)
             moving_piece.position = end_pos  # Update the piece's position
             
-            # check if pawn moved two squares
-            if isinstance(moving_piece, Pawn) and abs(start_pos[0] - end_pos[0]) == 2:
-                self.en_passant_target = (start_pos[0] + (end_pos[0] - start_pos[0]) // 2, start_pos[1])
-            
-            # check if promotion should occur
-            if isinstance(moving_piece, Pawn) and (end_pos[0] == 0 or end_pos[0] == 7):
-                self.board[end_pos[0]][end_pos[1]] = Queen(moving_piece.color, end_pos)
+            # handle pawn behaviors
+            if isinstance(moving_piece, Pawn):
+                # tell the pawn it moved
+                moving_piece.has_moved = True
+                
+                # check if pawn reached the end of the board
+                if end_pos[0] == 0 or end_pos[0] == 7:
+                    self.board[end_pos[0]][end_pos[1]] = Queen(moving_piece.color, end_pos)
+                
+                # check if en passant occured
+                if end_pos == self.en_passant_target:
+                    self.board[end_pos[0] + (1 if moving_piece.color == 'white' else -1)][end_pos[1]] = Empty('', (end_pos[0] + (1 if moving_piece.color == 'white' else -1), end_pos[1]))
 
-            # check if enPassant occured
-            if isinstance(moving_piece, Pawn) and end_pos == self.en_passant_target:
-                self.board[end_pos[0] + (1 if moving_piece.color == 'black' else -1)][end_pos[1]] = Empty('', (end_pos[0] + (1 if moving_piece.color == 'black' else -1), end_pos[1]))
+                    print("you took en passant")
+                    print("set board square {} to empty".format((end_pos[0] + (1 if moving_piece.color == 'black' else -1), end_pos[1])))
+                
+                self.en_passant_target = None  # Reset the en passant target
+                # check if pawn moved 2 squares for en passant
+                if abs(start_pos[0] - end_pos[0]) == 2:
+                    self.en_passant_target = (start_pos[0] + (end_pos[0] - start_pos[0]) // 2, start_pos[1])
+                    print('en passant target:', self.en_passant_target)
+            else:
+                self.en_passant_target = None
+                
         
             # check if castling occured
             if isinstance(moving_piece, King) and abs(start_pos[1] - end_pos[1]) == 2:
@@ -190,7 +210,7 @@ if __name__ == "__main__":
     game.display()
     print(game.check_status())
 
-    for move in (((6, 4), (4, 4)), ((1, 3), (3, 3)), ((4, 4), (3, 3)), ((0, 3), (3, 3)), ((7, 1), (5, 2)), ((3, 3), (2, 4))):
+    for move in (((6, 4), (4, 4)), ((1, 3), (3, 3)), ((4, 4), (3, 4)), ((1, 5), (3, 5)), ((3, 4), (2, 5)), ((3, 3), (4, 3))):
         print(move)
         game.move_piece(*move)
         print('piece that just moved:', type(game.board[move[1][0]][move[1][1]]).__name__)
