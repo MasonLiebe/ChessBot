@@ -127,6 +127,10 @@ class Game:
                 if piece.color == color:
                     attacked_positions.extend(piece.attacked_positions(self))
         return attacked_positions
+    
+    def square_attacked(self, color, position):
+        """Returns True if the square is attacked by a piece of the given color."""
+        return position in self.get_attacked_positions(color)
 
     def is_move_legal(self, start_pos, end_pos):
         """Checks if a move is legal. This method should be called from move_piece."""

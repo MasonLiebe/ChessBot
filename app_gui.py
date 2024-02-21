@@ -14,8 +14,8 @@ class ChessGui:
         # Create chessboard canvas
         self.canvas = tk.Canvas(self.root, width=800, height=800)
         self.canvas.grid(row=0, column=0, columnspan=2)
-        self.piece_images = {}
-        self.highlighted_squares = []
+        self.piece_images = {} # Stores the piece images due to tkinter garbage collection
+        self.highlighted_squares = [] # Tracks the highlighted squares for valid moves
         self.selected_piece_position = None  # Tracks the selected piece's position
         self.load_piece_images()
         self.create_board()
@@ -25,6 +25,10 @@ class ChessGui:
         # Button for resetting the game
         self.reset_button = tk.Button(self.root, text="Reset Game", command=self.reset_game)
         self.reset_button.grid(row=0, column=2, columnspan=2)  # Adjusted for layout
+
+        # Turn indicator label
+        self.turn_indicator = tk.Label(self.root, text="White to move", font=("Arial", 16))
+        self.turn_indicator.grid(row=0, column=2, sticky="nw", padx=20)
 
 
     def load_piece_images(self):
@@ -117,6 +121,8 @@ class ChessGui:
             print(status)
             if status not in ["Normal", "Check!"]:
                 messagebox.showinfo("Game Over", status)
+            
+            self.update_turn_indicator()
         else:
             # Move was illegal or failed, deselect the piece
             self.selected_piece_position = None
@@ -128,6 +134,11 @@ class ChessGui:
         self.game.reset_game()  # Reset the game state
         self.selected_piece_position = None  # Clear any selected piece
         self.update_board()  # Redraw the board with pieces in starting positions
+
+    def update_turn_indicator(self):
+        """Updates the turn indicator text based on the current player."""
+        text = "White to move" if self.game.current_player == "white" else "Black to move"
+        self.turn_indicator.config(text=text)
 
     def run(self):
         self.root.mainloop()

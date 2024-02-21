@@ -75,15 +75,6 @@ class Pawn(Piece):
             if game.board[position[0]][position[1]].color == opponent_color or position == game.en_passant_target:
                 possible_moves.append(position)
 
-        # if self.position[1] > 0 and game.board[self.position[0] + dir][self.position[1] - 1].color  is not None and game.board[self.position[0] + dir][self.position[1] - 1].color != self.color:
-        #     possible_moves.append((self.position[0] + dir, self.position[1] - 1))
-        # if self.position[1] < 7 and game.board[self.position[0] + dir][self.position[1] + 1].color  is not None and game.board[self.position[0] + dir][self.position[1] + 1].color != self.color:
-        #     possible_moves.append((self.position[0] + dir, self.position[1] + 1))
-
-        # # check if the pawn can capture en passant
-        # if game.en_passant_target == (self.position[0] + dir, self.position[1] - 1):
-        #     possible_moves.append((self.position[0] + dir, self.position[1] - 1))
-
         # remove moves that would put the king in check
         possible_moves = [move for move in possible_moves if not self.king_in_check(game, (self.position, move))]
         print(possible_moves)
@@ -263,19 +254,35 @@ class King(Piece):
         
         # check if the king can castle
         if self.color == "white":
-            if game.castle_rights["white"]["king_side"] and game.board[7][5].color is None and game.board[7][6].color is None:
-                if not game.king_in_check(game, (self.position, (7, 5))) and not game.king_in_check(game, (self.position, (7, 6))):
-                    possible_moves.append((7, 6))
-            if game.castle_rights["white"]["queen_side"] and game.board[7][1].color is None and game.board[7][2].color is None and game.board[7][3].color is None:
-                if not game.king_in_check(game, (self.position, (7, 2))) and not game.king_in_check(game, (self.position, (7, 3))):
-                    possible_moves.append((7, 2))
+            # block positions that are attacked by opponent pieces
+            blocked_positions = game.get_attacked_positions("black")
+            # block positions that are occupied by pieces
+            for col in [1, 2, 3, 5]:
+                if game.board[7][col].color is not None:
+                    blocked_positions.append((7, col))
+
+            
+            if not ((7, 4) in blocked_positions or (7, 5) in blocked_positions or (7, 6) in blocked_positions) and game.castle_rights["white"]["king_side"]:
+                # The king can castle
+                possible_moves.append((7, 6))
+            
+            if not ((7, 2) in blocked_positions or (7, 3) in blocked_positions or (7, 4) in blocked_positions) and game.castle_rights["white"]["queen_side"]:
+                # The king can castle
+                possible_moves.append((7, 2))
         else:
-            if game.castle_rights["black"]["king_side"] and game.board[0][5].color is None and game.board[0][6].color is None:
-                if not game.king_in_check(game, (self.position, (0, 5))) and not game.king_in_check(game, (self.position, (0, 6))):
-                    possible_moves.append((0, 6))
-            if game.castle_rights["black"]["queen_side"] and game.board[0][1].color is None and game.board[0][2].color is None and game.board[0][3].color is None:
-                if not game.king_in_check(game, (self.position, (0, 2))) and not game.king_in_check(game, (self.position, (0, 3))):
-                    possible_moves.append((0, 2))
+            # block positions that are attacked by opponent pieces
+            blocked_positions = game.get_attacked_positions("white")
+            # block positions that are occupied by pieces
+            for col in [1, 2, 3, 5]:
+                if game.board[0][col].color is not None:
+                    blocked_positions.append((0, col))
+
+            if not ((0, 4) in blocked_positions or (0, 5) in blocked_positions or (0, 6) in blocked_positions) and game.castle_rights["black"]["king_side"]:
+                # The king can castle
+                possible_moves.append((0, 6))
+            if not ((0, 2) in blocked_positions or (0, 3) in blocked_positions or (0, 4) in blocked_positions) and game.castle_rights["black"]["queen_side"]:
+                # The king can castle
+                possible_moves.append((0, 2))
 
         # remove moves that would put the king in check
         possible_moves = [move for move in possible_moves if not self.king_in_check(game, (self.position, move))]
