@@ -1,4 +1,5 @@
 from pieces import Piece, Empty, Pawn, Rook, Knight, Bishop, Queen, King
+import bot_configs
 
 class Game:
     def __init__(self):
@@ -103,9 +104,12 @@ class Game:
                     rook.position = (end_pos[0], 3)
             
             # check if castling rights are lost
+            # check if the king moved
             if isinstance(moving_piece, King):
                 self.castle_rights[moving_piece.color]["king_side"] = False
                 self.castle_rights[moving_piece.color]["queen_side"] = False
+            
+            # Check if a rook moved
             if isinstance(moving_piece, Rook):
                 if start_pos == (0, 0):
                     self.castle_rights["black"]["queen_side"] = False
@@ -115,6 +119,16 @@ class Game:
                     self.castle_rights["white"]["queen_side"] = False
                 elif start_pos == (7, 7):
                     self.castle_rights["white"]["king_side"] = False
+
+            # Check if a piece took the rook
+            if end_pos == (0, 0):
+                self.castle_rights["black"]["queen_side"] = False
+            elif end_pos == (0, 7):
+                self.castle_rights["black"]["king_side"] = False
+            elif end_pos == (7, 0):
+                self.castle_rights["white"]["queen_side"] = False
+            elif end_pos == (7, 7):
+                self.castle_rights["white"]["king_side"] = False
             return True
         else:
             return False
@@ -212,36 +226,54 @@ class Game:
         
     def minimax(self, depth, alpha, beta, maximizing_player):
         """Returns the best move for the current player using the minimax algorithm."""
+        # check game end states
+        if depth == 0 or self.check_status() in ["Checkmate!", "Stalemate!"]:
+            return self.evaluate_board()
+        
         if depth == 0:
             return self.evaluate_board()
         
         if maximizing_player:
             max_eval = float('-inf')
             for move in self.get_all_possible_moves():
-                test_game = game.copy()
+                test_game = self.copy()
                 test_game.move_piece(*move)
-                eval = test_game.minimax(depth - 1, alpha, beta, False)
+                eval = test_game.minimax(depth - 1, alpha, beta, False)[0]
                 max_eval = max(max_eval, eval)
+                if max_eval == eval:
+                    best_move = move
                 alpha = max(alpha, eval)
                 if beta <= alpha:
                     break
-            return max_eval
+            return max_eval, best_move
         else:
             min_eval = float('inf')
             for move in self.get_all_possible_moves():
-                test_game = game.copy()
+                test_game = self.copy()
                 test_game.move_piece(*move)
-                eval = test_game.minimax(depth - 1, alpha, beta, True)
+                eval = test_game.minimax(depth - 1, alpha, beta, True)[0]
                 test_game.undo_move(move)
                 min_eval = min(min_eval, eval)
+                if min_eval == eval:
+                    best_move = move
                 beta = min(beta, eval)
                 if beta <= alpha:
                     break
-            return min_eval
+            return min_eval, best_move
         
     def evaluate_board(self):
         """Returns a score for the current board position."""
-        piece_values = {"Pawn": 1, "Knight": 3, "Bishop": 3, "Rook": 5, "Queen": 9}
+        piece_values = bot_configs.piece_values
+        location_scores = bot_configs.location_scores
+
+        # check game-end states
+        match self.check_status():
+            case "Checkmate!":
+                return float('-inf') if self.current_player == "white" else float('inf')
+            case "Stalemate!":
+                return 0
+        
+        # calculate the score if the game is not over
         score = 0
         for row in self.board:
             for piece in row:
@@ -260,28 +292,4 @@ class Game:
                     for move in self.board[row][col].possible_moves(self):
                         moves.append(((row, col), move))
         return moves
-
-    
-
-    
-# if __name__ == "__main__":
-#     game = Game()
-#     game.display()
-#     print(game.check_status())
-
-#     for move in (((6, 4), (4, 4)), ((1, 3), (3, 3)), ((4, 4), (3, 4)), ((1, 5), (3, 5)), ((3, 4), (2, 5)), ((3, 3), (4, 3))):
-#         print(move)
-#         game.move_piece(*move)
-#         print('piece that just moved:', type(game.board[move[1][0]][move[1][1]]).__name__)
-#         print('color:', game.board[move[1][0]][move[1][1]].color)
-#         print('position:', game.board[move[1][0]][move[1][1]].position)
-#         print('possible moves:', game.board[move[1][0]][move[1][1]].possible_moves(game))
-#         game.current_player = 'black' if game.current_player == 'white' else 'white'
-#         game.display()
-#         print(game.check_status())
-    
-#     game.board = game.setup_board()
-#     game.display()
-    
-#     game.play()
 

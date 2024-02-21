@@ -9,7 +9,7 @@ class ChessGui:
     def __init__(self, game):
         self.game = game
         self.root = tk.Tk()
-        self.root.title("Chess Game")
+        self.root.title("Chess Game by Mason Liebe")
 
         # Create chessboard canvas
         self.canvas = tk.Canvas(self.root, width=800, height=800)
