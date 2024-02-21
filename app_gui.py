@@ -32,10 +32,10 @@ class ChessGui:
 
 
     def load_piece_images(self):
-        pieces = ['w_pawn', 'w_bishop', 'w_knight', 'w_rook', 'w_queen', 'w_king',
-                'b_pawn', 'b_bishop', 'b_knight', 'b_rook', 'b_queen', 'b_king']
+        pieces = ['white-pawn', 'white-bishop', 'white-knight', 'white-rook', 'white-queen', 'white-king',
+                'black-pawn', 'black-bishop', 'black-knight', 'black-rook', 'black-queen', 'black-king']
         for piece in pieces:
-            path = f'./assets/{piece}.png'
+            path = f'./assets/pieces/{piece}.png'
             img = Image.open(path)
             # Resize the image to 75x75 pixels using the LANCZOS filter
             img = img.resize((75, 75), Image.LANCZOS)
@@ -45,7 +45,7 @@ class ChessGui:
     def create_board(self):
         for row in range(8):
             for col in range(8):
-                color = "white" if (row + col) % 2 == 0 else "gray"
+                color = "antique white" if (row + col) % 2 == 0 else "saddle brown"
                 x1 = col * 100
                 y1 = row * 100
                 x2 = x1 + 100

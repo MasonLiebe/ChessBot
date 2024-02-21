@@ -207,26 +207,79 @@ class Game:
             print(game_state)
             if game_state not in ("Normal", "Check!"):
                 break
+    
+    # IMPLEMENTATION OF COMPUTER PLAYER BELOW
+        
+    def minimax(self, depth, alpha, beta, maximizing_player):
+        """Returns the best move for the current player using the minimax algorithm."""
+        if depth == 0:
+            return self.evaluate_board()
+        
+        if maximizing_player:
+            max_eval = float('-inf')
+            for move in self.get_all_possible_moves():
+                test_game = game.copy()
+                test_game.move_piece(*move)
+                eval = test_game.minimax(depth - 1, alpha, beta, False)
+                max_eval = max(max_eval, eval)
+                alpha = max(alpha, eval)
+                if beta <= alpha:
+                    break
+            return max_eval
+        else:
+            min_eval = float('inf')
+            for move in self.get_all_possible_moves():
+                test_game = game.copy()
+                test_game.move_piece(*move)
+                eval = test_game.minimax(depth - 1, alpha, beta, True)
+                test_game.undo_move(move)
+                min_eval = min(min_eval, eval)
+                beta = min(beta, eval)
+                if beta <= alpha:
+                    break
+            return min_eval
+        
+    def evaluate_board(self):
+        """Returns a score for the current board position."""
+        piece_values = {"Pawn": 1, "Knight": 3, "Bishop": 3, "Rook": 5, "Queen": 9}
+        score = 0
+        for row in self.board:
+            for piece in row:
+                if piece.color == "white":
+                    score += piece.value
+                else:
+                    score -= piece.value
+        return score
+
+    def get_all_possible_moves(self):
+        """Returns a list of all possible moves for the current player"""
+        moves = []
+        for row in range(8):
+            for col in range(8):
+                if self.board[row][col].color == self.current_player:
+                    for move in self.board[row][col].possible_moves(self):
+                        moves.append(((row, col), move))
+        return moves
 
     
-if __name__ == "__main__":
-    game = Game()
-    game.display()
-    print(game.check_status())
+# if __name__ == "__main__":
+#     game = Game()
+#     game.display()
+#     print(game.check_status())
 
-    for move in (((6, 4), (4, 4)), ((1, 3), (3, 3)), ((4, 4), (3, 4)), ((1, 5), (3, 5)), ((3, 4), (2, 5)), ((3, 3), (4, 3))):
-        print(move)
-        game.move_piece(*move)
-        print('piece that just moved:', type(game.board[move[1][0]][move[1][1]]).__name__)
-        print('color:', game.board[move[1][0]][move[1][1]].color)
-        print('position:', game.board[move[1][0]][move[1][1]].position)
-        print('possible moves:', game.board[move[1][0]][move[1][1]].possible_moves(game))
-        game.current_player = 'black' if game.current_player == 'white' else 'white'
-        game.display()
-        print(game.check_status())
+#     for move in (((6, 4), (4, 4)), ((1, 3), (3, 3)), ((4, 4), (3, 4)), ((1, 5), (3, 5)), ((3, 4), (2, 5)), ((3, 3), (4, 3))):
+#         print(move)
+#         game.move_piece(*move)
+#         print('piece that just moved:', type(game.board[move[1][0]][move[1][1]]).__name__)
+#         print('color:', game.board[move[1][0]][move[1][1]].color)
+#         print('position:', game.board[move[1][0]][move[1][1]].position)
+#         print('possible moves:', game.board[move[1][0]][move[1][1]].possible_moves(game))
+#         game.current_player = 'black' if game.current_player == 'white' else 'white'
+#         game.display()
+#         print(game.check_status())
     
-    game.board = game.setup_board()
-    game.display()
+#     game.board = game.setup_board()
+#     game.display()
     
-    game.play()
+#     game.play()
 
