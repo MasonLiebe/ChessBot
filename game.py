@@ -254,9 +254,6 @@ class Game:
         if depth == 0 or self.check_status() in ["Checkmate!", "Stalemate!"]:
             return (self.evaluate_board(), None)
         
-        if depth == 0:
-            return (self.evaluate_board(), None)
-        
         if maximizing_player:
             max_eval = float('-inf')
             for move in self.get_all_possible_moves():
@@ -319,9 +316,9 @@ class Game:
                         location_score += location_scores[type(piece).__name__][row][col]
                     else:
                         location_score -= location_scores[type(piece).__name__][7 - row][7-col]
-                    # add king safety score
-                    if isinstance(piece, King):
-                        location_score += len(self.get_attacked_positions(piece.color)) * bot_configs.evaluation_params['king_safety_weight']
+                    # # add king safety score
+                    # if isinstance(piece, King):
+                    #     location_score += len(self.get_attacked_positions(piece.color)) * bot_configs.evaluation_params['king_safety_weight']
         
         # compute piece mobility score
         # Was removed for performance reasons - value added was minimal

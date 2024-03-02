@@ -33,6 +33,10 @@ class ChessGui:
         self.computer_move_button = tk.Button(self.root, text="Computer Move", command=self.get_computer_move)
         self.computer_move_button.grid(row=1, column=2, columnspan=10)  # Adjusted for layout
 
+        # Button for getting immediate static valuation
+        self.eval_button = tk.Button(self.root, text="Get Eval", command=self.print_evaluation)
+        self.eval_button.grid(row=2, column=2, columnspan=10)
+
         # Turn indicator label
         self.turn_indicator = tk.Label(self.root, text="White to move", font=("Arial", 16))
         self.turn_indicator.grid(row=3, column=2, sticky="nw", padx=20)
@@ -163,13 +167,16 @@ class ChessGui:
     def get_computer_move(self):
         if self.game.current_player == "black":
             print("executing_minimax")
-            eval, move = self.game.minimax(3, float('-inf'), float('inf'), True)
+            eval, move = self.game.minimax(3, float('-inf'), float('inf'), False)
             print(eval)
             if move:
                 self.move_piece(move[0], move[1])
             else:
                 messagebox.showinfo("Game Over", "Checkmate! You win!")
                 self.reset_game()
+    
+    def print_evaluation(self):
+        print("Current Evaluation is:", self.game.evaluate_board())
 
     def start_computer_game(self):
         self.start_menu.destroy()  # Close the start menu
