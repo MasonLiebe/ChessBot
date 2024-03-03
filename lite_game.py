@@ -1,5 +1,6 @@
 # this class implements a lighter implementation of the game
 import re
+import chess
 
 class LiteGame:
     # much lighter implementation of the game to improve efficiency and performance
@@ -52,30 +53,12 @@ class LiteGame:
                 rank = rank.replace('.' * i, str(i))
 
         return '/'.join(new_board) + ' ' + self.turn + ' ' + self.castling + ' ' + self.en_passant + ' ' + self.halfmove + ' ' + self.fullmove
-        
-    def perform_move(self, move):
-        # performs a move and updates the game state
-        # move is a string in algebraic notation
-        # ex. 'e4', 'Nf3', 'O-O', 'dxe5', 'exd8=Q+', 'exd8=Q#', etc.
-        split_fen = self.fens[-1].split()
-        board = self.fen_to_board(split_fen[0])
-        turn = split_fen[1]
-        castling = split_fen[2]
-        en_passant = split_fen[3]
-        halfmove = split_fen[4]
-        fullmove = split_fen[5]
-        
-        # find the piece to move
-        piece = None
-        if move[0].islower(): # pawn move
-            piece = 'P'
-        else:
-            piece = move[0].upper()
-        
-        # find the destination square
-            move = re.sub('x+=#', '', move)
 
-        
+    def 
+
+    def perform_move(self, origin, destination, promotion = None):
+        # performs a move given the origin and destination squares
+            
     
     def set_board_with_pgn(self, pgn):
         # set's the board given a pgn
