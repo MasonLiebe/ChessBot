@@ -4,22 +4,22 @@ from custom_pieces import Piece, Pawn, Rook, Knight, Bishop, Queen, King, Empty,
 class CustomGame():
 
     CHAR_TO_PIECE = {
-        'p': Pawn('b'),
-        'r': Rook('b'),
-        'n': Knight('b'),
-        'b': Bishop('b'),
-        'q': Queen('b'),
-        'k': King('b'),
-        'P': Pawn('w'),
-        'R': Rook('w'),
-        'N': Knight('w'),
-        'B': Bishop('w'),
-        'Q': Queen('w'),
-        'K': King('w'),
-        '·': Empty(),
-        'x': enPassant('w'),
-        'X': enPassant('b')
-    }
+    'p': lambda position: Pawn('b', position),
+    'r': lambda position: Rook('b', position),
+    'n': lambda position: Knight('b', position),
+    'b': lambda position: Bishop('b', position),
+    'q': lambda position: Queen('b', position),
+    'k': lambda position: King('b', position),
+    'P': lambda position: Pawn('w', position),
+    'R': lambda position: Rook('w', position),
+    'N': lambda position: Knight('w', position),
+    'B': lambda position: Bishop('w', position),
+    'Q': lambda position: Queen('w', position),
+    'K': lambda position: King('w', position),
+    '·': lambda position: Empty(position),
+    'x': lambda position: enPassant('b', position),
+    'X': lambda position: enPassant('w', position)
+}
 
     PIECE_NAME_TO_CHAR = {
         'Pawn': 'p',
@@ -28,7 +28,8 @@ class CustomGame():
         'Bishop': 'b',
         'Queen': 'q',
         'King': 'k',
-        'Empty': '·'
+        'Empty': '·',
+        'enPassant': 'x'
     }
     
     def __init__(self, rows, cols, turn = 'w', self_capture=False, duck_chess=False, king_capture = False, starting_board=None, castle_rights = "KQkq", full_move_counter = 0, half_move_counter = 0, move_history = []):
@@ -40,7 +41,7 @@ class CustomGame():
         self.duck_chess = duck_chess
         if starting_board: # if a starting board is provided, use it, otherwise create an empty board
             self.board_string_list = starting_board
-            self.board = [[CustomGame.CHAR_TO_PIECE[piece] for piece in row] for row in starting_board]
+            self.board = [[self.CHAR_TO_PIECE[piece]((i, j)) for j, piece in enumerate(row)] for i, row in enumerate(starting_board)]
         else:
             self.board_string_list = ["·" * self.cols for _ in range(self.rows)]
             self.board = [[Empty((i ,j)) for j in range(self.cols)] for i in range(self.rows)]
@@ -56,28 +57,66 @@ class CustomGame():
 
     def get_game_state(self):
         # returns the current game state as a string, 'normal' 'check', 'checkmate', etc.
-        return self.game_state
-    
-    def get_board(self):
-        # returns the current board as a list of lists of Piece objects
-        return self.board
+        # TODO: Implement this function
+        return 'normal'
+
+    def execute_move(self, start, end):
+        # executes a move from start to end and updates the board
+        # get the piece at start
+        piece = self.board[start[0]][start[1]]
+
+        if piece.color != self.turn:
+            print("It is not {}'s turn to move".format(piece.color))
+            return False
+
+        # get the legal moves for the piece at start
+        legal_moves = piece.get_legal_moves(self)
+        print('legal moves found: ', legal_moves)
+
+        # don't allow the move if the end is not in the legal moves
+        if end not in legal_moves:
+            print("The move from {} to {} is not legal".format(start, end))
+            return False
+        
+        # if the move is legal, execute it
+        piece.move(self, end)
+
+        # update the game information
+        self.turn = 'w' if self.turn == 'b' else 'b'
+        self.move_count += 1
+        self.game_state = self.get_game_state()
+
+        return True
 
     # BELOW IS FOR TESTING AND DEBUGGING
     def print_board(self):
         # prints the board
-        for row in self.board_string_list:
-            print(row)
+        for row in self.board:
+            for piece in row:
+                if piece.color == 'w':
+                    print(self.PIECE_NAME_TO_CHAR[piece.__class__.__name__].upper(), end=' ')
+                else:
+                    print(self.PIECE_NAME_TO_CHAR[piece.__class__.__name__], end=' ')
+            print()
         
 
-test_game1 = CustomGame(8, 8, starting_board = ['rnbqkbnr',
-                                                'pppppppp', 
-                                                '········', 
-                                                '········', 
-                                                '········', 
-                                                '········', 
-                                                'PPPPPPPP',
-                                                'RNBQKBNR'])
+# test_game1 = CustomGame(8, 8, starting_board = ['rnbqkbnr',
+#                                                 'pppppppp', 
+#                                                 '········', 
+#                                                 '········', 
+#                                                 '········', 
+#                                                 '········', 
+#                                                 'PPPPPPPP',
+#                                                 'RNBQKBNR'])
 
-test_game1.print_board()
+# test_game1.print_board()
 
-# play a game taking in a move as a start and end tuple then updating the board
+# # play a game taking in a move as a start and end position
+
+# while True:
+#     start = input("Enter the start position: ")
+#     end = input("Enter the end position: ")
+#     start = (int(start[0]), int(start[1]))
+#     end = (int(end[0]), int(end[1]))
+#     test_game1.execute_move(start, end)
+#     test_game1.print_board()
