@@ -25,8 +25,11 @@ class Piece:
         # returns a set of legal moves for the piece
         legal_moves = set()
 
+        # check if the piece is the right color
+        if self.color != game.turn:
+            return legal_moves
+
         pin_directions = self.is_pinned(game)
-        print('pin directions: ', pin_directions)
 
         # check if the piece is pinned to the king
         if pin_directions: # if the piece is pinned, it can only move toward and away from the king
@@ -34,6 +37,7 @@ class Piece:
             for direction in pin_directions[:2]:
                 if getattr(self, direction, False):
                     i, j = self.position
+                    jump = self.directions[direction]
                     while True:
                         # iterate through the direction until an untraversable space is reached
                         i += jump[0]
@@ -117,12 +121,90 @@ class Piece:
                     if game.board[i][j].landable: # piece can be landed on
                         legal_moves.add((i,j))
         
-        # check if king can castle:
+        # check if king can castle or if it moves into check:
         if isinstance(self, King):
+            print('you clicked a king, can it castle?')
+            print('castle_rights:', game.castle_rights)
+            print('castle_rooks:', game.castle_rooks)
             if self.color == 'w':
-                #implement
-                pass
+                # check if player can queenside castle
+                if 'Q' in game.castle_rights:
+                    rook_col = game.castle_rooks['Q'][1]
+                    can_castle = True
+                    for col in range(rook_col + 1, self.position[1]):
+                        # check that square is traversable and not attacked
+                        if not game.board[i][col].traversable or game.square_is_attacked((self.position[0], col), 'b'):
+                            print('cannot castle queenside', (self.position[0], col))
+                            can_castle = False
+                            break
+                    if can_castle:
+                        legal_moves.add((self.position[0], rook_col + 1))
+
+                if 'K' in game.castle_rights:
+                    rook_col = game.castle_rooks['K'][1]
+                    can_castle = True
+                    for col in range(self.position[1] + 1, rook_col):
+                        # check that square is traversable and not attacked
+                        if not game.board[i][col].traversable or game.square_is_attacked((self.position[0], col), 'b'):
+                            print('cannot castle kingside', (self.position[0], col))
+                            can_castle = False
+                            break
+                    if can_castle:
+                        legal_moves.add((self.position[0], rook_col - 1))
+            else:
+                # check if player can queenside castle
+                if 'q' in game.castle_rights:
+                    rook_col = game.castle_rooks['q'][1]
+                    can_castle = True
+                    for col in range(rook_col + 1, self.position[1]):
+                        # check that square is traversable and not attacked
+                        if not game.board[i][col].traversable or game.square_is_attacked((self.position[0], col), 'w'):
+                            print('cannot castle queenside', (self.position[0], col))
+                            can_castle = False
+                            break
+                    if can_castle:
+                        legal_moves.add((self.position[0], rook_col + 1))
+
+                if 'k' in game.castle_rights:
+                    rook_col = game.castle_rooks['k'][1]
+                    can_castle = True
+                    for col in range(self.position[1] + 1, rook_col):
+                        # check that square is traversable and not attacked
+                        if (not game.board[i][col].traversable) or game.square_is_attacked((self.position[0], col), 'w'):
+                            print('cannot castle kingside', (self.position[0], col))
+                            can_castle = False
+                            break
+                    if can_castle:
+                        legal_moves.add((self.position[0], rook_col - 1))
+
         return legal_moves
+    
+    def get_vision(self, game):
+        # parameters: game object
+        # returns a set of all the squares that the piece can see, disregarding pins and checks
+        vision = set()
+        for direction, jump in self.directions.items():
+            if getattr(self, direction, False):
+                i, j = self.position
+                while True:
+                    # iterate through the direction until an untraversable space is reached
+                    i += jump[0]
+                    j += jump[1]
+                    if i < 0 or i >= game.rows or j < 0 or j >= game.cols:
+                        break
+                    vision.add((i, j))
+                    if not game.board[i][j].traversable:
+                        break
+        
+        for jump in self.attack_jumps:
+            i, j = self.position
+            i += jump[0]
+            j += jump[1]
+            if i < 0 or i >= game.rows or j < 0 or j >= game.cols:
+                continue
+            vision.add((i, j))
+        
+        return vision
 
     def can_take(self, game, piece):
         # parameters: piece object attempting to be taken
@@ -151,7 +233,6 @@ class Piece:
         king_direction = False
         for direction, jump in self.directions.items():
             i, j = self.position
-            print(i, j, type(i), type(j))
             while True:
                 # iterate through the direction until an untraversable space is reached
                 i += jump[0]
@@ -243,11 +324,16 @@ class Pawn(Piece):
             self.move_jumps = [(-1, 0)]
         else:
             self.move_jumps = [(1, 0)]
-
-        # updates the game board with the move
-        game.board[self.position[0]][self.position[1]] = Empty(self.position)
-        game.board[move[0]][move[1]] = self
-        self.position = move
+        
+        # if the pawn is at the end of the board, promote it to a queen
+        if move[0] == 0 or move[0] == game.rows-1:
+            game.board[self.position[0]][self.position[1]] = Empty(self.position)
+            game.board[move[0]][move[1]] = Queen(self.color, move)
+        else:
+            # updates the game board with the move
+            game.board[self.position[0]][self.position[1]] = Empty(self.position)
+            game.board[move[0]][move[1]] = self
+            self.position = move
     
 
 class Empty(Piece):
@@ -259,10 +345,3 @@ class enPassant(Piece):
     # empty square that can be taken by en passant
     def __init__(self, color, position):
         super().__init__(color, position, traversable=True, takeable=False, landable=True)
-
-        # mark the pawn that can be taken by en passant
-        if color == "w":
-            self.removable_pawn = (position[0]-1, position[1])
-        else:
-            self.removable_pawn = (position[0]+1, position[1])
-        

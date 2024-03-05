@@ -45,7 +45,6 @@ class CustomGame():
         else:
             self.board_string_list = ["·" * self.cols for _ in range(self.rows)]
             self.board = [[Empty((i ,j)) for j in range(self.cols)] for i in range(self.rows)]
-        self.castle_rights = castle_rights # string representing the castle rights of the game
         self.game_over = False # True if the game is over, False otherwise
         self.winner = None # winner of the game, 'w', 'b', or 'd'
         self.move_history = [] # list of moves made in the game as e1e2, e7e5, etc.
@@ -54,6 +53,51 @@ class CustomGame():
         self.full_move_counter = full_move_counter # full move counter for the game
         self.half_move_counter = half_move_counter # half move counter for the game
         self.move_history = move_history # list of moves made in the game as e1e2, e7e5, etc.
+
+        self.castle_rights = castle_rights # string representing the castle rights of the game
+        self.castle_rooks = self.get_castle_rooks()
+        print(self.castle_rooks)
+
+    def get_castle_rooks(self):
+        output = {}
+        for c in self.castle_rights:
+            if c == 'K':
+                # look for rightmost rook in bottom rank
+                for i in range(self.cols-1, -1, -1):
+                    if isinstance(self.board[self.rows - 1][i], Rook) and self.board[self.rows - 1][i].color == 'w':
+                        output['K'] = (self.rows - 1, i)
+                        break
+                    elif isinstance(self.board[self.rows - 1][i], King):  # no rook found
+                        break
+            elif c == 'Q':
+                # look for leftmost rook in bottom rank
+                for i in range(self.cols):
+                    if isinstance(self.board[self.rows - 1][i], Rook) and self.board[self.rows - 1][i].color == 'w':
+                        output['Q'] = (self.rows -1 , i)
+                        break
+                    elif isinstance(self.board[self.rows(-1)][i], King):
+                        break
+            elif c == 'k':
+                # look for rightmost rook in top rank
+                for i in range(self.cols-1, -1, -1):
+                    if isinstance(self.board[0][i], Rook) and self.board[0][i].color == 'b':
+                        output['k'] = (0, i)
+                        break
+                    elif isinstance(self.board[0][i], King):
+                        break
+
+            elif c == 'q':
+                # look for leftmost rook in top rank
+                for i in range(self.cols):
+                    if isinstance(self.board[0][i], Rook) and self.board[0][i].color == 'b':
+                        output['q'] = (0, i)
+                        break
+                    elif isinstance(self.board[0][i], King):
+                        break
+            else:
+                continue
+        return output
+
 
     def get_game_state(self):
         # returns the current game state as a string, 'normal' 'check', 'checkmate', etc.
@@ -87,6 +131,16 @@ class CustomGame():
         self.game_state = self.get_game_state()
 
         return True
+    
+    def square_is_attacked(self, position, color):
+        # returns True if the square at position is attacked by the color, False otherwise
+        for row in self.board:
+            for piece in row:
+                if piece.color == color:
+                    if position in piece.get_vision(self):
+                        print(position, " is attacked by ", piece.__class__.__name__)
+                        return True
+        return False
 
     # BELOW IS FOR TESTING AND DEBUGGING
     def print_board(self):
