@@ -49,15 +49,93 @@ class CustomGame():
         self.winner = None # winner of the game, 'w', 'b', or 'd'
         self.move_history = [] # list of moves made in the game as e1e2, e7e5, etc.
         self.move_count = 0 # number of moves made in the game
-        self.game_state = self.get_game_state() # current game state as a string, 'normal' 'check', 'checkmate', etc.
+        self.game_state = 'normal'
+        self.game_state = self.get_game_state(self.turn) # current game state as a string, 'normal' 'check', 'checkmate', etc.
         self.full_move_counter = full_move_counter # full move counter for the game
         self.half_move_counter = half_move_counter # half move counter for the game
         self.move_history = move_history # list of moves made in the game as e1e2, e7e5, etc.
 
         self.castle_rights = castle_rights # string representing the castle rights of the game
         self.castle_rooks = self.get_castle_rooks()
-        print(self.castle_rooks)
+        print(self.game_state)
+    
+    # Game state evaluation
 
+    def get_game_state(self, color_to_move):
+        # returns the current game state as a string, 'normal' 'check', 'checkmate', etc.
+        # iterate through the board to find king
+        if self.is_check(color_to_move):
+            if self.is_stalemate(color_to_move):
+                return 'checkmate'
+            return 'check'
+        if self.is_stalemate(color_to_move):
+            return 'stalemate'
+        return 'normal'
+
+    def is_check(self, color_to_move):
+        # returns True if the color is in check, False otherwise
+        for row in self.board:
+            for piece in row:
+                if isinstance(piece, King) and piece.color == color_to_move:
+                    king = piece
+                    break
+        # check if the king is in check
+        opposite_color = 'w' if color_to_move == 'b' else 'b' 
+        if self.square_is_attacked(king.position, opposite_color):
+            return True
+        return False
+
+    def is_stalemate(self, color_to_move):
+        # returns True if the color is in stalemate, False otherwise
+        for row in self.board:
+            for piece in row:
+                if piece.color == color_to_move:
+                    if piece.get_legal_moves(self):
+                        return False
+        return True
+    
+    # Game movement handler
+    def execute_move(self, start, end):
+        # executes a move from start to end and updates the board
+        # get the piece at start
+        piece = self.board[start[0]][start[1]]
+
+        if piece.color != self.turn:
+            print("It is not {}'s turn to move".format(piece.color))
+            return False
+
+        # get the legal moves for the piece at start
+        legal_moves = piece.get_legal_moves(self)
+        print('legal moves found: ', legal_moves)
+
+        # don't allow the move if the end is not in the legal moves
+        if end not in legal_moves:
+            print("The move from {} to {} is not legal".format(start, end))
+            return False
+        
+        # if the move is legal, execute it
+        piece.move(self, end)
+
+        # update the game information
+        self.turn = 'w' if self.turn == 'b' else 'b'
+        self.move_count += 1
+        self.game_state = self.get_game_state(self.turn)
+
+        print('game state is now: ', self.game_state)
+
+        return True
+    
+    def square_is_attacked(self, position, color):
+        # returns True if the square at position is attacked by the color, False otherwise
+        for row in self.board:
+            for piece in row:
+                if piece.color == color:
+                    if position in piece.get_vision(self):
+                        print(position, " is attacked by ", piece.__class__.__name__)
+                        return True
+        return False
+    
+    # Initialization Helpers
     def get_castle_rooks(self):
         output = {}
         for c in self.castle_rights:
@@ -98,49 +176,6 @@ class CustomGame():
                 continue
         return output
 
-
-    def get_game_state(self):
-        # returns the current game state as a string, 'normal' 'check', 'checkmate', etc.
-        # TODO: Implement this function
-        return 'normal'
-
-    def execute_move(self, start, end):
-        # executes a move from start to end and updates the board
-        # get the piece at start
-        piece = self.board[start[0]][start[1]]
-
-        if piece.color != self.turn:
-            print("It is not {}'s turn to move".format(piece.color))
-            return False
-
-        # get the legal moves for the piece at start
-        legal_moves = piece.get_legal_moves(self)
-        print('legal moves found: ', legal_moves)
-
-        # don't allow the move if the end is not in the legal moves
-        if end not in legal_moves:
-            print("The move from {} to {} is not legal".format(start, end))
-            return False
-        
-        # if the move is legal, execute it
-        piece.move(self, end)
-
-        # update the game information
-        self.turn = 'w' if self.turn == 'b' else 'b'
-        self.move_count += 1
-        self.game_state = self.get_game_state()
-
-        return True
-    
-    def square_is_attacked(self, position, color):
-        # returns True if the square at position is attacked by the color, False otherwise
-        for row in self.board:
-            for piece in row:
-                if piece.color == color:
-                    if position in piece.get_vision(self):
-                        print(position, " is attacked by ", piece.__class__.__name__)
-                        return True
-        return False
 
     # BELOW IS FOR TESTING AND DEBUGGING
     def print_board(self):

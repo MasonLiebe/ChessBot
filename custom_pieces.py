@@ -22,12 +22,85 @@ class Piece:
 
     def get_legal_moves(self, game):
         # parameters: game object
-        # returns a set of legal moves for the piece
+        # returns a set of legal moves for the piece given the game state
         legal_moves = set()
 
         # check if the piece is the right color
         if self.color != game.turn:
             return legal_moves
+        
+        # handle case where player is in check
+        if game.game_state == 'check':
+            checking_pieces = set() # dictionary saying jump or direction-based checks
+            # find the king's position
+            for row in game.board:
+                for piece in row:
+                    if isinstance(piece, King) and piece.color == game.turn:
+                        king = piece
+                        break
+            # iterate through board to find pieces checking the king
+            for row in game.board:
+                for piece in row:
+                    if piece.color != game.turn:
+                        for move in piece.get_legal_moves(game):
+                            if move == king.position:
+                                checking_pieces.add(piece)
+            
+            if len(checking_pieces) == 1:
+                checking_piece = checking_pieces.pop()
+                # check if piece is attacking via attack jumps
+                for jump in checking_piece.attack_jumps:
+                    i, j = checking_piece.position
+                    i += jump[0]
+                    j += jump[1]
+                    if (i, j) == king.position:
+                        # king must move or the checking piece must be taken
+                        if isinstance(self, King):
+                            for move in self.get_vision(game):
+                                opposite_color = 'b' if game.turn == 'w' else 'w'
+                                if not game.square_is_attacked(move, opposite_color):
+                                    legal_moves.add(move)
+                        else:
+                            # piece must be taken
+                            if checking_piece.position in self.get_vision(game):
+                                legal_moves.add(checking_piece.position)
+                
+                # check if piece is attacking via direction
+                for direction, jump in checking_piece.directions.items():
+                    if getattr(checking_piece, direction, False):
+                        i, j = checking_piece.position
+                        while True:
+                            # iterate through the direction until an untraversable space is reached
+                            i += jump[0]
+                            j += jump[1]
+                            if i < 0 or i >= game.rows or j < 0 or j >= game.cols:
+                                break
+                            if (i, j) == king.position:
+                                # piece must be taken, king must move, or the piece must be blocked in this direction
+                                if isinstance(self, King):
+                                    for move in self.get_vision(game):
+                                        opposite_color = 'b' if game.turn == 'w' else 'w'
+                                        if not game.square_is_attacked(move, opposite_color) and (self.can_take(game, game.board[i][j]) or game.board[i][j].landable):
+                                            "it got here 1"
+                                            legal_moves.add(move)
+                                else:
+                                    # iterate back to the checking piece and add the squares to the legal moves
+                                    vision = self.get_vision(game)
+                                    while (i, j) != checking_piece.position:
+                                        i -= jump[0]
+                                        j -= jump[1]
+                                        if (i, j) == vision:
+                                            legal_moves.add((i, j))
+                            if not game.board[i][j].traversable:
+                                break
+            else:
+                # king must move
+                if isinstance(self, King):
+                    for move in self.get_vision(game):
+                        if move not in checking_pieces:
+                            legal_moves.add(move)
+                else:
+                    return legal_moves
 
         pin_directions = self.is_pinned(game)
 
@@ -123,59 +196,84 @@ class Piece:
         
         # check if king can castle or if it moves into check:
         if isinstance(self, King):
-            print('you clicked a king, can it castle?')
-            print('castle_rights:', game.castle_rights)
-            print('castle_rooks:', game.castle_rooks)
             if self.color == 'w':
                 # check if player can queenside castle
                 if 'Q' in game.castle_rights:
                     rook_col = game.castle_rooks['Q'][1]
                     can_castle = True
+                    # check that the squares between the king and rook are traversable
                     for col in range(rook_col + 1, self.position[1]):
-                        # check that square is traversable and not attacked
-                        if not game.board[i][col].traversable or game.square_is_attacked((self.position[0], col), 'b'):
-                            print('cannot castle queenside', (self.position[0], col))
+                        if not game.board[self.position[0]][col].traversable:
+                            print('cannot castle queenside', (self.position[0], col), 'is not traversable')
                             can_castle = False
                             break
+                    # check that the 2 squares left of the king are not attacked
                     if can_castle:
-                        legal_moves.add((self.position[0], rook_col + 1))
-
+                        for col in range(self.position[1] - 1, self.position[1] - 3, -1):
+                            if game.square_is_attacked((self.position[0], col), 'b'):
+                                print('cannot castle queenside', (self.position[0], col), 'is attacked')
+                                can_castle = False
+                                break
+                        if can_castle:
+                            legal_moves.add((self.position[0], self.position[1] - 2))
                 if 'K' in game.castle_rights:
                     rook_col = game.castle_rooks['K'][1]
                     can_castle = True
+                    # check that the squares between the king and rook are traversable
                     for col in range(self.position[1] + 1, rook_col):
-                        # check that square is traversable and not attacked
-                        if not game.board[i][col].traversable or game.square_is_attacked((self.position[0], col), 'b'):
-                            print('cannot castle kingside', (self.position[0], col))
+                        if not game.board[self.position[0]][col].traversable:
+                            print('cannot castle kingside', (self.position[0], col), 'is not traversable')
                             can_castle = False
                             break
+                    # check that the 2 squares right of the king are not attacked
                     if can_castle:
-                        legal_moves.add((self.position[0], rook_col - 1))
+                        for col in range(self.position[1] + 1, self.position[1] + 3):
+                            if game.square_is_attacked((self.position[0], col), 'b'):
+                                print('cannot castle kingside', (self.position[0], col), 'is attacked')
+                                can_castle = False
+                                break
+                        if can_castle:
+                            legal_moves.add((self.position[0], self.position[1] + 2))
+                        
             else:
                 # check if player can queenside castle
                 if 'q' in game.castle_rights:
                     rook_col = game.castle_rooks['q'][1]
                     can_castle = True
+                    # check that the squares between the king and rook are traversable
                     for col in range(rook_col + 1, self.position[1]):
-                        # check that square is traversable and not attacked
-                        if not game.board[i][col].traversable or game.square_is_attacked((self.position[0], col), 'w'):
-                            print('cannot castle queenside', (self.position[0], col))
+                        if not game.board[self.position[0]][col].traversable:
+                            print('cannot castle queenside', (self.position[0], col), 'is not traversable')
                             can_castle = False
                             break
+                    # check that the 2 squares left of the king are not attacked
                     if can_castle:
-                        legal_moves.add((self.position[0], rook_col + 1))
+                        for col in range(self.position[1] - 1, self.position[1] - 3, -1):
+                            if game.square_is_attacked((self.position[0], col), 'w'):
+                                print('cannot castle queenside', (self.position[0], col), 'is attacked')
+                                can_castle = False
+                                break
+                        if can_castle:
+                            legal_moves.add((self.position[0], self.position[1] - 2))
 
                 if 'k' in game.castle_rights:
                     rook_col = game.castle_rooks['k'][1]
                     can_castle = True
+                    # check that the squares between the king and rook are traversable
                     for col in range(self.position[1] + 1, rook_col):
-                        # check that square is traversable and not attacked
-                        if (not game.board[i][col].traversable) or game.square_is_attacked((self.position[0], col), 'w'):
-                            print('cannot castle kingside', (self.position[0], col))
+                        if not game.board[self.position[0]][col].traversable:
+                            print('cannot castle kingside', (self.position[0], col), 'is not traversable')
                             can_castle = False
                             break
+                    # check that the 2 squares right of the king are not attacked
                     if can_castle:
-                        legal_moves.add((self.position[0], rook_col - 1))
+                        for col in range(self.position[1] + 1, self.position[1] + 3):
+                            if game.square_is_attacked((self.position[0], col), 'w'):
+                                print('cannot castle kingside', (self.position[0], col), 'is attacked')
+                                can_castle = False
+                                break
+                        if can_castle:
+                            legal_moves.add((self.position[0], self.position[1] + 2))
 
         return legal_moves
     
@@ -285,12 +383,80 @@ class King(Piece):
     def __init__(self, color, position = (-1, -1)):
         super().__init__(color, position, move_jumps=[(1,0), (-1,0), (0,1), (0,-1), (1,1), (1,-1), (-1,1), (-1,-1)], attack_jumps=[(1,0), (-1,0), (0,1), (0,-1), (1,1), (1,-1), (-1,1), (-1,-1)])
 
-    #TODO: override move method to handle castling
+    def move(self, game, move):
+        # parameters: game object, move as a destination tuple
+        # update castle rights if the king moves
+        if self.color == 'w':
+            game.castle_rights = game.castle_rights.replace('Q', '').replace('K', '')
+            # check if the king is castling
+            if self.position[1] - move[1] == 2: # castiling queenside
+                # move king to the move square
+                game.board[self.position[0]][self.position[1]] = Empty(self.position)
+                game.board[move[0]][move[1]] = self
+                self.position = move
+                # move the rook one to the right of the move square
+                game.board[self.position[0]][self.position[1]+1] = Rook('w', (self.position[0], self.position[1]+1))
+                game.board[self.position[0]][game.castle_rooks['Q'][1]] = Empty((self.position[0], game.castle_rooks['Q'][1]))
+            elif move[1] - self.position[1] == 2: # castling kingside
+                # move king to the move square
+                game.board[self.position[0]][self.position[1]] = Empty(self.position)
+                game.board[move[0]][move[1]] = self
+                self.position = move
+                # move the rook one to the left of the move square
+                game.board[self.position[0]][self.position[1]-1] = Rook('w', (self.position[0], self.position[1]-1))
+                game.board[self.position[0]][game.castle_rooks['K'][1]] = Empty((self.position[0], game.castle_rooks['K'][1]))
+            else: # normal move
+                game.board[self.position[0]][self.position[1]] = Empty(self.position)
+                game.board[move[0]][move[1]] = self
+                self.position = move
+        else:
+            game.castle_rights = game.castle_rights.replace('q', '').replace('k', '')
+            # check if the king is castling
+            if self.position[1] - move[1] == 2: # castiling queenside
+                # move king to the move square
+                game.board[self.position[0]][self.position[1]] = Empty(self.position)
+                game.board[move[0]][move[1]] = self
+                self.position = move
+                # move the rook one to the right of the move square
+                game.board[self.position[0]][self.position[1]+1] = Rook('b', (self.position[0], self.position[1]+1))
+                game.board[self.position[0]][game.castle_rooks['q'][1]] = Empty((self.position[0], game.castle_rooks['q'][1]))
+            elif move[1] - self.position[1] == 2: # castling kingside
+                # move king to the move square
+                game.board[self.position[0]][self.position[1]] = Empty(self.position)
+                game.board[move[0]][move[1]] = self
+                self.position = move
+                # move the rook one to the left of the move square
+                game.board[self.position[0]][self.position[1]-1] = Rook('b', (self.position[0], self.position[1]-1))
+                game.board[self.position[0]][game.castle_rooks['k'][1]] = Empty((self.position[0], game.castle_rooks['k'][1]))
+            else: # normal move
+                game.board[self.position[0]][self.position[1]] = Empty(self.position)
+                game.board[move[0]][move[1]] = self
+                self.position = move
+        
+
         
 class Rook(Piece):
     # standard rook piece
     def __init__(self, color, position = (-1, -1)):
         super().__init__(color, position, n = True, s = True, e = True, w = True)
+    
+    # override move to update castle rights
+    def move(self, game, move):
+        # parameters: game object, move as a destination tuple
+        # update castle rights if the rook moves
+        if self.color == 'w':
+            if self.position == game.castle_rooks['Q']:
+                game.castle_rights = game.castle_rights.replace('Q', '')
+            elif self.position == game.castle_rooks['K']:
+                game.castle_rights = game.castle_rights.replace('K', '')
+        else:
+            if self.position == game.castle_rooks['q']:
+                game.castle_rights = game.castle_rights.replace('q', '')
+            elif self.position == game.castle_rooks['k']:
+                game.castle_rights = game.castle_rights.replace('k', '')
+        game.board[self.position[0]][self.position[1]] = Empty(self.position)
+        game.board[move[0]][move[1]] = self
+        self.position = move
     
 class Bishop(Piece):
     # standard bishop piece
