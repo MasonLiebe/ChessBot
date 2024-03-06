@@ -3,7 +3,7 @@ class Piece:
     directions = {'n': (1,0), 's': (-1,0), 'e': (0,1), 'w': (0,-1), 'ne': (1,1), 'nw': (1,-1), 'se': (-1,1), 'sw': (-1,-1)}
     opposite_direction = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e', 'ne': 'sw', 'nw': 'se', 'se': 'nw', 'sw': 'ne'}
 
-    def __init__(self, color, position = (-1, -1), n = False, s = False, e = False, w = False, ne = False, nw = False, se = False, sw = False, attack_jumps = [], move_jumps = [], traversable = False, landable = False, takeable = True):
+    def __init__(self, color, position = (-1, -1), n = False, s = False, e = False, w = False, ne = False, nw = False, se = False, sw = False, attack_jumps = [], move_jumps = [], traversable = False, landable = False, takeable = True, new = True):
         self.color = color
         self.position = position
         self.n = n
@@ -386,6 +386,25 @@ class Piece:
         game.board[move[0]][move[1]] = self
         self.position = move
 
+        # check if rook is taken for castle rights
+        if move in game.castle_rooks.values():
+            if move == game.castle_rooks['Q']:
+                game.castle_rights = game.castle_rights.replace('Q', '')
+            elif move == game.castle_rooks['K']:
+                game.castle_rights = game.castle_rights.replace('K', '')
+            elif move == game.castle_rooks['q']:
+                game.castle_rights = game.castle_rights.replace('q', '')
+            elif move == game.castle_rooks['k']:
+                game.castle_rights = game.castle_rights.replace('k', '')
+
+    
+    def force_move(self, game, move):
+        # parameters: game object, move as a destination tuple
+        # updates the game board with the move - DOESN'T CHECK IF THE MOVE IS LEGAL OR EN PASSANT
+        game.board[self.position[0]][self.position[1]] = Empty(self.position)
+        game.board[move[0]][move[1]] = self
+        self.position = move
+
     def is_pinned(self, game):
         # parameters: game object
         # returns the direction and location of attacking piece if the piece is pinned to the king, False otherwise
@@ -501,6 +520,16 @@ class King(Piece):
                 game.board[move[0]][move[1]] = self
                 self.position = move
         
+        if move in game.castle_rooks.values():
+            if move == game.castle_rooks['Q']:
+                game.castle_rights = game.castle_rights.replace('Q', '')
+            elif move == game.castle_rooks['K']:
+                game.castle_rights = game.castle_rights.replace('K', '')
+            elif move == game.castle_rooks['q']:
+                game.castle_rights = game.castle_rights.replace('q', '')
+            elif move == game.castle_rooks['k']:
+                game.castle_rights = game.castle_rights.replace('k', '')
+        
 
         
 class Rook(Piece):
@@ -525,6 +554,16 @@ class Rook(Piece):
         game.board[self.position[0]][self.position[1]] = Empty(self.position)
         game.board[move[0]][move[1]] = self
         self.position = move
+
+        if move in game.castle_rooks.values():
+            if move == game.castle_rooks['Q']:
+                game.castle_rights = game.castle_rights.replace('Q', '')
+            elif move == game.castle_rooks['K']:
+                game.castle_rights = game.castle_rights.replace('K', '')
+            elif move == game.castle_rooks['q']:
+                game.castle_rights = game.castle_rights.replace('q', '')
+            elif move == game.castle_rooks['k']:
+                game.castle_rights = game.castle_rights.replace('k', '')
     
 class Bishop(Piece):
     # standard bishop piece
@@ -568,6 +607,26 @@ class Pawn(Piece):
             game.board[self.position[0]][self.position[1]] = Empty(self.position)
             game.board[move[0]][move[1]] = self
             self.position = move
+        
+        if move in game.castle_rooks.values():
+            if move == game.castle_rooks['Q']:
+                game.castle_rights = game.castle_rights.replace('Q', '')
+            elif move == game.castle_rooks['K']:
+                game.castle_rights = game.castle_rights.replace('K', '')
+            elif move == game.castle_rooks['q']:
+                game.castle_rights = game.castle_rights.replace('q', '')
+            elif move == game.castle_rooks['k']:
+                game.castle_rights = game.castle_rights.replace('k', '')
+
+
+    
+    def remove_double_move(self):
+        # parameters: game object, move as a destination tuple
+        # remove en passant square if the pawn moves to the square
+        if (-2, 0) in self.move_jumps:
+            self.move_jumps.remove((-2, 0))
+        if (2, 0) in self.move_jumps:
+            self.move_jumps.remove((2, 0))
     
 
 class Empty(Piece):

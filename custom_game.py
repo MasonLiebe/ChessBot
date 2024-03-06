@@ -1,5 +1,6 @@
 # Generalized game class to handle custom chess games
 from custom_pieces import Piece, Pawn, Rook, Knight, Bishop, Queen, King, Empty, enPassant
+from copy import deepcopy
 
 class CustomGame():
 
@@ -32,13 +33,15 @@ class CustomGame():
         'enPassant': 'x'
     }
     
-    def __init__(self, rows, cols, turn = 'w', self_capture=False, duck_chess=False, king_capture = False, starting_board=None, castle_rights = "KQkq", full_move_counter = 0, half_move_counter = 0, move_history = []):
+    def __init__(self, rows, cols, turn = 'w', self_capture=False, duck_chess=False, king_capture = False, starting_board=None, castle_rights = "KQkq", full_move_counter = 0, half_move_counter = 0, move_history = [], capture_history = []):
         self.rows = rows # number of rows on the board
         self.cols = cols # number of columns on the board
         self.turn = turn # current player whose turn it is, 'w' or 'b'
         self.self_capture = self_capture # True if self-capture is allowed, False otherwise
         self.king_capture = king_capture
         self.duck_chess = duck_chess
+        self.move_history = move_history # list of moves made in the game as ((orgin),(dest)) tuples.
+        self.state_history = capture_history # list of boards before each move
         if starting_board: # if a starting board is provided, use it, otherwise create an empty board
             self.board_string_list = starting_board
             self.board = [[self.CHAR_TO_PIECE[piece]((i, j)) for j, piece in enumerate(row)] for i, row in enumerate(starting_board)]
@@ -58,6 +61,8 @@ class CustomGame():
             self.board[self.rows - 1][self.cols // 2] = self.white_king
             self.board[0][self.cols // 2] = self.black_king
 
+        self.state_history.append(deepcopy(self.board))
+
         self.game_over = False # True if the game is over, False otherwise
         self.winner = None # winner of the game, 'w', 'b', or 'd'
         self.move_history = [] # list of moves made in the game as e1e2, e7e5, etc.
@@ -66,12 +71,9 @@ class CustomGame():
         self.game_state = self.get_game_state(self.turn) # current game state as a string, 'normal' 'check', 'checkmate', etc.
         self.full_move_counter = full_move_counter # full move counter for the game
         self.half_move_counter = half_move_counter # half move counter for the game
-        self.move_history = move_history # list of moves made in the game as e1e2, e7e5, etc.
-
         self.castle_rights = castle_rights # string representing the castle rights of the game
         self.castle_rooks = self.get_castle_rooks()
-        print(self.game_state)
-    
+        
     # Game state evaluation
 
     def get_game_state(self, color_to_move):
@@ -121,6 +123,9 @@ class CustomGame():
             print("The move from {} to {} is not legal".format(start, end))
             return False
         
+        self.move_history.append((start, end))
+        self.state_history.append(deepcopy(self.board))
+        
         # if the move is legal, execute it
         piece.move(self, end)
 
@@ -133,9 +138,25 @@ class CustomGame():
 
         return True
     
+    
     def undo_move(self):
         # undoes the last move made in the game
-        pass
+        if len(self.move_history) == 0:
+            return False
+        # get last move from move history
+        self.board = self.state_history.pop()
+        self.move_history.pop()
+
+        # update the game information
+        self.turn = 'w' if self.turn == 'b' else 'b'
+        self.move_count -= 1
+        self.game_state = self.get_game_state(self.turn)
+
+    def reset_game(self):
+        # undo moves until the game is reset
+        while len(self.move_history) > 0:
+            self.undo_move()
+
 
     # game state checking functions
     

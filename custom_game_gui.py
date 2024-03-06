@@ -23,7 +23,12 @@ class CustomChessGUI(tk.Tk):
         self.highlighted_squares = [] # Tracks the highlighted squares for valid moves
         self.game_state_label = tk.Label(self, text="Game State: " + self.game.game_state)
         self.game_state_label.grid(row=1, column=0, columnspan=1)
-        self.game_state_label.config(font=("Courier", 44))
+        self.move_count_label = tk.Label(self, text="Move Count: " + str(self.game.move_count))
+        self.move_count_label.grid(row=1, column=1, columnspan=1)
+        self.reset_game_button = tk.Button(self, text="Reset Game", command=self.reset_game)
+        self.reset_game_button.grid(row=2, column=0, columnspan=1)
+        self.undo_move_button = tk.Button(self, text="Undo Move", command=self.undo_move)
+        self.undo_move_button.grid(row=3, column=0, columnspan=1)
 
         # load the piece images and draw the board
         self.load_piece_images()
@@ -73,7 +78,7 @@ class CustomChessGUI(tk.Tk):
                     piece_name = piece.__class__.__name__.lower()
                     color = 'white' if piece.color == 'w' else 'black'
                     self.canvas.create_image((col + .5) * self.cell_size, (row + .5) * self.cell_size, image=self.piece_images[f'{color}-{piece_name}'], anchor="c")
-                    
+
         self.game_state_label.config(text="Game State: " + self.game.game_state)
 
     
@@ -117,6 +122,14 @@ class CustomChessGUI(tk.Tk):
         square = self.canvas.create_rectangle(x1, y1, x2, y2, outline=color, width=5, tags="highlight")
         self.highlighted_squares.append(square)
         
+    # button functions
+    def reset_game(self):
+        self.game.reset_game()
+        self.update_board()
+    
+    def undo_move(self):
+        self.game.undo_move()
+        self.update_board()
 
 if __name__ == "__main__":
     # Example usage
