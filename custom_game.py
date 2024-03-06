@@ -61,7 +61,8 @@ class CustomGame():
             self.board[self.rows - 1][self.cols // 2] = self.white_king
             self.board[0][self.cols // 2] = self.black_king
 
-        self.state_history.append(deepcopy(self.board))
+        self.board_history = [] # list of boards at each move
+        self.board_history.append(deepcopy(self.board))
 
         self.game_over = False # True if the game is over, False otherwise
         self.winner = None # winner of the game, 'w', 'b', or 'd'
@@ -73,6 +74,7 @@ class CustomGame():
         self.half_move_counter = half_move_counter # half move counter for the game
         self.castle_rights = castle_rights # string representing the castle rights of the game
         self.castle_rooks = self.get_castle_rooks()
+        self.castle_rights_history = [castle_rights] # list of castle rights at each move
         
     # Game state evaluation
 
@@ -124,7 +126,8 @@ class CustomGame():
             return False
         
         self.move_history.append((start, end))
-        self.state_history.append(deepcopy(self.board))
+        self.board_history.append(deepcopy(self.board))
+        self.castle_rights_history.append(deepcopy(self.castle_rights))
         
         # if the move is legal, execute it
         piece.move(self, end)
@@ -144,8 +147,8 @@ class CustomGame():
         if len(self.move_history) == 0:
             return False
         # get last move from move history
-        self.board = self.state_history.pop()
-        self.move_history.pop()
+        self.board = self.board_history.pop()
+        self.castle_rights = self.castle_rights_history.pop()
 
         # update the game information
         self.turn = 'w' if self.turn == 'b' else 'b'
