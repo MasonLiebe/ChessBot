@@ -21,6 +21,9 @@ class CustomChessGUI(tk.Tk):
         self.canvas.grid(row=0, column=0, columnspan=1)
         self.piece_images = {} # Stores the piece images due to tkinter garbage collection
         self.highlighted_squares = [] # Tracks the highlighted squares for valid moves
+        self.game_state_label = tk.Label(self, text="Game State: " + self.game.game_state)
+        self.game_state_label.grid(row=1, column=0, columnspan=1)
+        self.game_state_label.config(font=("Courier", 44))
 
         # load the piece images and draw the board
         self.load_piece_images()
@@ -70,6 +73,9 @@ class CustomChessGUI(tk.Tk):
                     piece_name = piece.__class__.__name__.lower()
                     color = 'white' if piece.color == 'w' else 'black'
                     self.canvas.create_image((col + .5) * self.cell_size, (row + .5) * self.cell_size, image=self.piece_images[f'{color}-{piece_name}'], anchor="c")
+                    
+        self.game_state_label.config(text="Game State: " + self.game.game_state)
+
     
     ### Methods for handling the user inputs to the chess board
     
@@ -90,7 +96,7 @@ class CustomChessGUI(tk.Tk):
         else:
             # Clicked on an empty square or outside legal moves
             self.selected_piece = None
-            self.draw_board()
+            self.update_board()
     
     def highlight_legal_moves(self, row, col):
         """Highlights legal moves for the selected piece."""

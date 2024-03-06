@@ -42,9 +42,22 @@ class CustomGame():
         if starting_board: # if a starting board is provided, use it, otherwise create an empty board
             self.board_string_list = starting_board
             self.board = [[self.CHAR_TO_PIECE[piece]((i, j)) for j, piece in enumerate(row)] for i, row in enumerate(starting_board)]
+            # find the king locations
+            for row in self.board:
+                for piece in row:
+                    if isinstance(piece, King) and piece.color == 'w':
+                        self.white_king = piece
+                    elif isinstance(piece, King) and piece.color == 'b':
+                        self.black_king = piece
         else:
             self.board_string_list = ["·" * self.cols for _ in range(self.rows)]
             self.board = [[Empty((i ,j)) for j in range(self.cols)] for i in range(self.rows)]
+            # set the kings in the middle of the board in the back rank
+            self.white_king = King('w', (self.rows - 1, self.cols // 2))
+            self.black_king = King('b', (0, self.cols // 2))
+            self.board[self.rows - 1][self.cols // 2] = self.white_king
+            self.board[0][self.cols // 2] = self.black_king
+
         self.game_over = False # True if the game is over, False otherwise
         self.winner = None # winner of the game, 'w', 'b', or 'd'
         self.move_history = [] # list of moves made in the game as e1e2, e7e5, etc.
@@ -65,6 +78,7 @@ class CustomGame():
         # returns the current game state as a string, 'normal' 'check', 'checkmate', etc.
         # iterate through the board to find king
         if self.is_check(color_to_move):
+            self.game_state = "check"
             if self.is_stalemate(color_to_move):
                 return 'checkmate'
             return 'check'
@@ -74,27 +88,21 @@ class CustomGame():
 
     def is_check(self, color_to_move):
         # returns True if the color is in check, False otherwise
-        for row in self.board:
-            for piece in row:
-                if isinstance(piece, King) and piece.color == color_to_move:
-                    king = piece
-                    break
-        # check if the king is in check
-        opposite_color = 'w' if color_to_move == 'b' else 'b' 
-        if self.square_is_attacked(king.position, opposite_color):
-            return True
-        return False
-
+        king = self.white_king if color_to_move == 'w' else self.black_king
+        return self.square_is_attacked(king.position, 'w' if color_to_move == 'b' else 'b')
+    
     def is_stalemate(self, color_to_move):
         # returns True if the color is in stalemate, False otherwise
         for row in self.board:
             for piece in row:
                 if piece.color == color_to_move:
-                    if piece.get_legal_moves(self):
+                    if len(piece.get_legal_moves(self)) != 0:
+                        print(piece.__class__.__name__, piece.position, "can move")
+                        print(piece.get_legal_moves(self))
                         return False
         return True
     
-    # Game movement handler
+    # Game movement handlers
     def execute_move(self, start, end):
         # executes a move from start to end and updates the board
         # get the piece at start
@@ -125,6 +133,12 @@ class CustomGame():
 
         return True
     
+    def undo_move(self):
+        # undoes the last move made in the game
+        pass
+
+    # game state checking functions
+    
     def square_is_attacked(self, position, color):
         # returns True if the square at position is attacked by the color, False otherwise
         for row in self.board:
@@ -134,8 +148,7 @@ class CustomGame():
                         print(position, " is attacked by ", piece.__class__.__name__)
                         return True
         return False
-    
-    # Initialization Helpers
+
     def get_castle_rooks(self):
         output = {}
         for c in self.castle_rights:

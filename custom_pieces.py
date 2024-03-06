@@ -24,6 +24,8 @@ class Piece:
         # parameters: game object
         # returns a set of legal moves for the piece given the game state
         legal_moves = set()
+        vision = self.get_vision(game)
+        mobility = self.get_mobility(game)
 
         # check if the piece is the right color
         if self.color != game.turn:
@@ -32,19 +34,17 @@ class Piece:
         # handle case where player is in check
         if game.game_state == 'check':
             checking_pieces = set() # dictionary saying jump or direction-based checks
-            # find the king's position
-            for row in game.board:
-                for piece in row:
-                    if isinstance(piece, King) and piece.color == game.turn:
-                        king = piece
-                        break
+            # find the king that is in check
+            king = game.white_king if self.color == 'w' else game.black_king
+            
             # iterate through board to find pieces checking the king
             for row in game.board:
                 for piece in row:
                     if piece.color != game.turn:
-                        for move in piece.get_legal_moves(game):
+                        for move in piece.get_vision(game):
                             if move == king.position:
                                 checking_pieces.add(piece)
+            print([piece.position for piece in checking_pieces])
             
             if len(checking_pieces) == 1:
                 checking_piece = checking_pieces.pop()
@@ -56,51 +56,50 @@ class Piece:
                     if (i, j) == king.position:
                         # king must move or the checking piece must be taken
                         if isinstance(self, King):
-                            for move in self.get_vision(game):
+                            for move in vision:
                                 opposite_color = 'b' if game.turn == 'w' else 'w'
-                                if not game.square_is_attacked(move, opposite_color):
+                                if (not game.square_is_attacked(move, opposite_color)) and self.can_move_to(game, move):
                                     legal_moves.add(move)
                         else:
                             # piece must be taken
-                            if checking_piece.position in self.get_vision(game):
+                            if checking_piece.position in vision:
                                 legal_moves.add(checking_piece.position)
                 
                 # check if piece is attacking via direction
                 for direction, jump in checking_piece.directions.items():
                     if getattr(checking_piece, direction, False):
                         i, j = checking_piece.position
+                        blocking_squares = set() # squares that can block a potential attack
                         while True:
                             # iterate through the direction until an untraversable space is reached
                             i += jump[0]
                             j += jump[1]
+                            blocking_squares.add((i, j))
                             if i < 0 or i >= game.rows or j < 0 or j >= game.cols:
                                 break
-                            if (i, j) == king.position:
-                                # piece must be taken, king must move, or the piece must be blocked in this direction
+                            if (i, j) == king.position: # piece sees the king
+                                # king must move or the checking piece must be taken or blcocked
                                 if isinstance(self, King):
-                                    for move in self.get_vision(game):
+                                    for move in vision:
                                         opposite_color = 'b' if game.turn == 'w' else 'w'
-                                        if not game.square_is_attacked(move, opposite_color) and (self.can_take(game, game.board[i][j]) or game.board[i][j].landable):
-                                            "it got here 1"
+                                        if (not game.square_is_attacked(move, opposite_color)) and self.can_move_to(game, move):
                                             legal_moves.add(move)
                                 else:
-                                    # iterate back to the checking piece and add the squares to the legal moves
-                                    vision = self.get_vision(game)
-                                    while (i, j) != checking_piece.position:
-                                        i -= jump[0]
-                                        j -= jump[1]
-                                        if (i, j) == vision:
-                                            legal_moves.add((i, j))
-                            if not game.board[i][j].traversable:
+                                    # checking piece can be taken
+                                    if checking_piece.position in vision:
+                                        legal_moves.add(checking_piece.position)
+                                    # or piece can be blocked
+                                    for square in blocking_squares:
+                                        if square in mobility:
+                                            legal_moves.add(square) # piece can block the attack
                                 break
             else:
                 # king must move
                 if isinstance(self, King):
-                    for move in self.get_vision(game):
+                    for move in vision:
                         if move not in checking_pieces:
                             legal_moves.add(move)
-                else:
-                    return legal_moves
+            return legal_moves
 
         pin_directions = self.is_pinned(game)
 
@@ -274,6 +273,23 @@ class Piece:
                                 break
                         if can_castle:
                             legal_moves.add((self.position[0], self.position[1] + 2))
+            
+            # check if the king moves into check
+            for move in list(legal_moves):
+                if game.square_is_attacked(move, 'b' if self.color == 'w' else 'w'):
+                    legal_moves.remove(move)
+
+        # check if pawn is trying to jump over a piece:
+        if isinstance(self, Pawn):
+            for move in list(legal_moves):
+                if abs(self.position[0] - move[0]) == 2:
+                    # if the move is 2 squares, check if the square in between is a legal move
+                    if self.color == 'w':
+                        if (move[0] + 1, move[1]) not in legal_moves:
+                            legal_moves.remove(move)
+                    else:
+                        if (move[0] - 1, move[1]) not in legal_moves:
+                            legal_moves.remove(move)
 
         return legal_moves
     
@@ -303,6 +319,48 @@ class Piece:
             vision.add((i, j))
         
         return vision
+    
+    def get_mobility(self, game):
+        # parameters: game object
+        # returns a set of all the squares that the piece can move to, disregarding pins and checks
+        mobility = set()
+        for direction, jump in self.directions.items():
+            if getattr(self, direction, False):
+                i, j = self.position
+                while True:
+                    # iterate through the direction until an untraversable space is reached
+                    i += jump[0]
+                    j += jump[1]
+                    if i < 0 or i >= game.rows or j < 0 or j >= game.cols:
+                        break
+                    if game.board[i][j].traversable:
+                        mobility.add((i, j))
+                    else:
+                        if self.can_take(game, game.board[i][j]):
+                            mobility.add((i, j))
+                        break
+
+        # iterate through the attack jumps and add legal moves
+        for jump in self.attack_jumps:
+            i, j = self.position
+            i += jump[0]
+            j += jump[1]
+            if i < 0 or i >= game.rows or j < 0 or j >= game.cols:
+                continue
+            if self.can_take(game, game.board[i][j]):
+                mobility.add((i,j))
+
+        # iterate through the move jumps and add legal moves
+        for jump in self.move_jumps:
+            i, j = self.position
+            i += jump[0]
+            j += jump[1]
+            if i < 0 or i >= game.rows or j < 0 or j >= game.cols:
+                continue
+            if game.board[i][j].landable:
+                mobility.add((i,j))
+
+        return mobility
 
     def can_take(self, game, piece):
         # parameters: piece object attempting to be taken
@@ -310,6 +368,16 @@ class Piece:
         if (isinstance(piece, enPassant) and isinstance(self,Pawn)) or piece.takeable:
             return (self.color != piece.color or game.self_capture)
         return False
+    
+    def can_move_to(self, game, move):
+        # if it's a king, check if it moves into check
+        if isinstance(self, King):
+            if game.square_is_attacked(move, 'b' if self.color == 'w' else 'w'):
+                print(move, "is into check")
+                return False
+        # otherwise, check if it can take or land on the piece 
+            print('still in can move to: ', game.board[move[0]][move[1]].landable or self.can_take(game, game.board[move[0]][move[1]]))
+        return game.board[move[0]][move[1]].landable or self.can_take(game, game.board[move[0]][move[1]])
 
     def move(self, game, move):
         # parameters: game object, move as a destination tuple
