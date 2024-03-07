@@ -1,39 +1,58 @@
 from bitboard.src.types.bitboard import Bitboard, from_index, to_index
-from bitboard.src.types.mod import PieceType
+from bitboard.src.position.piece import Piece
+
+class Bitboard:
+    def __init__(self):
+        self.bits = 0
+
+    @staticmethod
+    def zero():
+        return Bitboard()
+
+    def bit(self, index):
+        return (self.bits >> index) & 1
+
+    def __ior__(self, other):
+        self.bits |= other.bits
+        return self
+
 
 class Piece:
-    def __init__(self, char_rep, player_num, piece_type, bitboard):
-        self.char_rep = char_rep
+    def __init__(self, player_num, piece_type):
+        self.bitboard = Bitboard()
         self.player_num = player_num
         self.piece_type = piece_type
-        self.bitboard = bitboard
 
-    @classmethod
-    def blank_custom(cls, player_num, char_rep):
-        return cls(char_rep, player_num, PieceType.Custom(char_rep), Bitboard.zero())
+    @staticmethod
+    def blank_piece(player_num, piece_type):
+        return Piece(player_num, piece_type)
 
-    @classmethod
-    def blank_pawn(cls, player_num):
-        return cls('p', player_num, PieceType.Pawn, Bitboard.zero())
 
-    @classmethod
-    def blank_knight(cls, player_num):
-        return cls('n', player_num, PieceType.Knight, Bitboard.zero())
+class PieceSet:
+    def __init__(self, player_num):
+        self.occupied = Bitboard.zero()
+        self.king = Piece.blank_piece(player_num, 'king')
+        self.queen = Piece.blank_piece(player_num, 'queen')
+        self.bishop = Piece.blank_piece(player_num, 'bishop')
+        self.knight = Piece.blank_piece(player_num, 'knight')
+        self.rook = Piece.blank_piece(player_num, 'rook')
+        self.pawn = Piece.blank_piece(player_num, 'pawn')
+        self.custom = []
+        self.player_num = player_num
 
-    @classmethod
-    def blank_king(cls, player_num):
-        return cls('k', player_num, PieceType.King, Bitboard.zero())
+    def piece_at(self, index):
+        pieces = [self.king, self.queen, self.bishop, self.knight, self.rook, self.pawn] + self.custom
+        for piece in pieces:
+            if piece.bitboard.bit(index):
+                return piece
+        return None
 
-    @classmethod
-    def blank_rook(cls, player_num):
-        return cls('r', player_num, PieceType.Rook, Bitboard.zero())
+    def get_piece_refs(self):
+        return [self.king, self.queen, self.bishop, self.knight, self.rook, self.pawn] + self.custom
 
-    @classmethod
-    def blank_bishop(cls, player_num):
-        return cls('b', player_num, PieceType.Bishop, Bitboard.zero())
-
-    @classmethod
-    def blank_queen(cls, player_num):
-        return cls('q', player_num, PieceType.Queen, Bitboard.zero())
+    def update_occupied(self):
+        self.occupied = Bitboard.zero()
+        for piece in self.get_piece_refs():
+            self.occupied |= piece.bitboard
 
 

@@ -1,5 +1,11 @@
 from typing import Tuple
 
+class Bitboard:
+
+    def __init__(self, value = 0):
+        self.bitboard = value
+    
+    
 def zero() -> int:
     return 0
 
