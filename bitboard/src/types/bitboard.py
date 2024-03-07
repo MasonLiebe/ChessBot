@@ -1,5 +1,8 @@
 from typing import Tuple
 
+def zero() -> int:
+    return 0
+
 def to_index(x: int, y: int) -> int:
     return 16 * y + x
 
