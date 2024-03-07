@@ -1,6 +1,7 @@
 from typing import List
 from typing import Optional, Tuple
 from bitboard.src.types.bitboard import from_index, to_index
+from bitboard.src.types.bitboard import Bitboard
 
 class MovementPatternExternal:
     def __init__(
