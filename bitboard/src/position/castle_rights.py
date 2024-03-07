@@ -25,15 +25,15 @@ class CastleRights:
     def disable_queenside_castle(self, playernum):
         self.queenside_rights &= ~(1 << playernum)
 
-# # Test cases
-# if __name__ == "__main__":
-#     test_rights = CastleRights()
-#     print(test_rights.can_player_castle_queenside(0))
-#     test_rights.disable_queenside_castle(0)
-#     print(test_rights.can_player_castle_queenside(0))
-#     print(test_rights.can_player_castle_kingside(0))
-#     print(test_rights.can_player_castle(0))
-#     test_rights.disable_kingside_castle(0)
-#     print(test_rights.can_player_castle_kingside(0))
-#     print(test_rights.can_player_castle(0))
+# Test cases
+if __name__ == "__main__":
+    test_rights = CastleRights()
+    print(test_rights.can_player_castle_queenside(0))
+    test_rights.disable_queenside_castle(0)
+    print(test_rights.can_player_castle_queenside(0))
+    print(test_rights.can_player_castle_kingside(0))
+    print(test_rights.can_player_castle(0))
+    test_rights.disable_kingside_castle(0)
+    print(test_rights.can_player_castle_kingside(0))
+    print(test_rights.can_player_castle(0))
 

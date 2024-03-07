@@ -42,7 +42,7 @@ class Position:
         num_players = 2
         whos_turn = 0
         movement_rules = {}
-        pieces = arrayvec.ArrayVec()
+        pieces = set()
         occupied = Bitboard()
         properties = PositionProperties()
 

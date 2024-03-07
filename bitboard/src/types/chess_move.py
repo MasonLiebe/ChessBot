@@ -14,7 +14,7 @@ class MoveType(Enum):
     Null = 6
 
 class Move:
-    def __init__(self, from_square: int, to_square: int, target_loc: Optional[int], move_type: MoveType, promo: Optional[str]):
+    def __init__(self, from_square, to_square, target_loc: Optional[int], move_type: MoveType, promo: Optional[str]):
         self.move_data = (
             from_square
             | (to_square << 8)
@@ -27,19 +27,19 @@ class Move:
     def null():
         return Move(0, 0, None, MoveType.Null, None)
 
-    def get_from(self) -> int:
+    def get_from(self):
         return self.move_data & 255
 
-    def get_to(self) -> int:
+    def get_to(self):
         return (self.move_data >> 8) & 255
 
-    def get_is_capture(self) -> bool:
+    def get_is_capture(self):
         return ((self.move_data >> 24) & 1) != 0
 
-    def get_move_type(self) -> MoveType:
+    def get_move_type(self):
         return MoveType((self.move_data >> 24) & 7)
 
-    def get_promotion_char(self) -> Optional[str]:
+    def get_promotion_char(self):
         return self.promo
 
     def get_target(self) -> int:

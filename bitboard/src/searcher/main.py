@@ -1,8 +1,8 @@
 from types.chess_move import Move, MoveType
-from position import Position
-from move_generator import MoveGenerator
-from evaluator import Evaluator
-from transposition_table import TranspositionTable, Entry, EntryFlag
+from position.mod import Position
+from move_generator.mod import MoveGenerator
+from evaluator.mod import Evaluator
+from transposition_table.mod import TranspositionTable, Entry, EntryFlag
 from datetime import datetime, timedelta
 
 class Searcher:

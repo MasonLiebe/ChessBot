@@ -1,4 +1,4 @@
-from bitboard.src.types.bitboard import Bitboard, from_index, to_index
+from bitboard.src.types.bitboard import Bitboard
 from bitboard.src.position.piece import Piece
 
 class Bitboard:
@@ -54,5 +54,3 @@ class PieceSet:
         self.occupied = Bitboard.zero()
         for piece in self.get_piece_refs():
             self.occupied |= piece.bitboard
-
-
