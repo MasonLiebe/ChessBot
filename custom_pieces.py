@@ -638,3 +638,4 @@ class enPassant(Piece):
     # empty square that can be taken by en passant
     def __init__(self, color, position):
         super().__init__(color, position, traversable=True, takeable=False, landable=True)
+

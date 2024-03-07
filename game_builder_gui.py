@@ -2,6 +2,22 @@
 import tkinter as tk
 
 class GameBuilderGUI(tk.Tk):
+    
+    CHAR_TO_FILENAME = {
+        'p': 'black-pawn.png',
+        'r': 'black-rook.png',
+        'n': 'black-knight.png',
+        'b': 'black-bishop.png',
+        'q': 'black-queen.png',
+        'k': 'black-king.png',
+        'P': 'white-pawn.png',
+        'R': 'white-rook.png',
+        'N': 'white-knight.png',
+        'B': 'white-bishop.png',
+        'Q': 'white-queen.png',
+        'K': 'white-king.png'
+    }
+
     def __init__(self):
         super().__init__()
         self.title("Custom Chess Game Builder")
@@ -10,6 +26,8 @@ class GameBuilderGUI(tk.Tk):
         # Initialize board variables
         self.rows = 8
         self.cols = 8
+
+        self.board_strings = ['rnbqkbnr', 'pppppppp', '········', '········', '········', '········', 'PPPPPPPP', 'RNBQKBNR']
 
         self.cell_size = 600 // max(self.rows, self.cols)
 
@@ -21,23 +39,19 @@ class GameBuilderGUI(tk.Tk):
         control_panel = tk.Frame(self)
         control_panel.pack(side=tk.LEFT, fill=tk.Y, padx=5, pady=5)
 
-        # Rows configuration
+        # Rows configuration with slider
         self.rows_label = tk.Label(control_panel, text="Rows:")
         self.rows_label.grid(row=0, column=0)
-        self.rows_entry = tk.Entry(control_panel)
-        self.rows_entry.insert(0, "8")
-        self.rows_entry.grid(row=0, column=1)
-        self.rows_button = tk.Button(control_panel, text="Set Rows", command=self.set_rows)
-        self.rows_button.grid(row=1, column=0, columnspan=2)
+        self.rows_slider = tk.Scale(control_panel, from_=1, to=16, orient=tk.HORIZONTAL, command=self.update_rows)
+        self.rows_slider.set(self.rows)  # Initialize slider position
+        self.rows_slider.grid(row=0, column=1)
 
-        # Columns configuration
+        # Columns configuration with slider
         self.cols_label = tk.Label(control_panel, text="Columns:")
-        self.cols_label.grid(row=2, column=0)
-        self.cols_entry = tk.Entry(control_panel)
-        self.cols_entry.insert(0, "8")
-        self.cols_entry.grid(row=2, column=1)
-        self.cols_button = tk.Button(control_panel, text="Set Columns", command=self.set_cols)
-        self.cols_button.grid(row=3, column=0, columnspan=2)
+        self.cols_label.grid(row=1, column=0)
+        self.cols_slider = tk.Scale(control_panel, from_=1, to=16, orient=tk.HORIZONTAL, command=self.update_cols)
+        self.cols_slider.set(self.cols)  # Initialize slider position
+        self.cols_slider.grid(row=1, column=1)
 
         # Create game button
         self.create_game_button = tk.Button(control_panel, text="Create Game", command=self.create_game)
@@ -48,14 +62,16 @@ class GameBuilderGUI(tk.Tk):
         self.board_canvas.pack(side=tk.RIGHT, expand=True, fill=tk.BOTH, padx=5, pady=5)
         self.render_board()
 
-    def set_rows(self):
-        self.rows = int(self.rows_entry.get())
+    def update_rows(self, val):
+        # TODO: update the board string representation to add or remove rows
+        self.rows = int(val)
         self.cell_size = 600 // max(self.rows, self.cols)
         print("reset rows to", self.rows, "cell size to", self.cell_size, "pixels")
         self.render_board()
 
-    def set_cols(self):
-        self.cols = int(self.cols_entry.get())
+    def update_cols(self, val):
+        # TODO: update the board string representation to add or remove columns
+        self.cols = int(val)
         self.cell_size = 600 // max(self.rows, self.cols)
         self.render_board()
 
@@ -77,6 +93,10 @@ class GameBuilderGUI(tk.Tk):
                     y2 = y1 + self.cell_size
                     fill = "antique white" if (row + col) % 2 == 0 else "saddle brown"
                     self.board_canvas.create_rectangle(x1, y1, x2, y2, fill=fill, outline="black")
+
+    def render_pieces(self):
+        # Your logic to render the pieces on the board
+        pass
 
 
     def create_game(self):
