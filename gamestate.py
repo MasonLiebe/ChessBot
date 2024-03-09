@@ -3,39 +3,44 @@
 # game state, and for generating moves
 
 from bitboard import Bitboard
-from piece import *
+from piece_full import *
 from constants import *
 
-class Move:
-    def __init__(self, start, end, move_type, promotion_choice = 0, enpassant_square = None):
-        # start and end are 8-bit integers representing the start and end squares of the move
-        # move_type is a 3-bit integer representing the type of move
-        # 000: normal move
-        # 001: capture
-        # 010: queenside castle
-        # 011: kingside castle
-        # 100: promotion
-        # 101: promotion capture
-        # 110: enpassant
+class CastleRights:
+    """
+    Castling rights for each player
+    CastleRights.0 -- kingside rights
+    CastleRights.1 -- Queenside rights
+    CastleRights.2 -- 1 if the player actually castled
+    Where each bit in the u8 represents the castling right for the player at that index
+    Ex if CastleRights.0 == 1 then the 0th player can castle kingside
+    """
+    def __init__(self):
+        self.kingside_rights = 255
+        self.queenside_rights = 255
+        self.has_castled = 0
 
-        # promotion_choice is a 4-bit integer representing the piece to promote to
-        # 0000: queen
-        # 0001: rook
-        # 0010: knight
-        # 0011: bishop
-        # 0100: custom1
-        # 0101: custom2
-        # 0110: custom3
-        # 0111: custom4
-        # 1000: custom5
-        # 1001: custom6
+    def can_player_castle_kingside(self, playernum):
+        return (self.kingside_rights >> playernum) & 1 != 0
 
-        # enpassant_square is an 8-bit integer representing the square where an enpassant capture can be made
-        self.start = start
-        self.end = end
-        self.move_type = move_type
-        self.promotion_choice = promotion_choice
-        self.enpassant_square = enpassant_square
+    def can_player_castle_queenside(self, playernum):
+        return (self.queenside_rights >> playernum) & 1 != 0
+
+    def can_player_castle(self, playernum):
+        return self.can_player_castle_kingside(playernum) or self.can_player_castle_queenside(playernum)
+
+    def did_player_castle(self, playernum):
+        return (self.has_castled >> playernum) & 1 != 0
+
+    def set_player_castled(self, playernum):
+        self.has_castled |= 1 << playernum
+
+    def disable_kingside_castle(self, playernum):
+        self.kingside_rights &= ~(1 << playernum)
+
+    def disable_queenside_castle(self, playernum):
+        self.queenside_rights &= ~(1 << playernum)
+
 
 class GameState:
     # represents the state of the game

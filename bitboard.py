@@ -43,7 +43,7 @@ class Bitboard:
         for y in range(16):
             self.value |= (((1 << (16 - x)) - 1) << x) << (16 * y)
     
-    def clear(self):
+    def zero(self):
         self.value = 0
     
     def fill(self):
@@ -84,6 +84,19 @@ class Bitboard:
     def __rshift__(self, n):
         return Bitboard(self.value >> n)
 
+
+def to_rank_file(x, y):
+    return_string = ""
+    return_string += chr(x + 65)
+    return_string += str(y + 1)
+    return return_string
+
+def from_index(index):
+    return (index % 16, index // 16)
+
+def to_index(x, y):
+    return 16 * y + x
+
 # testing
 if __name__ == '__main__':
     test_bitboard = Bitboard()
@@ -99,7 +112,7 @@ if __name__ == '__main__':
     print("This should have all squares below the 4th row set:\n",test_bitboard)
     test_bitboard.set_col_bound(3) # set all squares to the right of the 4th column to 1
     print("This should have all squares to the right of the 4th column set:\n",test_bitboard)
-    test_bitboard.clear()
+    test_bitboard.zero()
 
     print("This should be clear:\n",test_bitboard) 
     test_bitboard.fill()
