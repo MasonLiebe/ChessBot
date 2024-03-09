@@ -34,14 +34,14 @@ class Bitboard:
         # set all squares below a certain row to 1
         if not (0 <= y < 16):
             raise ValueError('Row out of range')
-        self.value |= ((1 << (16*y)) - 1) ^ ((1 << 256) - 1) 
+        self.value |= ((1 << (16 * y)) - 1) ^ ((1 << 256) - 1) 
     
     def set_col_bound(self, x):
         # set all squares to the right of a certain column
         if not (0 <= x < 16):
             raise ValueError('Column out of range')
         for y in range(16):
-            self.value |= ((((1 << (16 - x)) - 1)) << (16 * y))
+            self.value |= (((1 << (16 - x)) - 1) << x) << (16 * y)
     
     def clear(self):
         self.value = 0
@@ -59,9 +59,32 @@ class Bitboard:
     
     def __repr__(self):
         return f'Bitboard(value={bin(self.value)})'
-
-# testing 
     
+    def __eq__(self, other):
+        return self.value == other.value
+    
+    def __ne__(self, other):
+        return self.value != other.value
+    
+    def __and__(self, other):
+        return Bitboard(self.value & other.value)
+    
+    def __or__(self, other):
+        return Bitboard(self.value | other.value)
+    
+    def __xor__(self, other):
+        return Bitboard(self.value ^ other.value)
+    
+    def __invert__(self):
+        return Bitboard(~self.value)
+    
+    def __lshift__(self, n):
+        return Bitboard(self.value << n)
+    
+    def __rshift__(self, n):
+        return Bitboard(self.value >> n)
+
+# testing
 if __name__ == '__main__':
     test_bitboard = Bitboard()
     print("This should be clear:\n ",str(test_bitboard))
@@ -76,3 +99,30 @@ if __name__ == '__main__':
     print("This should have all squares below the 4th row set:\n",test_bitboard)
     test_bitboard.set_col_bound(3) # set all squares to the right of the 4th column to 1
     print("This should have all squares to the right of the 4th column set:\n",test_bitboard)
+    test_bitboard.clear()
+
+    print("This should be clear:\n",test_bitboard) 
+    test_bitboard.fill()
+    print("This should be full:")
+    print(test_bitboard)
+    test_bitboard.clear()
+
+    for i in range(16):
+        test_bitboard.set_coord(i, i)
+    print("This should have the main diagonal set:")
+    print(test_bitboard)
+
+    test_bitboard1 = Bitboard()
+    for i in range(16):
+        test_bitboard1.set_coord(15-i, i)
+    print("This should have the other diagonal set:")
+    print(test_bitboard1)
+
+    print("This should have both diagonals set:")
+    print(test_bitboard | test_bitboard1)
+
+    print("This should be empty:")
+    print(test_bitboard & test_bitboard1)
+
+
+    

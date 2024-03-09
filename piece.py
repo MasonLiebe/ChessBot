@@ -1,0 +1,1 @@
+# This class represents the nature of a piece
