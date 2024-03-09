@@ -7,27 +7,67 @@ from piece import *
 from constants import *
 
 class Move:
-    # represents a move in the game
-    def __init__(self, start, end, promotion = None, enpassant = False, castle = False):
+    def __init__(self, start, end, move_type, promotion_choice = 0, enpassant_square = None):
+        # start and end are 8-bit integers representing the start and end squares of the move
+        # move_type is a 3-bit integer representing the type of move
+        # 000: normal move
+        # 001: capture
+        # 010: queenside castle
+        # 011: kingside castle
+        # 100: promotion
+        # 101: promotion capture
+        # 110: enpassant
+
+        # promotion_choice is a 4-bit integer representing the piece to promote to
+        # 0000: queen
+        # 0001: rook
+        # 0010: knight
+        # 0011: bishop
+        # 0100: custom1
+        # 0101: custom2
+        # 0110: custom3
+        # 0111: custom4
+        # 1000: custom5
+        # 1001: custom6
+
+        # enpassant_square is an 8-bit integer representing the square where an enpassant capture can be made
         self.start = start
         self.end = end
-        self.promotion = promotion
-        self.enpassant = enpassant
-        self.castle = castle
+        self.move_type = move_type
+        self.promotion_choice = promotion_choice
+        self.enpassant_square = enpassant_square
 
 class GameState:
     # represents the state of the game
     # has a total of 26 piece bitboards, 
-    def __init__(self, fen = STARTING_FEN, promotion_squares = Bitboard(0), enpassant_square = 0):
+    def __init__(self, fen = STARTING_FEN, white_promotion_squares = None, black_promotion_squares = None):
         if fen == None:
             # Initialize the board position using the FEN
             self.build_from_fen(STARTING_FEN)
-            # Set the promotion squares
-            self.promotion_squares = promotion_squares
-            
         else:
             self.build_from_fen(fen)
+        
+        # Set the promotion squares
+        if white_promotion_squares is None:
+            # if no promotion squares are given, set the back rank as promotion squares
+            self.white_promotion_squares = Bitboard(0)
+            self.white_promotion_squares.set_row_bound(0)
+        else:
+            self.white_promotion_squares = white_promotion_squares
+
+        if black_promotion_squares is None:
+            # if no promotion squares are given, set the back rank as promotion squares
+            self.black_promotion_squares = Bitboard(0)
+            self.black_promotion_squares.set_row_bound(self.rows - 2)
+        else:
+            self.black_promotion_squares = black_promotion_squares
     
+    # GAMESTATE MANAGEMENT METHODS
+    def make_move(self, move):
+        pass
+
+
+    # INITIALIZATION METHODS
     def build_from_fen(self, fen):
         # builds the game state from a fen string
         
@@ -134,14 +174,14 @@ class GameState:
 
                     # update the takeable bitboard
                     if piece.takeable:
-                        if color == 'white':
+                        if color == 'black':
                             self.white_takeable.set_coord(x, y)
                         else:
                             self.black_takeable.set_coord(x, y)
                     
                     # update the traversable bitboard
                     if piece.self_traversable:
-                        if color == 'white':
+                        if color == 'black':
                             self.white_traversable.set_coord(x, y)
                         else:
                             self.black_traversable.set_coord(x, y)
@@ -174,7 +214,7 @@ class GameState:
 
 # Test the GameState class
 if __name__ == '__main__':
-    game = GameState(FOURBYFIVE_FEN)
+    game = GameState(E4E5_FEN)
     print('Rows:', game.rows)
     print('Cols:', game.cols)
 
