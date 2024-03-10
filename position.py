@@ -29,19 +29,31 @@ class Position:
     # movement_rules: Hashmap<PieceType, MovementPattern>
     # pieces: array of PieceSets representing each player
     # occupied: Bitboard representing all occupied squares
-    # properties # PositionProperties object
+    # properties: PositionProperties object
 
     def __init__(self, fen = STARTING_FEN):
         self.from_fen(fen)
     
     def from_fen(self, fen: str):
+        # takes in a standard game fen and sets up the position
+
+        # set dims to 8x8 and construct the bounds
         self.dims = Dimensions(DEFAULT_WIDTH, DEFAULT_HEIGHT)
+        self.bounds = Bitboard(0)
+        self.bounds.set_col_bounds(self.dims.width)
+        self.bounds.set_row_bounds(self.dims.height)
+        self.num_players = 2
+
+        # Set up the piece sets (these by default contain empty pieces)
+        w_pieces = PieceSet(0) # player_num is 0
+        b_pieces = PieceSet(1) # player_num is 1
+        self.pieces = [w_pieces, b_pieces]
+        self.occupied = Bitboard(0) # empty for now
+
+        # parse the fen and construct the board state
         piece_placement, turn, castling, en_passant, half_move_clock, full_move_number = fen.split(' ')
 
-        wb_pieces = []
-        w_pieces = PieceSet(0)
-        b_pieces = PieceSet(1)
-
+        # add each piece to the board from the fen
         y = 7
         for row in piece_placement.split('/'):
             x = 0
@@ -52,21 +64,35 @@ class Position:
                     index = to_index(x, y)
                     piece = CHAR_TO_PIECE[c.lower()]
                     is_white = c.isupper()
-                    bitboard = getattr(w_pieces if is_white else b_pieces, piece).bitboard
-                    bitboard.set_index(index)
-                    getattr(w_pieces if is_white else b_pieces, 'occupied').set_index(index)
+                    pieceSet = self.pieces[0] if is_white else self.pieces[1]
+                    pieceSet.place_piece_at_index(piece, index)
                     x += 1
             y -= 1
+        
+        # set occupied to be the union of all the pieceSet.occupied bitboards
+        for pieceSet in self.pieces:
+            self.occupied |= pieceSet.occupied
 
-        whos_turn = 0 if turn == 'w' else 1
+        # set the turn
+        self.whos_turn = 0 if turn == 'w' else 1
 
         castle_rights = CastleRights()
         castle_rights.set_from_string(castling)
 
         ep_square = to_index(FILE_TO_INT[en_passant[0]], int(en_passant[1])) if en_passant != '-' else None
 
-        # TODO: Make sure that everything needed for get_zobrist is set before calling it
-        self.properties = PositionProperties(zob.get_zobrist, None, None, castle_rights, ep_square, None, None)
+        # Compute the zobrist key
+        self.zobrist_table = ZobristTable()
+        zobrist_key = 0
+
+        self.compute_zobrist()
+        
+
+        self.properties = PositionProperties(0, None, None, castle_rights, ep_square, None, None)
+    
+    def custom_board(self, dims: Dimensions, bounds: Bitboard, movement_patterns, pieces: list[tuple[int, int, str]] ):
+        # Pieces tuples are (owner, index, piece_type)
+        pass
 
     def register_piecetype(self, char_rep: str, mpe: MovementPatternExternal):
         pass
@@ -94,13 +120,18 @@ class Position:
 
     def tiles_as_tuples(self):
         pass
-
-    def custom_board(self, dims: Dimensions, bounds: Bitboard, movement_patterns, pieces: list[tuple[int, int, str]] ):
-        # Pieces tuples are (owner, index, piece_type)
-        pass
-
+    
     def get_zobrist(self):
         pass
+
+    def compute_zobrist(self):
+        # computes the zobrist key for the current position, from the position properties
+        self.zobrist_key = 0
+        # player to move
+        self.zobrist_key ^= zob.get_to_move_zobrist(self.whos_turn)
+        # castling rights
+        if self.properties().castling_rights.king:
+            self.zobrist_key ^= zob.get_castling_zobrist(0, True)
 
     def piece_at(self, index: int):
         pass

@@ -17,6 +17,11 @@ class PieceSet:
         self.Custom5 = Piece.blank_custom5(player_num)
         self.Custom6 = Piece.blank_custom6(player_num)
         self.player_num = player_num
+    
+    def place_piece_at_index(self, piece_name, index):
+        piece = getattr(self, piece_name)
+        piece.place_piece_at_index(index)
+        self.occupied.set_index(index)
 
     def piece_at(self, index):
         if self.King.bitboard.bit(index):

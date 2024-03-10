@@ -22,7 +22,20 @@ class Piece:
         self.piece_type = piece_type # type of piece as a PieceType Object
         self.bitboard = bitboard # bitboard representing the locations of the piece
 
+    def place_piece_at_index(self, index):
+        self.bitboard.set_index(index)
+
+    def remove_piece_at_index(self, index):
+        self.bitboard.clear_index(index)
+
+    def place_piece_at_xy(self, x, y):
+        self.bitboard.set_coord(x, y)
+    
+    def remove_piece_at_xy(self, x, y):
+        self.bitboard.clear_coord(x, y)
+
     # The methods below are used to create blank pieces of each type
+
     @classmethod
     def blank_pawn(cls, player_num):
         return cls(player_num, 'p', "Pawn", Bitboard(0))
