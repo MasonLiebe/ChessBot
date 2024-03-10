@@ -40,8 +40,8 @@ class Position:
         # set dims to 8x8 and construct the bounds
         self.dims = Dimensions(DEFAULT_WIDTH, DEFAULT_HEIGHT)
         self.bounds = Bitboard(0)
-        self.bounds.set_col_bounds(self.dims.width)
-        self.bounds.set_row_bounds(self.dims.height)
+        self.bounds.set_col_bound(self.dims.width)
+        self.bounds.set_row_bound(self.dims.height)
         self.num_players = 2
 
         # Set up the piece sets (these by default contain empty pieces)
@@ -54,7 +54,7 @@ class Position:
         piece_placement, turn, castling, en_passant, half_move_clock, full_move_number = fen.split(' ')
 
         # add each piece to the board from the fen
-        y = 7
+        y = 0
         for row in piece_placement.split('/'):
             x = 0
             for c in row:
@@ -67,7 +67,7 @@ class Position:
                     pieceSet = self.pieces[0] if is_white else self.pieces[1]
                     pieceSet.place_piece_at_index(piece, index)
                     x += 1
-            y -= 1
+            y += 1
         
         # set occupied to be the union of all the pieceSet.occupied bitboards
         for pieceSet in self.pieces:
@@ -79,16 +79,18 @@ class Position:
         castle_rights = CastleRights()
         castle_rights.set_from_string(castling)
 
-        ep_square = to_index(FILE_TO_INT[en_passant[0]], int(en_passant[1])) if en_passant != '-' else None
+        ep_square = to_index(FILE_TO_INT[en_passant[0]], self.dims.height - int(en_passant[1])) if en_passant != '-' else None
+        
+        # set the Properties object
+        self.properties = PositionProperties(0, None, None, castle_rights, ep_square, None, None)
 
         # Compute the zobrist key
         self.zobrist_table = ZobristTable()
-        zobrist_key = 0
+        self.properties.zobrist_key = self.compute_zobrist()
 
-        self.compute_zobrist()
-        
+        # Set the movement rules
+        self.movement_rules = {}
 
-        self.properties = PositionProperties(0, None, None, castle_rights, ep_square, None, None)
     
     def custom_board(self, dims: Dimensions, bounds: Bitboard, movement_patterns, pieces: list[tuple[int, int, str]] ):
         # Pieces tuples are (owner, index, piece_type)
@@ -112,7 +114,15 @@ class Position:
         pass
 
     def to_string(self):
-        pass
+        for y in range(self.dims.height):
+            for x in range(self.dims.width):
+                if self.pieces[0].occupied.get_coord(x, y):
+                    print(self.pieces[0].piece_at(y * 16 + x).char_rep.upper(), end=' ')
+                elif self.pieces[1].occupied.get_coord(x, y):
+                    print(self.pieces[1].piece_at(y * 16 + x).char_rep, end=' ')
+                else:
+                    print('·', end=' ')
+            print()
 
     def pieces_as_tuples(self):
         #
@@ -130,8 +140,25 @@ class Position:
         # player to move
         self.zobrist_key ^= zob.get_to_move_zobrist(self.whos_turn)
         # castling rights
-        if self.properties().castling_rights.king:
+        if self.properties.castling_rights.can_player_castle_kingside(0):
             self.zobrist_key ^= zob.get_castling_zobrist(0, True)
+        if self.properties.castling_rights.can_player_castle_queenside(0):
+            self.zobrist_key ^= zob.get_castling_zobrist(0, False)
+        if self.properties.castling_rights.can_player_castle_kingside(1):
+            self.zobrist_key ^= zob.get_castling_zobrist(1, True)
+        if self.properties.castling_rights.can_player_castle_queenside(1):
+            self.zobrist_key ^= zob.get_castling_zobrist(1, False)
+        # en passant square
+        if self.properties.ep_square is not None:
+            self.zobrist_key ^= zob.get_ep_zobrist_file(self.properties.ep_square % 16)
+        else:
+            self.zobrist_key ^= zob.get_ep_zobrist_file(16)
+        # pieces
+        for pieceSet in self.pieces:
+            for piece in [pieceSet.King, pieceSet.Queen, pieceSet.Bishop, pieceSet.Knight, pieceSet.Rook, pieceSet.Pawn, pieceSet.Custom1, pieceSet.Custom2, pieceSet.Custom3, pieceSet.Custom4, pieceSet.Custom5, pieceSet.Custom6]:
+                self.zobrist_key ^= zob.get_zobrist_piece(piece, pieceSet.player_num)
+
+        return self.zobrist_key
 
     def piece_at(self, index: int):
         pass
@@ -164,7 +191,7 @@ class Position:
 
 # Testing for the Position class
     
-p = Position()
+p = Position(E4E5_FEN)
 print(p)
 print('zobrist_key:', p.properties.zobrist_key)
 print('Kingside_rights:', p.properties.castling_rights.kingside_rights)
@@ -173,3 +200,5 @@ print('ep square index:', p.properties.ep_square)
 print('move_played:', p.properties.move_played)
 print('promote_from:', p.properties.promote_from)
 print('captured_piece:', p.properties.captured_piece)
+
+p.to_string()

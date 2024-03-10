@@ -113,7 +113,7 @@ class MovementPatternExternal:
         self.translate_northwest = translate_northwest
         self.translate_southeast = translate_southeast
         self.translate_southwest = translate_southwest
-
+    
 class MovementPattern:
     def __init__(
         self,
@@ -234,16 +234,15 @@ def internal_mp_to_external(mp: MovementPattern) -> MovementPatternExternal:
         translate_southwest=mp.translate_southwest,
     )
 
-
 # Testing
-if __name__ == "__main__":
-    mp = Move(0, 10, 1, promo='Q', move_type = "Capture")
+# if __name__ == "__main__":
+#     mp = Move(0, 10, 1, promo='Q', move_type = "Capture")
     
-    null_move = Move.null()
+#     null_move = Move.null()
 
-    print(mp.get_from())
-    print(mp.get_to())
-    print(mp.get_target())
-    print(mp.get_is_capture())
-    print(mp.get_move_type())
-    print(mp.get_promotion_char())
+#     print(mp.get_from())
+#     print(mp.get_to())
+#     print(mp.get_target())
+#     print(mp.get_is_capture())
+#     print(mp.get_move_type())
+#     print(mp.get_promotion_char())

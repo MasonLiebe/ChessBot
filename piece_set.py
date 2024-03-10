@@ -24,29 +24,29 @@ class PieceSet:
         self.occupied.set_index(index)
 
     def piece_at(self, index):
-        if self.King.bitboard.bit(index):
+        if self.King.bitboard.get_index(index):
             return self.King
-        elif self.Queen.bitboard.bit(index):
+        elif self.Queen.bitboard.get_index(index):
             return self.Queen
-        elif self.Bishop.Bitboard.bit(index):
+        elif self.Bishop.bitboard.get_index(index):
             return self.Bishop
-        elif self.Knight.bitboard.bit(index):
+        elif self.Knight.bitboard.get_index(index):
             return self.Knight
-        elif self.Rook.bitboard.bit(index):
+        elif self.Rook.bitboard.get_index(index):
             return self.Rook
-        elif self.Pawn.bitboard.bit(index):
+        elif self.Pawn.bitboard.get_index(index):
             return self.Pawn
-        elif self.Custom1.bitboard.bit(index):
+        elif self.Custom1.bitboard.get_index(index):
             return self.Custom1
-        elif self.Custom2.bitboard.bit(index):
+        elif self.Custom2.bitboard.get_index(index):
             return self.Custom2
-        elif self.Custom3.bitboard.bit(index):
+        elif self.Custom3.bitboard.get_index(index):
             return self.Custom3
-        elif self.Custom4.bitboard.bit(index):
+        elif self.Custom4.bitboard.get_index(index):
             return self.Custom4
-        elif self.Custom5.bitboard.bit(index):
+        elif self.Custom5.bitboard.get_index(index):
             return self.Custom5
-        elif self.Custom6.bitboard.bit(index):
+        elif self.Custom6.bitboard.get_index(index):
             return self.Custom6
         else:
             return None

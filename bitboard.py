@@ -49,6 +49,9 @@ class Bitboard:
     def clear_index(self, index):
         self.value &= ~(1 << index)
     
+    def get_index(self, index):
+        return (self.value >> index) & 1
+    
     def zero(self):
         self.value = 0
     
@@ -108,7 +111,7 @@ if __name__ == '__main__':
     test_bitboard = Bitboard()
     print("This should be clear:\n ",str(test_bitboard))
     test_bitboard.set_coord(0,6) # set the 7th square to 1
-    test_bitboard.set_coord(3,8)
+    test_bitboard.set_coord(4,2)
     test_bitboard.set_coord(0,0)
     print("This should have 3 squares set:\n",test_bitboard)
 
@@ -124,7 +127,7 @@ if __name__ == '__main__':
     test_bitboard.fill()
     print("This should be full:")
     print(test_bitboard)
-    test_bitboard.clear()
+    test_bitboard.zero()
 
     for i in range(16):
         test_bitboard.set_coord(i, i)

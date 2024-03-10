@@ -83,58 +83,58 @@ class PositionProperties:
 
 # testing 
 
-def print_castle_rights(castle_rights: CastleRights):
-    print('Information for white')
-    print('Kingside:', castle_rights.can_player_castle_kingside(0))
-    print('Queenside:', castle_rights.can_player_castle_queenside(0))
-    print('Can Castle:', castle_rights.can_player_castle(0))
-    print('Did Castle:', castle_rights.did_player_castle(0))
+# def print_castle_rights(castle_rights: CastleRights):
+#     print('Information for white')
+#     print('Kingside:', castle_rights.can_player_castle_kingside(0))
+#     print('Queenside:', castle_rights.can_player_castle_queenside(0))
+#     print('Can Castle:', castle_rights.can_player_castle(0))
+#     print('Did Castle:', castle_rights.did_player_castle(0))
 
-    print('Information for black')
-    print('Kingside:', castle_rights.can_player_castle_kingside(1))
-    print('Queenside:', castle_rights.can_player_castle_queenside(1))
-    print('Can Castle:', castle_rights.can_player_castle(1))
-    print('Did Castle:', castle_rights.did_player_castle(1))
+#     print('Information for black')
+#     print('Kingside:', castle_rights.can_player_castle_kingside(1))
+#     print('Queenside:', castle_rights.can_player_castle_queenside(1))
+#     print('Can Castle:', castle_rights.can_player_castle(1))
+#     print('Did Castle:', castle_rights.did_player_castle(1))
 
-def correct_from_str(string):
-    answers = []
-    if 'K' in string:
-        answers.append(True)
-    else:
-        answers.append(False)
-    if 'Q' in string:
-        answers.append(True)
-    else:
-        answers.append(False)
-    if 'k' in string:
-        answers.append(True)
-    else:
-        answers.append(False)
-    if 'q' in string:
-        answers.append(True)
-    else:
-        answers.append(False)
-    return answers
+# def correct_from_str(string):
+#     answers = []
+#     if 'K' in string:
+#         answers.append(True)
+#     else:
+#         answers.append(False)
+#     if 'Q' in string:
+#         answers.append(True)
+#     else:
+#         answers.append(False)
+#     if 'k' in string:
+#         answers.append(True)
+#     else:
+#         answers.append(False)
+#     if 'q' in string:
+#         answers.append(True)
+#     else:
+#         answers.append(False)
+#     return answers
 
-def answers_from_cr(castle_rights):
-    answers = []
-    answers.append(castle_rights.can_player_castle_kingside(0))
-    answers.append(castle_rights.can_player_castle_queenside(0))
-    answers.append(castle_rights.can_player_castle_kingside(1))
-    answers.append(castle_rights.can_player_castle_queenside(1))
-    return answers
+# def answers_from_cr(castle_rights):
+#     answers = []
+#     answers.append(castle_rights.can_player_castle_kingside(0))
+#     answers.append(castle_rights.can_player_castle_queenside(0))
+#     answers.append(castle_rights.can_player_castle_kingside(1))
+#     answers.append(castle_rights.can_player_castle_queenside(1))
+#     return answers
 
-passed_count = 0
-for string in ['KQkq', 'Kkq', 'KQk', 'Kk', 'KQq', 'Kq', 'KQ', 'K', 'Qkq', 'Qk', 'Qq', 'Q', 'kq', 'k', 'q', '', '-']:
-    cr = CastleRights()
-    cr.set_from_string(string)
+# passed_count = 0
+# for string in ['KQkq', 'Kkq', 'KQk', 'Kk', 'KQq', 'Kq', 'KQ', 'K', 'Qkq', 'Qk', 'Qq', 'Q', 'kq', 'k', 'q', '', '-']:
+#     cr = CastleRights()
+#     cr.set_from_string(string)
 
-    print('TESTING:', string)
-    if answers_from_cr(cr) == correct_from_str(string):
-        print('PASSED')
-        passed_count += 1
-    else:
-        print('FAILED')
-    print('Correct:', correct_from_str(string))
-    print('Answers:', answers_from_cr(cr))
-print('Passed', passed_count, 'out of 17')
+#     print('TESTING:', string)
+#     if answers_from_cr(cr) == correct_from_str(string):
+#         print('PASSED')
+#         passed_count += 1
+#     else:
+#         print('FAILED')
+#     print('Correct:', correct_from_str(string))
+#     print('Answers:', answers_from_cr(cr))
+# print('Passed', passed_count, 'out of 17')
