@@ -1,51 +1,20 @@
-from enum import Enum, auto
 from bitboard import Bitboard
 
-# this is weird because it's a bit of a retrofit, I will convert to dictionary at some point
-class PieceType(Enum):
-    King = auto()
-    Queen = auto()
-    Rook = auto()
-    Bishop = auto()
-    Knight = auto()
-    Pawn = auto()
-    Custom1 = auto()
-    Custom2 = auto()
-    Custom3 = auto()
-    Custom4 = auto()
-    Custom5 = auto()
-    Custom6 = auto()
+PieceType = {
+    "Pawn": 0,
+    "Knight": 1,
+    "King": 2,
+    "Rook": 3,
+    "Bishop": 4,
+    "Queen": 5,
+    "Custom1": 6,
+    "Custom2": 7,
+    "Custom3": 8,
+    "Custom4": 9,
+    "Custom5": 10,
+    "Custom6": 11
+}
 
-    @staticmethod
-    def from_char(c):
-        c = c.lower()
-        if c == 'k':
-            return PieceType.King
-        elif c == 'q':
-            return PieceType.Queen
-        elif c == 'r':
-            return PieceType.Rook
-        elif c == 'b':
-            return PieceType.Bishop
-        elif c == 'n':
-            return PieceType.Knight
-        elif c == 'p':
-            return PieceType.Pawn
-        elif c == 'a':
-            return PieceType.Custom1
-        elif c == 'c':
-            return PieceType.Custom2
-        elif c == 'd':
-            return PieceType.Custom3
-        elif c == 'e':
-            return PieceType.Custom4
-        elif c == 'f':
-            return PieceType.Custom5
-        elif c == 'g':
-            return PieceType.Custom6
-        else:
-            raise ValueError(f'Invalid piece character: {c}')
-    
 class Piece:
     def __init__(self, player_num, char_rep, piece_type, bitboard):
         self.player_num = player_num # 0 for white, 1 for black

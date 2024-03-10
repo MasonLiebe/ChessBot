@@ -4,23 +4,42 @@ from enum import Enum
 from typing import Optional, Tuple
 from bitboard import Bitboard, from_index, to_index, to_rank_file
 
-class MoveType(Enum):
-    Quiet = 0
-    Capture = 1
-    QueensideCastle = 2
-    KingsideCastle = 3
-    Promotion = 4
-    PromotionCapture = 5
-    Null = 6
+moveType = {
+    "Quiet": 0,
+    "Capture": 1,
+    "QueensideCastle": 2,
+    "KingsideCastle": 3,
+    "Promotion": 4,
+    "PromotionCapture": 5,
+    "Null": 6
+}
+
+intToMoveType = {
+    0: "Quiet",
+    1: "Capture",
+    2: "QueensideCastle",
+    3: "KingsideCastle",
+    4: "Promotion",
+    5: "PromotionCapture",
+    6: "Null"
+}
+
 
 class Move:
-    def __init__(self, from_square: int, to_square: int, target_loc: Optional[int], move_type: MoveType, promo: Optional[str]):
-        self.move_data = from_square | (to_square << 8) | (target_loc << 16 if target_loc is not None else 0) | (move_type.value << 24)
+    # Stores the move data in a single 32 bit integer
+    # 0-7: from square
+    # 8-15: to square
+    # 16-23: target square
+    # 24-26: move type
+    # 27-31: promotion type
+
+    def __init__(self, from_square: int, to_square: int, target_loc: Optional[int], move_type: str, promo: Optional[str]):
+        self.move_data = from_square | (to_square << 8) | (target_loc << 16 if target_loc is not None else 0) | (moveType[move_type] << 24)
         self.promo = promo
 
     @staticmethod
     def null():
-        return Move(0, 0, None, MoveType.Null, None)
+        return Move(0, 0, None, 'Null', None)
 
     def get_from(self) -> int:
         return self.move_data & 255
@@ -31,8 +50,8 @@ class Move:
     def get_is_capture(self) -> bool:
         return ((self.move_data >> 24) & 1) != 0
 
-    def get_move_type(self) -> MoveType:
-        return MoveType((self.move_data >> 24) & 7)
+    def get_move_type(self) -> str:
+        return intToMoveType[(self.move_data >> 24) & 7]
 
     def get_promotion_char(self) -> Optional[str]:
         return self.promo
@@ -44,7 +63,7 @@ class Move:
         x1, y1 = from_index(self.get_from())
         x2, y2 = from_index(self.get_to())
         return f"(from: {to_rank_file(x1, y1)}, to: {to_rank_file(x2, y2)})"
-    
+
 
 class MovementPatternExternal:
     def __init__(
@@ -152,7 +171,7 @@ class MovementPattern:
 def external_mp_to_internal(mpe: MovementPatternExternal) -> MovementPattern:
     promotion_squares = None
     if mpe.promotion_squares is not None:
-        bb = Bitboard.zero()
+        bb = Bitboard(0)
         for x, y in mpe.promotion_squares:
             bb.set_bit(to_index(x, y), True)
         promotion_squares = bb
@@ -216,3 +235,15 @@ def internal_mp_to_external(mp: MovementPattern) -> MovementPatternExternal:
     )
 
 
+# Testing
+if __name__ == "__main__":
+    mp = Move(0, 10, 1, promo='Q', move_type = "Capture")
+    
+    null_move = Move.null()
+
+    print(mp.get_from())
+    print(mp.get_to())
+    print(mp.get_target())
+    print(mp.get_is_capture())
+    print(mp.get_move_type())
+    print(mp.get_promotion_char())

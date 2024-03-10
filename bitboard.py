@@ -42,6 +42,12 @@ class Bitboard:
             raise ValueError('Column out of range')
         for y in range(16):
             self.value |= (((1 << (16 - x)) - 1) << x) << (16 * y)
+
+    def set_index(self, index):
+        self.value |= 1 << index
+    
+    def clear_index(self, index):
+        self.value &= ~(1 << index)
     
     def zero(self):
         self.value = 0

@@ -1,8 +1,6 @@
 # This code manages the properties of a position
 from moves import Move
 from typing import Optional, Tuple
-from collections import namedtuple
-from piece import PieceType
 
 class CastleRights:
     """
@@ -14,8 +12,8 @@ class CastleRights:
     Ex if CastleRights.0 == 1 then the 0th player can castle kingside
     """
     def __init__(self):
-        self.kingside_rights = 255
-        self.queenside_rights = 255
+        self.kingside_rights = 7
+        self.queenside_rights = 7
         self.has_castled = 0
 
     def can_player_castle_kingside(self, playernum):
@@ -39,16 +37,28 @@ class CastleRights:
     def disable_queenside_castle(self, playernum):
         self.queenside_rights &= ~(1 << playernum)
 
+    def set_from_string(self, string: str):
+        # sets the castling rights from standard FEN string
+        for c in string:
+            if c == 'K':
+                self.disable_kingside_castle(0)
+            elif c == 'Q':
+                self.disable_queenside_castle(0)
+            elif c == 'k':
+                self.disable_kingside_castle(1)
+            elif c == 'q':
+                self.disable_queenside_castle(1)
+
 
 class PositionProperties:
-    def __init__(self, zobrist_key: int = 0, move_played: Optional[Move] = None, promote_from: Optional[PieceType] = None, castling_rights: CastleRights = CastleRights(), ep_square: Optional[int] = None, captured_piece: Optional[Tuple[int, PieceType]] = None, prev_properties: Optional['PositionProperties'] = None):
-        self.zobrist_key = zobrist_key
-        self.move_played = move_played
-        self.promote_from = promote_from
-        self.castling_rights = castling_rights
-        self.ep_square = ep_square
-        self.captured_piece = captured_piece
-        self.prev_properties = prev_properties
+    def __init__(self, zobrist_key: int = 0, move_played: Optional[Move] = None, promote_from: Optional[str] = None, castling_rights: CastleRights = CastleRights(), ep_square: Optional[int] = None, captured_piece: Optional[Tuple[int, str]] = None, prev_properties: Optional['PositionProperties'] = None):
+        self.zobrist_key = zobrist_key # 64 bit integer representing the zobrist key of the position
+        self.move_played = move_played # Move object
+        self.promote_from = promote_from # string representation of the piece type promoted from 'Pawn'
+        self.castling_rights = castling_rights # CastleRights object
+        self.ep_square = ep_square # integer representing the index of the en passant square
+        self.captured_piece = captured_piece # string representation of the piece type captuere 'Pawn'
+        self.prev_properties = prev_properties # PositionProperties object
 
     @staticmethod
     def default():
