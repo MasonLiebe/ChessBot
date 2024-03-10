@@ -10,6 +10,7 @@ class PieceSet:
         self.Knight = Piece.blank_knight(player_num)
         self.Rook = Piece.blank_rook(player_num)
         self.Pawn = Piece.blank_pawn(player_num)
+        self.NPawn = Piece.blank_npawn(player_num)
         self.Custom1 = Piece.blank_custom1(player_num)
         self.Custom2 = Piece.blank_custom2(player_num)
         self.Custom3 = Piece.blank_custom3(player_num)
@@ -24,7 +25,13 @@ class PieceSet:
         self.occupied.set_index(index)
 
     def piece_at(self, index):
-        if self.King.bitboard.get_index(index):
+        if not self.occupied.get_index(index):
+            return None
+        elif self.Pawn.bitboard.get_index(index):
+            return self.Pawn
+        elif self.NPawn.bitboard.get_index(index):
+            return self.NPawn
+        elif self.King.bitboard.get_index(index):
             return self.King
         elif self.Queen.bitboard.get_index(index):
             return self.Queen
@@ -34,8 +41,6 @@ class PieceSet:
             return self.Knight
         elif self.Rook.bitboard.get_index(index):
             return self.Rook
-        elif self.Pawn.bitboard.get_index(index):
-            return self.Pawn
         elif self.Custom1.bitboard.get_index(index):
             return self.Custom1
         elif self.Custom2.bitboard.get_index(index):
@@ -52,7 +57,7 @@ class PieceSet:
             return None
 
     def get_piece_refs(self):
-        return_vec = [self.King, self.Queen, self.Bishop, self.Knight, self.Rook, self.Pawn, self.Custom1, self.Custom2, self.Custom3, self.Custom4, self.Custom5, self.Custom6]
+        return_vec = [self.King, self.Queen, self.Bishop, self.Knight, self.Rook, self.Pawn, self.Custom1, self.Custom2, self.Custom3, self.Custom4, self.Custom5, self.Custom6, self.NPawn]
         return return_vec
 
     def update_occupied(self):
@@ -63,6 +68,7 @@ class PieceSet:
         self.occupied |= self.Knight.bitboard
         self.occupied |= self.Rook.bitboard
         self.occupied |= self.Pawn.bitboard
+        self.occupied |= self.NPawn.bitboard
         self.occupied |= self.Custom1.bitboard
         self.occupied |= self.Custom2.bitboard
         self.occupied |= self.Custom3.bitboard

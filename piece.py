@@ -12,7 +12,8 @@ PieceType = {
     "Custom3": 8,
     "Custom4": 9,
     "Custom5": 10,
-    "Custom6": 11
+    "Custom6": 11,
+    "NPawn": 12
 }
 
 class Piece:
@@ -83,5 +84,9 @@ class Piece:
     @classmethod
     def blank_custom6(cls, player_num):
         return cls(player_num, 'g', "Custom6", Bitboard(0))
+    
+    @classmethod
+    def blank_npawn(cls, player_num):
+        return cls(player_num, 'z', "NPawn", Bitboard(0))
     
 

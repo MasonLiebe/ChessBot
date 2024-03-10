@@ -90,6 +90,7 @@ class MovementPatternExternal:
         translate_northwest: bool = False,
         translate_southeast: bool = False,
         translate_southwest: bool = False,
+        can_enpassant: bool = False,
     ):
         self.promotion_squares = promotion_squares
         self.promo_vals = promo_vals
@@ -113,6 +114,7 @@ class MovementPatternExternal:
         self.translate_northwest = translate_northwest
         self.translate_southeast = translate_southeast
         self.translate_southwest = translate_southwest
+        self.can_enpassant = can_enpassant
     
 class MovementPattern:
     def __init__(
@@ -139,6 +141,7 @@ class MovementPattern:
         translate_northwest: bool = False,
         translate_southeast: bool = False,
         translate_southwest: bool = False,
+        can_enpassant: bool = False,
     ):
         self.promotion_squares = promotion_squares
         self.promo_vals = promo_vals
@@ -162,6 +165,7 @@ class MovementPattern:
         self.translate_northwest = translate_northwest
         self.translate_southeast = translate_southeast
         self.translate_southwest = translate_southwest
+        self.can_enpassant = can_enpassant
 
     def promotion_at(self, index: int) -> bool:
         if self.promotion_squares is not None:
@@ -198,6 +202,7 @@ def external_mp_to_internal(mpe: MovementPatternExternal) -> MovementPattern:
         translate_northwest=mpe.translate_northwest,
         translate_southeast=mpe.translate_southeast,
         translate_southwest=mpe.translate_southwest,
+        can_enpassant=mpe.can_enpassant
     )
 
 def internal_mp_to_external(mp: MovementPattern) -> MovementPatternExternal:
@@ -232,7 +237,69 @@ def internal_mp_to_external(mp: MovementPattern) -> MovementPatternExternal:
         translate_northwest=mp.translate_northwest,
         translate_southeast=mp.translate_southeast,
         translate_southwest=mp.translate_southwest,
+        can_enpassant=mp.can_enpassant
     )
+
+STANDARD_PATTERNS = {
+    'Pawn' : MovementPattern(
+        attack_jump_deltas=[(1, 1), (-1, 1)],
+        translate_jump_deltas=[(0, 1)],
+        can_enpassant=True,
+        promo_vals=['Q', 'R', 'B', 'N', 'A', 'C', 'D', 'E', 'F', 'G'] # Can promote to custom squares
+        ),
+    'Bishop' : MovementPattern(
+        attack_northwest = True,
+        attack_northeast = True,
+        attack_southwest = True,
+        attack_southeast = True,
+        translate_northwest = True,
+        translate_northeast = True,
+        translate_southwest = True,
+        translate_southeast = True
+    ),
+    'Knight' : MovementPattern(
+        attack_jump_deltas=[(1, 2), (2, 1), (-1, 2), (-2, 1), (1, -2), (2, -1), (-1, -2), (-2, -1)],
+        translate_jump_deltas=[(1, 2), (2, 1), (-1, 2), (-2, 1), (1, -2), (2, -1), (-1, -2), (-2, -1)]
+    ),
+    'Rook' : MovementPattern(
+        attack_north = True,
+        attack_south = True,
+        attack_east = True,
+        attack_west = True,
+        translate_north = True,
+        translate_south = True,
+        translate_east = True,
+        translate_west = True
+    ),
+    'Queen' : MovementPattern(
+        attack_north = True,
+        attack_south = True,
+        attack_east = True,
+        attack_west = True,
+        attack_northeast = True,
+        attack_northwest = True,
+        attack_southeast = True,
+        attack_southwest = True,
+        translate_north = True,
+        translate_south = True,
+        translate_east = True,
+        translate_west = True,
+        translate_northeast = True,
+        translate_northwest = True,
+        translate_southeast = True,
+        translate_southwest = True
+    ),
+    'King' : MovementPattern(
+        attack_jump_deltas=[(1, 1), (-1, 1), (1, -1), (-1, -1), (1, 0), (-1, 0), (0, 1), (0, -1)],
+        translate_jump_deltas=[(1, 1), (-1, 1), (1, -1), (-1, -1), (1, 0), (-1, 0), (0, 1), (0, -1)]
+    ),
+    'NPawn' : MovementPattern(
+        attack_jump_deltas=[(1, 1), (-1, 1)],
+        translate_sliding_deltas=[[(0,1), (0,2)]],
+        can_enpassant=True,
+        promo_vals=['Q', 'R', 'B', 'N', 'A', 'C', 'D', 'E', 'F', 'G']
+    )
+}
 
 # Testing
 # if __name__ == "__main__":

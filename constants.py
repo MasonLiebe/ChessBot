@@ -5,6 +5,7 @@ DEFAULT_HEIGHT = 8
 
 # CHARACTER TO PIECE LOOKUPS
 CHAR_TO_PIECE = {'p': 'Pawn',
+             'z': 'NPawn', # New Pawn that can move 2 squares
              'r': 'Rook',
              'n': 'Knight',
              'b': 'Bishop',
@@ -51,14 +52,12 @@ CHAR_TO_FILE_NAME = {
                     }
 
 # FENS
-STARTING_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-E4E5_FEN = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e6 0 1'
-D4D5_FEN = 'rnbqkbnr/pppppppp/8/8/3pP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 1'
-D4E5_FEN = 'rnbqkbnr/pppppppp/8/8/3P4/8/PPP2PPP/RNBQKBNR b KQkq - 0 1'
+STARTING_FEN = 'rnbqkbnr/zzzzzzzz/8/8/8/8/ZZZZZZZZZ/RNBQKBNR w KQkq - 0 1'
+E4E5_FEN = 'rnbqkbnr/zzzz1zzz/8/4p3/4P3/8/ZZZZ1ZZZ/RNBQKBNR b KQkq e6 0 1'
 JUST_KINGS_FEN = '8/8/8/8/8/8/8/4k3 w - - 0 1'
-NINEBYNINE_FEN = 'rnbqkqbnr/ppppppppp/9/9/9/9/9/PPPPPPPPP/RNBQKQBNR w KQkq - 0 1'
-NINEBYEIGHT_FEN = 'rnbqkqbnr/ppppppppp/9/9/9/9/PPPPPPPPP/RNBQKQBNR w KQkq - 0 1'
-FOURBYFIVE_FEN = 'rqkr/pppp/4/PPPP/RQKR w - - 0 1'
+NINEBYNINE_FEN = 'rnbqkqbnr/zzzzzzzzz/9/9/9/9/9/ZZZZZZZZZ/RNBQKQBNR w KQkq - 0 1'
+NINEBYEIGHT_FEN = 'rnbqkqbnr/zzzzzzzzz/9/9/9/9/ZZZZZZZZZ/RNBQKQBNR w KQkq - 0 1'
+FOURBYFIVE_FEN = 'rqkr/zzzz/4/ZZZZ/RQKR w - - 0 1'
 
 # Board Information
 FILE_TO_INT = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7, 'i': 8, 'j': 9, 'k': 10, 'l': 11, 'm': 12, 'n': 13, 'o': 14, 'p': 15}

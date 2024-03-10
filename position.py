@@ -89,18 +89,30 @@ class Position:
         self.properties.zobrist_key = self.compute_zobrist()
 
         # Set the movement rules
-        self.movement_rules = {}
+        self.movement_rules = STANDARD_PATTERNS
 
     
     def custom_board(self, dims: Dimensions, bounds: Bitboard, movement_patterns, pieces: list[tuple[int, int, str]] ):
         # Pieces tuples are (owner, index, piece_type)
-        pass
+        self.dims = dims
+        self.bounds = bounds
+        self.num_players = 2
+        self.whos_turn = 0
+        self.movement_rules = movement_patterns
+        self.pieces = [PieceSet(0), PieceSet(1)]
+        self.occupied = Bitboard(0)
+
+        for owner, index, piece_type in pieces:
+            self.add_piece(owner, piece_type, index)
+        
+        self.properties = PositionProperties(0, None, None, CastleRights(), None, None, None)
+        self.properties.zobrist_key = self.compute_zobrist()
 
     def register_piecetype(self, char_rep: str, mpe: MovementPatternExternal):
-        pass
+        self.movement_rules[CHAR_TO_PIECE[char_rep]] = mpe
 
     def get_movement_pattern(self, piece_type: str) -> MovementPattern:
-        pass
+        return self.movement_rules.get(piece_type, None)
 
     def set_bounds(self, dims: Dimensions, bounds: Bitboard):
         self.dimensions = dims
@@ -108,7 +120,44 @@ class Position:
     
     def make_move(self, move: Move):
         # takes in a move object and modifies position to make the move
-        pass
+        # move is a Move object, info can be retrieved with these methods::
+        # move.get_from() - index
+        # move.get_to() - index
+        # move.get_is_capture() - bool
+        # move.get_move_type() - MoveType
+        # move.get_target - index
+        # get_promotion_char
+        # 0: "Quiet",
+        # 1: "Capture",
+        # 2: "QueensideCastle",
+        # 3: "KingsideCastle",
+        # 4: "Promotion",
+        # 5: "PromotionCapture",
+        # 6: "Null"
+
+        # Update the turn
+        player = self.whos_turn
+        self.whos_turn = (self.whos_turn + 1) % self.num_players
+
+        # Before properties are changed, save the old_properties
+        new_props = self.properties.copy()
+
+        # match the move type and update the position properties
+        match move.get_move_type():
+            case 0: # quiet move
+                pass
+            case 1: # capture
+                pass
+            case 2: # queenside castle
+                pass
+            case 3: # kingside castle
+                pass
+            case 4: # promotion
+                pass
+            case 5: # promotion capture
+                pass
+            case 6: # null move
+                pass
 
     def unmake_move(self):
         pass
@@ -123,16 +172,9 @@ class Position:
                 else:
                     print('·', end=' ')
             print()
-
-    def pieces_as_tuples(self):
-        #
-        pass
-
-    def tiles_as_tuples(self):
-        pass
     
     def get_zobrist(self):
-        pass
+        return self.properties.zobrist_key
 
     def compute_zobrist(self):
         # computes the zobrist key for the current position, from the position properties
@@ -155,16 +197,25 @@ class Position:
             self.zobrist_key ^= zob.get_ep_zobrist_file(16)
         # pieces
         for pieceSet in self.pieces:
-            for piece in [pieceSet.King, pieceSet.Queen, pieceSet.Bishop, pieceSet.Knight, pieceSet.Rook, pieceSet.Pawn, pieceSet.Custom1, pieceSet.Custom2, pieceSet.Custom3, pieceSet.Custom4, pieceSet.Custom5, pieceSet.Custom6]:
+            for piece in [pieceSet.King, pieceSet.Queen, pieceSet.Bishop, pieceSet.Knight, pieceSet.Rook, pieceSet.Pawn, pieceSet.Custom1, pieceSet.Custom2, pieceSet.Custom3, pieceSet.Custom4, pieceSet.Custom5, pieceSet.Custom6, pieceSet.NPawn]:
                 self.zobrist_key ^= zob.get_zobrist_piece(piece, pieceSet.player_num)
 
         return self.zobrist_key
 
     def piece_at(self, index: int):
-        pass
+        # returns tuple (player_num, piece_type)
+        for pieceSet in self.pieces:
+            if pieceSet.occupied.get_coord(from_index(index)):
+                return (pieceSet.player_num, pieceSet.piece_at(index))
+        return None
 
-    def place_bb_at(self, index: int):
-        pass
+    def piece_bb_at(self, index: int):
+        # returns bitboard of piece at index
+        for pieceSet in self.pieces:
+            if pieceSet.occupied.get_coord(from_index(index)):
+                for piece in [pieceSet.King, pieceSet.Queen, pieceSet.Bishop, pieceSet.Knight, pieceSet.Rook, pieceSet.Pawn, pieceSet.Custom1, pieceSet.Custom2, pieceSet.Custom3, pieceSet.Custom4, pieceSet.Custom5, pieceSet.Custom6, pieceSet.NPawn]:
+                    if piece.occupied.get_coord(from_index(index)):
+                        return piece.occupied
 
     def xy_in_bounds(self, x: int, y: int):
         pass

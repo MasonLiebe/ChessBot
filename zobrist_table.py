@@ -6,7 +6,7 @@ class ZobristTable:
     def __init__(self):
         self.rng = random.Random(5435651169991665628)
         self.ep_zobrist = [self.rng.getrandbits(64) for _ in range(17)]
-        self.zobrist = [[self._generate_randoms(256) for _ in range(12)] for _ in range(2)] # 2 players, 12 piece types, 256 squares
+        self.zobrist = [[self._generate_randoms(256) for _ in range(13)] for _ in range(2)] # 2 players, 13 piece types, 256 squares
         self.to_move = self.rng.getrandbits(64)
         self.w_q_castle = self.rng.getrandbits(64)
         self.b_q_castle = self.rng.getrandbits(64)
@@ -44,6 +44,7 @@ class ZobristTable:
             'Bishop': 3,
             'Knight': 4,
             'Pawn': 5,
+            'NPawn': 12,
             'Custom1': 6,
             'Custom2': 7,
             'Custom3': 8,
@@ -74,6 +75,7 @@ class ZobristTable:
             'Bishop': 3,
             'Knight': 4,
             'Pawn': 5,
+            'NPawn': 12,
             'Custom1': 6,
             'Custom2': 7,
             'Custom3': 8,
