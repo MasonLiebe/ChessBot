@@ -23,6 +23,11 @@ class PieceSet:
         piece = getattr(self, piece_name)
         piece.place_piece_at_index(index)
         self.occupied.set_index(index)
+    
+    def remove_piece_at_index(self, index):
+        piece = self.piece_at(index)
+        piece.remove_piece_at_index(index)
+        self.occupied.clear_index(index)
 
     def piece_at(self, index):
         if not self.occupied.get_index(index):

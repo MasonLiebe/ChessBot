@@ -145,6 +145,7 @@ class Position:
         # match the move type and update the position properties
         match move.get_move_type():
             case 0: # quiet move
+                self.move_piece(move.get_from(), move.get_to())
                 pass
             case 1: # capture
                 pass
@@ -216,27 +217,35 @@ class Position:
                 for piece in [pieceSet.King, pieceSet.Queen, pieceSet.Bishop, pieceSet.Knight, pieceSet.Rook, pieceSet.Pawn, pieceSet.Custom1, pieceSet.Custom2, pieceSet.Custom3, pieceSet.Custom4, pieceSet.Custom5, pieceSet.Custom6, pieceSet.NPawn]:
                     if piece.occupied.get_coord(from_index(index)):
                         return piece.occupied
+        return None
 
     def xy_in_bounds(self, x: int, y: int):
-        pass
+        return not (x < 0 or x >= self.dims.width or y < 0 or y >= self.dims.height)
 
     def move_piece(self, from_index: int, to_index: int):
-        pass
-
-    def _remove_piece(self, index: int):
-        pass
-
-    def _add_piece(self, owner: int, index: int, piece_type: str):
-        pass
+        # ONLY MOVES THIS PIECE, DOESN'T CAPTURE THE OTHER PIECE
+        source_bitboard = self.piece_bb_at(from_index)
+        if source_bitboard is None:
+            return
+        source_bitboard.clear_coord(from_index)
+        source_bitboard.set_coord(to_index)
+        self.update_occupied()
 
     def update_occupied(self):
-        pass
+        self.occupied.zero()
+        self.occupied = self.pieces[0].occupied | self.pieces[1].occupied
 
     def add_piece(self, owner: int, piece_type: str, index: int):
-        pass
+        # adds a piece to the board
+        pieceSet = self.pieces[owner]
+        pieceSet.place_piece_at_index(piece_type, index)
+        self.update_occupied()
 
     def remove_piece(self, index: int):
-        pass
+        # removes a piece from the board
+        for pieceSet in self.pieces:
+            pieceSet.remove_piece_at_index(index)
+        self.update_occupied()
 
 
 
