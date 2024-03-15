@@ -183,38 +183,38 @@ STANDARD_PATTERNS = {
     )
 }
 
-# Testing
-if __name__ == "__main__":
-    test_cases = [{
-            'from': 0,
-            'to': 8,
-            'move_type': 'Quiet',
-            'moving_piece_type': 'Pawn',
-            'target_piece_type': 'Empty',
-            'promotion_piece_type': 'Queen'
-        },
-        {
-            'from': 0,
-            'to': 8,
-            'move_type': 'Capture',
-            'moving_piece_type': 'Pawn',
-            'target_piece_type': 'Rook',
-            'promotion_piece_type': 'Queen'
-        }
-    ]
+# # Testing
+# if __name__ == "__main__":
+#     test_cases = [{
+#             'from': 0,
+#             'to': 8,
+#             'move_type': 'Quiet',
+#             'moving_piece_type': 'Pawn',
+#             'target_piece_type': 'Empty',
+#             'promotion_piece_type': 'Queen'
+#         },
+#         {
+#             'from': 0,
+#             'to': 8,
+#             'move_type': 'Capture',
+#             'moving_piece_type': 'Pawn',
+#             'target_piece_type': 'Rook',
+#             'promotion_piece_type': 'Queen'
+#         }
+#     ]
 
-    # for test in test_cases:
-    #     print('Test info:')
-    #     for key in test:
-    #         print(f'{key}: {test[key]}')
-    #     print('-----')
+#     for test in test_cases:
+#         print('Test info:')
+#         for key in test:
+#             print(f'{key}: {test[key]}')
+#         print('-----')
 
-    #     move = Move(test['from'], test['to'], test['moving_piece_type'], test['target_piece_type'], test['move_type'], test['promotion_piece_type'])
-    #     print(move)
-    #     print(move.get_from_index())
-    #     print(move.get_to_index())
-    #     print(move.get_move_type())
-    #     print(move.get_moving_piece_type())
-    #     print(move.get_target_piece_type())
-    #     print(move.get_promotion_piece_type())
-    #     print('-----------------')
+#         move = Move(test['from'], test['to'], test['moving_piece_type'], test['target_piece_type'], test['move_type'], test['promotion_piece_type'])
+#         print(move)
+#         print(move.get_from_index())
+#         print(move.get_to_index())
+#         print(move.get_move_type())
+#         print(move.get_moving_piece_type())
+#         print(move.get_target_piece_type())
+#         print(move.get_promotion_piece_type())
+#         print('-----------------')

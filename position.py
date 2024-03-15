@@ -5,7 +5,7 @@ from collections import defaultdict
 from position_properties import PositionProperties, CastleRights
 from bitboard import Bitboard, from_index, to_index, to_rank_file
 from moves import *
-from python_bitboard.zobrist_table import ZobristTable
+from zobrist_table import ZobristTable
 from piece import Piece
 from piece_set import PieceSet
 from constants import *
@@ -33,6 +33,7 @@ class Position:
 
     def __init__(self, fen = STARTING_FEN):
         self.from_fen(fen)
+        self.compute_rook_origins()
     
     def from_fen(self, fen: str):
         # takes in a standard game fen and sets up the position
@@ -91,6 +92,35 @@ class Position:
         # Set the movement rules
         self.movement_rules = STANDARD_PATTERNS
 
+    def set_rook_origins(self):
+        # sets the rook origins for the castling rightes
+        self.rook_origins = {'0q': None, '0k': None, '1q': None, '1k': None}
+        for index in range(256):
+            if self.pieces[0].King.occupied.get_index(index):
+                # find most distal queenside and kingside rooks
+                current_rook = False
+                for rook_index in range(index - index % 16, index - index % 16 + 16):
+                    if self.pieces[0].Rook.occupied.get_index(rook_index):
+                        if current_rook:
+                            self.rook_origins['0k'] = rook_index
+                        else:
+                            current_rook = True
+                            # first rook found, if just one rook king can castle both sides
+                            self.rook_origins['0q'] = rook_index
+                            self.rook_origins['0k'] = rook_index
+            if self.pieces[1].King.occupied.get_index(index):
+                # find most distal queenside and kingside rooks
+                current_rook = False
+                for rook_index in range(index - index % 16, index - index % 16 + 16):
+                    if self.pieces[1].Rook.occupied.get_index(rook_index):
+                        if current_rook:
+                            self.rook_origins['0k'] = rook_index
+                        else:
+                            current_rook = True
+                            # first rook found, if just one rook king can castle both sides
+                            self.rook_origins['0q'] = rook_index
+                            self.rook_origins['0k'] = rook_index
+
     
     def custom_board(self, dims: Dimensions, bounds: Bitboard, movement_patterns, pieces: list[tuple[int, int, str]] ):
         # Pieces tuples are (owner, index, piece_type)
@@ -147,23 +177,57 @@ class Position:
         # match the move type and update the position properties
         match move_type:
             case 'Quiet': # quiet move
-                self.move_known_piece(from_index, to_index, moving_piece_type)
+                self.move_known_piece(from_index, to_index, moving_piece_type, self.whos_turn)
             case 'Capture': # capture
-                self.move_known_piece(from_index, to_index, moving_piece_type)
-                target_piece_type = self.piece_at(to_index)
-                self.remove_known_piece(to_index, target_piece_type)
+                self.move_known_piece(from_index, to_index, moving_piece_type, self.whos_turn)
+                self.remove_known_piece(to_index, move.get_target_piece_type(), self.whos_turn)
             case 'QueensideCastle': # queenside castle
-                pass
+                self.move_known_piece(from_index, to_index, moving_piece_type, self.whos_turn) # move the king to its destination square
+                # move the rook to its destination square
+                rook_origin_index = self.rook_origins[str(self.whos_turn) + 'q']
+                self.move_known_piece(rook_origin_index, to_index + 1, "Rook", self.whos_turn) # 1 square to the right of the king
             case 'KingsideCastle': # kingside castle
-                pass
+                self.move_known_piece(from_index, to_index, moving_piece_type, self.whos_turn)
+                # move the rook to its destination square
+                rook_origin_index = self.rook_origins[str(self.whos_turn) + 'k']
+                self.move_known_piece(rook_origin_index, to_index - 1, "Rook", self.whos_turn) # 1 square to the left of the king
             case 'Promotion': # promotion
-                pass
+                # remove the piece
+                self.remove_known_piece(from_index, moving_piece_type, self.whos_turn)
+                # add the promoted_piece
+                self.place_known_piece(to_index, move.get_promotion_piece_type(), self.whos_turn)
             case 'PromotionCapture': # promotion capture
-                pass
-            case 'KingMove': # king move
-                pass
+                # remove the moving piece and the captured piece
+                self.remove_known_piece(from_index, moving_piece_type, self.whos_turn)
+                self.remove_known_piece(to_index, move.get_target_piece_type(), self.whos_turn)
+                # add the promoted piece
+                self.place_known_piece(to_index, move.get_promotion_piece_type(), self.whos_turn)
             case 'Null': # null move
                 pass
+        
+        # handle the new pawn move
+        if moving_piece_type == "NPawn":
+            # if the pawn moved two squares, set the en passant square
+            if abs(from_index - to_index) == 32:
+                self.properties.ep_square = from_index + 16
+            else:
+                self.properties.ep_square = None
+            # convert the piece type to a regular Pawn
+            self.remove_known_piece(to_index, moving_piece_type, self.whos_turn)
+            self.place_known_piece(to_index, "Pawn", self.whos_turn)
+        
+        # update castling rights if needed
+        if moving_piece_type == "King":
+            self.properties.castling_rights.remove_rights(self.whos_turn)
+        if moving_piece_type == "Rook":
+            if from_index == 0:
+                self.properties.castling_rights.remove_rights(self.whos_turn, False)
+            elif from_index == 7:
+                self.properties.castling_rights.remove_rights(self.whos_turn, True)
+            elif from_index == 112:
+                self.properties.castling_rights.remove_rights(self.whos_turn, False)
+            elif from_index == 119:
+                self.properties.castling_rights.remove_rights(self.whos_turn, True)
 
         # Update the turn
         player = self.whos_turn

@@ -1,5 +1,4 @@
 # Contains the constants used throughout the program
-
 DEFAULT_WIDTH = 8
 DEFAULT_HEIGHT = 8
 

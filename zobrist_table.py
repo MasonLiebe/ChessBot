@@ -1,4 +1,4 @@
-from piece import PieceType, Piece
+from piece import Piece
 import random
 from collections import defaultdict
 from constants import *
@@ -57,7 +57,7 @@ class ZobristTable:
 
         for index in range(256):
             if piece.bitboard.get_index(index):
-                output_zobrist ^= self.zobrist[owner][INT_TO_PIECE[piece.piece_type - 1]][index]  # piece ints are 1-indexed
+                output_zobrist ^= self.zobrist[owner][PIECE_TO_INT[piece.piece_type] - 1][index]  # piece ints are 1-indexed
         return output_zobrist
 
     def get_ep_zobrist_file(self, rank):
