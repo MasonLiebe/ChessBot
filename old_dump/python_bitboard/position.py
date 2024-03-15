@@ -5,8 +5,8 @@ from collections import defaultdict
 from position_properties import PositionProperties, CastleRights
 from bitboard import Bitboard, from_index, to_index, to_rank_file
 from moves import *
-from zobrist_table import ZobristTable
-from piece import Piece, PieceType
+from python_bitboard.zobrist_table import ZobristTable
+from piece import Piece
 from piece_set import PieceSet
 from constants import *
 
@@ -108,7 +108,7 @@ class Position:
         self.properties = PositionProperties(0, None, None, CastleRights(), None, None, None)
         self.properties.zobrist_key = self.compute_zobrist()
 
-    def register_piecetype(self, char_rep: str, mpe: MovementPatternExternal):
+    def register_piecetype(self, char_rep: str, mpe: MovementPattern):
         self.movement_rules[CHAR_TO_PIECE[char_rep]] = mpe
 
     def get_movement_pattern(self, piece_type: str) -> MovementPattern:
@@ -135,30 +135,40 @@ class Position:
         # 5: "PromotionCapture",
         # 6: "Null"
 
-        # Update the turn
-        player = self.whos_turn
-        self.whos_turn = (self.whos_turn + 1) % self.num_players
-
         # Before properties are changed, save the old_properties
         new_props = self.properties.copy()
 
+        # Grab the move properties
+        from_index = move.get_from_index()
+        to_index = move.get_to_index()
+        move_type = move.get_move_type()
+        moving_piece_type = move.get_moving_piece_type()
+
         # match the move type and update the position properties
-        match move.get_move_type():
-            case 0: # quiet move
-                self.move_piece(move.get_from(), move.get_to())
+        match move_type:
+            case 'Quiet': # quiet move
+                self.move_known_piece(from_index, to_index, moving_piece_type)
+            case 'Capture': # capture
+                self.move_known_piece(from_index, to_index, moving_piece_type)
+                target_piece_type = self.piece_at(to_index)
+                self.remove_known_piece(to_index, target_piece_type)
+            case 'QueensideCastle': # queenside castle
                 pass
-            case 1: # capture
+            case 'KingsideCastle': # kingside castle
                 pass
-            case 2: # queenside castle
+            case 'Promotion': # promotion
                 pass
-            case 3: # kingside castle
+            case 'PromotionCapture': # promotion capture
                 pass
-            case 4: # promotion
+            case 'KingMove': # king move
                 pass
-            case 5: # promotion capture
+            case 'Null': # null move
                 pass
-            case 6: # null move
-                pass
+
+        # Update the turn
+        player = self.whos_turn
+        self.whos_turn = (self.whos_turn + 1) % self.num_players
+        self.zobrist_key ^= zob.get_to_move_zobrist(player) # inverts the to_move zobrist signature
 
     def unmake_move(self):
         pass
@@ -176,7 +186,33 @@ class Position:
     
     def get_zobrist(self):
         return self.properties.zobrist_key
+    
+    # INTERNAL MOVEMENT METHODS THAT MAINTAIN ZOBRIST KEY
+    def move_known_piece(self, from_index: int, to_index: int, piece_type: str, player_num: int):
+        # moves a piece given the from and to indices and piece type/owner
+        # update the piece bitboard for the piece object
+        self.pieces[player_num].place_piece_at_index(piece_type, to_index)
+        self.pieces[player_num].remove_piece_at_index(from_index)
+        self.update_occupied()
 
+        # update the zobrist key
+        self.zobrist_key ^= zob.get_zobrist_sq_from_pt(piece_type, player_num, from_index) # inverts the zobrist signature for the piece at the from index
+        self.zobrist_key ^= zob.get_zobrist_sq_from_pt(piece_type, player_num, to_index) # reverts the zobrist signature for the piece at the to index
+    
+    def place_known_piece(self, index: int, piece_type: str, player_num: int):
+        # places a piece at the given index
+        self.pieces[player_num].place_piece_at_index(piece_type, index)
+        self.update_occupied()
+        self.zobrist_key ^= zob.get_zobrist_sq_from_pt(piece_type, player_num, index)
+    
+    def remove_known_piece(self, index: int, piece_type: str, player_num: int):
+        # removes a piece at the given index
+        self.pieces[player_num].remove_piece_at_index(index)
+        self.update_occupied()
+        self.zobrist_key ^= zob.get_zobrist_sq_from_pt(piece_type, player_num, index)
+    
+    # END INTERNAL MOVEMENT METHODS
+        
     def compute_zobrist(self):
         # computes the zobrist key for the current position, from the position properties
         self.zobrist_key = 0
@@ -217,13 +253,14 @@ class Position:
                 for piece in [pieceSet.King, pieceSet.Queen, pieceSet.Bishop, pieceSet.Knight, pieceSet.Rook, pieceSet.Pawn, pieceSet.Custom1, pieceSet.Custom2, pieceSet.Custom3, pieceSet.Custom4, pieceSet.Custom5, pieceSet.Custom6, pieceSet.NPawn]:
                     if piece.occupied.get_coord(from_index(index)):
                         return piece.occupied
+        # There's no piece at this index, return none
         return None
 
     def xy_in_bounds(self, x: int, y: int):
         return not (x < 0 or x >= self.dims.width or y < 0 or y >= self.dims.height)
 
     def move_piece(self, from_index: int, to_index: int):
-        # ONLY MOVES THIS PIECE, DOESN'T CAPTURE THE OTHER PIECE
+        # ONLY MOVES THIS PIECE, DOESN'T CAPTURE THE OTHER PIECE OR SET THE ZOBRIST KEY
         source_bitboard = self.piece_bb_at(from_index)
         if source_bitboard is None:
             return

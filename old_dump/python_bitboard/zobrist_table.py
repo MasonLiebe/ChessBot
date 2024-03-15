@@ -1,6 +1,7 @@
 from piece import PieceType, Piece
 import random
 from collections import defaultdict
+from constants import *
 
 class ZobristTable:
     def __init__(self):
@@ -36,24 +37,9 @@ class ZobristTable:
     def get_zobrist_sq_from_pt(self, pt, owner, index):
         # returns the zobrist signature for the piece at the given square
         # pt is a string 'King', 'Queen', etc.
-        # regardless if the piece is there or not
-        piece_type_mapping = {
-            'King': 0,
-            'Queen': 1,
-            'Rook': 2,
-            'Bishop': 3,
-            'Knight': 4,
-            'Pawn': 5,
-            'NPawn': 12,
-            'Custom1': 6,
-            'Custom2': 7,
-            'Custom3': 8,
-            'Custom4': 9,
-            'Custom5': 10,
-            'Custom6': 11
-        }
-        if pt in piece_type_mapping:
-            return self.zobrist[owner][piece_type_mapping[pt]][index]
+        # regardless if the piece is there or not=
+        if pt in PIECE_TO_INT:
+            return self.zobrist[owner][PIECE_TO_INT[pt] - 1][index] # piece ints are 1-indexed
         else:
             return 0
 
@@ -68,25 +54,10 @@ class ZobristTable:
         # if the piece is in that square
         output_zobrist = 0
         # iterate through all indices and test if the piece is there
-        piece_type_mapping = {
-            'King': 0,
-            'Queen': 1,
-            'Rook': 2,
-            'Bishop': 3,
-            'Knight': 4,
-            'Pawn': 5,
-            'NPawn': 12,
-            'Custom1': 6,
-            'Custom2': 7,
-            'Custom3': 8,
-            'Custom4': 9,
-            'Custom5': 10,
-            'Custom6': 11
-        }
 
         for index in range(256):
             if piece.bitboard.get_index(index):
-                output_zobrist ^= self.zobrist[owner][piece_type_mapping[piece.piece_type]][index]
+                output_zobrist ^= self.zobrist[owner][INT_TO_PIECE[piece.piece_type - 1]][index]  # piece ints are 1-indexed
         return output_zobrist
 
     def get_ep_zobrist_file(self, rank):

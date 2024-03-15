@@ -1,26 +1,10 @@
 from bitboard import Bitboard
 
-PieceType = {
-    "Pawn": 0,
-    "Knight": 1,
-    "King": 2,
-    "Rook": 3,
-    "Bishop": 4,
-    "Queen": 5,
-    "Custom1": 6,
-    "Custom2": 7,
-    "Custom3": 8,
-    "Custom4": 9,
-    "Custom5": 10,
-    "Custom6": 11,
-    "NPawn": 12
-}
-
 class Piece:
     def __init__(self, player_num, char_rep, piece_type, bitboard):
         self.player_num = player_num # 0 for white, 1 for black
         self.char_rep = char_rep # character representation of the piece
-        self.piece_type = piece_type # type of piece as a PieceType Object
+        self.piece_type = piece_type # type of piece as a string
         self.bitboard = bitboard # bitboard representing the locations of the piece
 
     def place_piece_at_index(self, index):

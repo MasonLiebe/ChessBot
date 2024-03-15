@@ -7,6 +7,10 @@
 # a 1 in the bitboard represents the presence of a piece of that type
 # in that square, a bitboard for each color, where a 1 in the bitboard
 
+'''
+[]
+'''
+
 class Bitboard:
 
     def __init__(self, value=0):
@@ -108,43 +112,51 @@ def to_index(x, y):
 
 # testing
 if __name__ == '__main__':
-    test_bitboard = Bitboard()
-    print("This should be clear:\n ",str(test_bitboard))
-    test_bitboard.set_coord(0,6) # set the 7th square to 1
-    test_bitboard.set_coord(4,2)
-    test_bitboard.set_coord(0,0)
-    print("This should have 3 squares set:\n",test_bitboard)
+    print (to_rank_file(0,0))
+    print (to_rank_file(7,7))
+    print (to_rank_file(15,15))
+    print (from_index(0))
+    print (from_index(37))
+    print (to_index(0,0))
 
-    test_bitboard.clear_coord(0,6) # clear the 7th square
-    print("This should have 2 squares set:\n",test_bitboard)
-    test_bitboard.set_row_bound(3) # set all squares below the 4th row to 1
-    print("This should have all squares below the 4th row set:\n",test_bitboard)
-    test_bitboard.set_col_bound(3) # set all squares to the right of the 4th column to 1
-    print("This should have all squares to the right of the 4th column set:\n",test_bitboard)
-    test_bitboard.zero()
 
-    print("This should be clear:\n",test_bitboard) 
-    test_bitboard.fill()
-    print("This should be full:")
-    print(test_bitboard)
-    test_bitboard.zero()
+    # test_bitboard = Bitboard()
+    # print("This should be clear:\n ",str(test_bitboard))
+    # test_bitboard.set_coord(0,6) # set the 7th square to 1
+    # test_bitboard.set_coord(4,2)
+    # test_bitboard.set_coord(0,0)
+    # print("This should have 3 squares set:\n",test_bitboard)
 
-    for i in range(16):
-        test_bitboard.set_coord(i, i)
-    print("This should have the main diagonal set:")
-    print(test_bitboard)
+    # test_bitboard.clear_coord(0,6) # clear the 7th square
+    # print("This should have 2 squares set:\n",test_bitboard)
+    # test_bitboard.set_row_bound(3) # set all squares below the 4th row to 1
+    # print("This should have all squares below the 4th row set:\n",test_bitboard)
+    # test_bitboard.set_col_bound(3) # set all squares to the right of the 4th column to 1
+    # print("This should have all squares to the right of the 4th column set:\n",test_bitboard)
+    # test_bitboard.zero()
 
-    test_bitboard1 = Bitboard()
-    for i in range(16):
-        test_bitboard1.set_coord(15-i, i)
-    print("This should have the other diagonal set:")
-    print(test_bitboard1)
+    # print("This should be clear:\n",test_bitboard) 
+    # test_bitboard.fill()
+    # print("This should be full:")
+    # print(test_bitboard)
+    # test_bitboard.zero()
 
-    print("This should have both diagonals set:")
-    print(test_bitboard | test_bitboard1)
+    # for i in range(16):
+    #     test_bitboard.set_coord(i, i)
+    # print("This should have the main diagonal set:")
+    # print(test_bitboard)
 
-    print("This should be empty:")
-    print(test_bitboard & test_bitboard1)
+    # test_bitboard1 = Bitboard()
+    # for i in range(16):
+    #     test_bitboard1.set_coord(15-i, i)
+    # print("This should have the other diagonal set:")
+    # print(test_bitboard1)
+
+    # print("This should have both diagonals set:")
+    # print(test_bitboard | test_bitboard1)
+
+    # print("This should be empty:")
+    # print(test_bitboard & test_bitboard1)
 
 
     

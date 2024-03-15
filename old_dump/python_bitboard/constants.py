@@ -18,7 +18,42 @@ CHAR_TO_PIECE = {'p': 'Pawn',
              'e': 'Custom4',
              'f': 'Custom5',
              'g': 'Custom6',
-             '.': 'Empty',}
+             '.': 'Empty',
+}
+
+# Int to Piece Lookups
+INT_TO_PIECE = {0: 'Empty',
+                1: 'King',
+                2: 'Queen',
+                3: 'Rook',
+                4: 'Bishop',
+                5: 'Knight',
+                6: 'Pawn',
+                7: 'NPawn',
+                8: 'Custom1',
+                9: 'Custom2',
+                10: 'Custom3',
+                11: 'Custom4',
+                12: 'Custom5',
+                13: 'Custom6',
+}
+
+PIECE_TO_INT = {'Empty': 0,
+                'King': 1,
+                'Queen': 2,
+                'Rook': 3,
+                'Bishop': 4,
+                'Knight': 5,
+                'Pawn': 6,
+                'NPawn': 7,
+                'Custom1': 8,
+                'Custom2': 9,
+                'Custom3': 10,
+                'Custom4': 11,
+                'Custom5': 12,
+                'Custom6': 13,
+}
+
 
 CHAR_TO_FILE_NAME = {   
                         'p': '/assets/pieces/black_pawn.png',
