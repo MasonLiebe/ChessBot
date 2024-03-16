@@ -65,7 +65,7 @@ class CastleRights:
 class PositionProperties:
     def __init__(self, zobrist_key: int = 0, move_played: Optional[Move] = None, promote_from: Optional[str] = None, castling_rights: CastleRights = CastleRights(), ep_square: Optional[int] = None, captured_piece: Optional[Tuple[int, str]] = None, prev_properties: Optional['PositionProperties'] = None):
         self.zobrist_key = zobrist_key # 64 bit integer representing the zobrist key of the position
-        self.move_played = move_played # Move object
+        self.move_played = move_played # Move object for the most recent move
         self.promote_from = promote_from # string representation of the piece type promoted from 'Pawn'
         self.castling_rights = castling_rights # CastleRights object
         self.ep_square = ep_square # integer representing the index of the en passant square

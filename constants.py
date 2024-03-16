@@ -87,7 +87,7 @@ CHAR_TO_FILE_NAME = {
 
 # FENS
 STARTING_FEN = 'rnbqkbnr/zzzzzzzz/8/8/8/8/ZZZZZZZZZ/RNBQKBNR w KQkq - 0 1'
-E4E5_FEN = 'rnbqkbnr/zzzz1zzz/8/4p3/4P3/8/ZZZZ1ZZZ/RNBQKBNR b KQkq e6 0 1'
+E4E5_FEN = 'rnbqkbnr/zzzz1zzz/8/4p3/4P3/8/ZZZZ1ZZZ/RNBQKBNR w KQkq e6 0 1'
 JUST_KINGS_FEN = '8/8/8/8/8/8/8/4k3 w - - 0 1'
 NINEBYNINE_FEN = 'rnbqkqbnr/zzzzzzzzz/9/9/9/9/9/ZZZZZZZZZ/RNBQKQBNR w KQkq - 0 1'
 NINEBYEIGHT_FEN = 'rnbqkqbnr/zzzzzzzzz/9/9/9/9/ZZZZZZZZZ/RNBQKQBNR w KQkq - 0 1'

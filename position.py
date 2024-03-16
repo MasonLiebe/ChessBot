@@ -9,10 +9,8 @@ from zobrist_table import ZobristTable
 from piece import Piece
 from piece_set import PieceSet
 from constants import *
+import copy
 
-
-# create the zobrist table that will be used the entirety of the game
-zob = ZobristTable() # ONLY CREATES AND CONTAINS ZOBRIST KEYS
 
 class Dimensions():
     # Represents the dimensions of the board
@@ -33,7 +31,7 @@ class Position:
 
     def __init__(self, fen = STARTING_FEN):
         self.from_fen(fen)
-        self.compute_rook_origins()
+        self.set_rook_origins()
     
     def from_fen(self, fen: str):
         # takes in a standard game fen and sets up the position
@@ -86,7 +84,7 @@ class Position:
         self.properties = PositionProperties(0, None, None, castle_rights, ep_square, None, None)
 
         # Compute the zobrist key
-        self.zobrist_table = ZobristTable()
+        self.zob = ZobristTable()
         self.properties.zobrist_key = self.compute_zobrist()
 
         # Set the movement rules
@@ -96,11 +94,11 @@ class Position:
         # sets the rook origins for the castling rightes
         self.rook_origins = {'0q': None, '0k': None, '1q': None, '1k': None}
         for index in range(256):
-            if self.pieces[0].King.occupied.get_index(index):
+            if self.pieces[0].King.bitboard.get_index(index):
                 # find most distal queenside and kingside rooks
                 current_rook = False
                 for rook_index in range(index - index % 16, index - index % 16 + 16):
-                    if self.pieces[0].Rook.occupied.get_index(rook_index):
+                    if self.pieces[0].Rook.bitboard.get_index(rook_index):
                         if current_rook:
                             self.rook_origins['0k'] = rook_index
                         else:
@@ -108,18 +106,18 @@ class Position:
                             # first rook found, if just one rook king can castle both sides
                             self.rook_origins['0q'] = rook_index
                             self.rook_origins['0k'] = rook_index
-            if self.pieces[1].King.occupied.get_index(index):
+            if self.pieces[1].King.bitboard.get_index(index):
                 # find most distal queenside and kingside rooks
                 current_rook = False
                 for rook_index in range(index - index % 16, index - index % 16 + 16):
-                    if self.pieces[1].Rook.occupied.get_index(rook_index):
+                    if self.pieces[1].Rook.bitboard.get_index(rook_index):
                         if current_rook:
-                            self.rook_origins['0k'] = rook_index
+                            self.rook_origins['1k'] = rook_index
                         else:
                             current_rook = True
                             # first rook found, if just one rook king can castle both sides
-                            self.rook_origins['0q'] = rook_index
-                            self.rook_origins['0k'] = rook_index
+                            self.rook_origins['1q'] = rook_index
+                            self.rook_origins['1k'] = rook_index
 
     
     def custom_board(self, dims: Dimensions, bounds: Bitboard, movement_patterns, pieces: list[tuple[int, int, str]] ):
@@ -166,7 +164,7 @@ class Position:
         # 6: "Null"
 
         # Before properties are changed, save the old_properties
-        new_props = self.properties.copy()
+        old_props = copy.deepcopy(self.properties)
 
         # Grab the move properties
         from_index = move.get_from_index()
@@ -174,7 +172,7 @@ class Position:
         move_type = move.get_move_type()
         moving_piece_type = move.get_moving_piece_type()
 
-        # match the move type and update the position properties
+        # match the move type and move the pieces on the bitboards
         match move_type:
             case 'Quiet': # quiet move
                 self.move_known_piece(from_index, to_index, moving_piece_type, self.whos_turn)
@@ -205,37 +203,91 @@ class Position:
             case 'Null': # null move
                 pass
         
+        # update all of the properties in the self.position_properties object
+        # Zobrist key is handled incrementally
+        # here are the easy ones
+        self.properties.move_played = move
+        self.properties.promote_from = move.get_from_index()
+        self.properties.captured_piece = move.get_target_piece_type()
+        self.properties.prev_properties = old_props
+
+        # handle en passant capture:
+        if moving_piece_type in ("Pawn", "NPawn") and move.get_to_index() == self.properties.ep_square:
+            # remove the captured pawn
+            self.remove_known_piece(self.properties.ep_square - 16, "Pawn", (self.whos_turn + 1) % self.num_players)
+
         # handle the new pawn move
+        if self.properties.ep_square is not None: # revert the en passant square zobrist signature if needed
+            self.properties.zobrist_key ^= self.zob.get_ep_zobrist_file(self.properties.ep_square % 16)
         if moving_piece_type == "NPawn":
             # if the pawn moved two squares, set the en passant square
             if abs(from_index - to_index) == 32:
                 self.properties.ep_square = from_index + 16
+                self.properties.zobrist_key ^= self.zob.get_ep_zobrist_file(from_index % 16)
             else:
                 self.properties.ep_square = None
             # convert the piece type to a regular Pawn
             self.remove_known_piece(to_index, moving_piece_type, self.whos_turn)
             self.place_known_piece(to_index, "Pawn", self.whos_turn)
+        else:
+            self.properties.ep_square = None
         
         # update castling rights if needed
         if moving_piece_type == "King":
             self.properties.castling_rights.remove_rights(self.whos_turn)
         if moving_piece_type == "Rook":
-            if from_index == 0:
-                self.properties.castling_rights.remove_rights(self.whos_turn, False)
-            elif from_index == 7:
-                self.properties.castling_rights.remove_rights(self.whos_turn, True)
-            elif from_index == 112:
-                self.properties.castling_rights.remove_rights(self.whos_turn, False)
-            elif from_index == 119:
-                self.properties.castling_rights.remove_rights(self.whos_turn, True)
+            if from_index == self.rook_origins[str(self.whos_turn) + 'q']:
+                self.properties.castling_rights.disable_queenside_castle(self.whos_turn)
+                self.properties.zobrist_key ^= self.zob.get_castling_zobrist(self.whos_turn, False)
+            if from_index == self.rook_origins[str(self.whos_turn) + 'k']:
+                self.properties.castling_rights.disable_kingside_castle(self.whos_turn)
+                self.properties.zobrist_key ^= self.zob.get_castling_zobrist(self.whos_turn, True)
 
         # Update the turn
         player = self.whos_turn
         self.whos_turn = (self.whos_turn + 1) % self.num_players
-        self.zobrist_key ^= zob.get_to_move_zobrist(player) # inverts the to_move zobrist signature
+        self.properties.zobrist_key ^= self.zob.get_to_move_zobrist(player) # inverts the to_move zobrist signature
 
     def unmake_move(self):
-        pass
+        # reverts a move based on the current position_properties and
+        # reverts exactly to the state before the last move was made
+        if self.properties.prev_properties is None:
+            return
+        
+        # revert the board position
+        move = self.properties.move_played
+        from_index = move.get_from_index()
+        to_index = move.get_to_index()
+        moving_piece_type = move.get_moving_piece_type()
+        self.whos_turn = (self.whos_turn + 1) % self.num_players
+
+        match move.get_move_type():
+            case 'Quiet':
+                self.move_known_piece(to_index, from_index, moving_piece_type, self.whos_turn)
+            case 'Capture':
+                self.move_known_piece(to_index, from_index, moving_piece_type, self.whos_turn)
+                self.place_known_piece(to_index, move.get_target_piece_type(), self.whos_turn)
+            case 'QueensideCastle':
+                self.move_known_piece(to_index, from_index, moving_piece_type, self.whos_turn)
+                rook_origin_index = self.rook_origins[str(self.whos_turn) + 'q']
+                self.move_known_piece(to_index + 1, rook_origin_index, "Rook", self.whos_turn)
+            case 'KingsideCastle':
+                self.move_known_piece(to_index, from_index, moving_piece_type, self.whos_turn)
+                rook_origin_index = self.rook_origins[str(self.whos_turn) + 'k']
+                self.move_known_piece(to_index - 1, rook_origin_index, "Rook", self.whos_turn)
+            case 'Promotion':
+                self.remove_known_piece(to_index, move.get_promotion_piece_type(), self.whos_turn)
+                self.place_known_piece(from_index, moving_piece_type, self.whos_turn)
+            case 'PromotionCapture':
+                self.remove_known_piece(to_index, move.get_promotion_piece_type(), self.whos_turn)
+                self.place_known_piece(to_index, move.get_target_piece_type(), self.whos_turn)
+                self.place_known_piece(from_index, moving_piece_type, self.whos_turn)
+            case 'Null':
+                pass
+        
+        # revert the properties
+        self.properties = self.properties.prev_properties
+
 
     def to_string(self):
         for y in range(self.dims.height):
@@ -256,52 +308,52 @@ class Position:
         # moves a piece given the from and to indices and piece type/owner
         # update the piece bitboard for the piece object
         self.pieces[player_num].place_piece_at_index(piece_type, to_index)
-        self.pieces[player_num].remove_piece_at_index(from_index)
+        self.pieces[player_num].remove_known_piece_at_index(piece_type, from_index)
         self.update_occupied()
 
         # update the zobrist key
-        self.zobrist_key ^= zob.get_zobrist_sq_from_pt(piece_type, player_num, from_index) # inverts the zobrist signature for the piece at the from index
-        self.zobrist_key ^= zob.get_zobrist_sq_from_pt(piece_type, player_num, to_index) # reverts the zobrist signature for the piece at the to index
+        self.properties.zobrist_key ^= self.zob.get_zobrist_sq_from_pt(piece_type, player_num, from_index) # inverts the zobrist signature for the piece at the from index
+        self.properties.zobrist_key ^= self.zob.get_zobrist_sq_from_pt(piece_type, player_num, to_index) # reverts the zobrist signature for the piece at the to index
     
     def place_known_piece(self, index: int, piece_type: str, player_num: int):
         # places a piece at the given index
         self.pieces[player_num].place_piece_at_index(piece_type, index)
         self.update_occupied()
-        self.zobrist_key ^= zob.get_zobrist_sq_from_pt(piece_type, player_num, index)
+        self.properties.zobrist_key ^= self.zob.get_zobrist_sq_from_pt(piece_type, player_num, index)
     
     def remove_known_piece(self, index: int, piece_type: str, player_num: int):
         # removes a piece at the given index
-        self.pieces[player_num].remove_piece_at_index(index)
+        self.pieces[player_num].remove_known_piece_at_index(piece_type, index)
         self.update_occupied()
-        self.zobrist_key ^= zob.get_zobrist_sq_from_pt(piece_type, player_num, index)
+        self.properties.zobrist_key ^= self.zob.get_zobrist_sq_from_pt(piece_type, player_num, index)
     
     # END INTERNAL MOVEMENT METHODS
         
     def compute_zobrist(self):
         # computes the zobrist key for the current position, from the position properties
-        self.zobrist_key = 0
+        self.properties.zobrist_key = 0
         # player to move
-        self.zobrist_key ^= zob.get_to_move_zobrist(self.whos_turn)
+        self.properties.zobrist_key ^= self.zob.get_to_move_zobrist(self.whos_turn)
         # castling rights
         if self.properties.castling_rights.can_player_castle_kingside(0):
-            self.zobrist_key ^= zob.get_castling_zobrist(0, True)
+            self.properties.zobrist_key ^= self.zob.get_castling_zobrist(0, True)
         if self.properties.castling_rights.can_player_castle_queenside(0):
-            self.zobrist_key ^= zob.get_castling_zobrist(0, False)
+            self.properties.zobrist_key ^= self.zob.get_castling_zobrist(0, False)
         if self.properties.castling_rights.can_player_castle_kingside(1):
-            self.zobrist_key ^= zob.get_castling_zobrist(1, True)
+            self.properties.zobrist_key ^= self.zob.get_castling_zobrist(1, True)
         if self.properties.castling_rights.can_player_castle_queenside(1):
-            self.zobrist_key ^= zob.get_castling_zobrist(1, False)
+            self.properties.zobrist_key ^= self.zob.get_castling_zobrist(1, False)
         # en passant square
         if self.properties.ep_square is not None:
-            self.zobrist_key ^= zob.get_ep_zobrist_file(self.properties.ep_square % 16)
+            self.properties.zobrist_key ^= self.zob.get_ep_zobrist_file(self.properties.ep_square % 16)
         else:
-            self.zobrist_key ^= zob.get_ep_zobrist_file(16)
+            self.properties.zobrist_key ^= self.zob.get_ep_zobrist_file(16)
         # pieces
         for pieceSet in self.pieces:
             for piece in [pieceSet.King, pieceSet.Queen, pieceSet.Bishop, pieceSet.Knight, pieceSet.Rook, pieceSet.Pawn, pieceSet.Custom1, pieceSet.Custom2, pieceSet.Custom3, pieceSet.Custom4, pieceSet.Custom5, pieceSet.Custom6, pieceSet.NPawn]:
-                self.zobrist_key ^= zob.get_zobrist_piece(piece, pieceSet.player_num)
+                self.properties.zobrist_key ^= self.zob.get_zobrist_piece(piece, pieceSet.player_num)
 
-        return self.zobrist_key
+        return self.properties.zobrist_key
 
     def piece_at(self, index: int):
         # returns tuple (player_num, piece_type)
@@ -348,12 +400,50 @@ class Position:
             pieceSet.remove_piece_at_index(index)
         self.update_occupied()
 
+'''
+16 X 16 Board
+      a   b   c   d   e   f   g   h   a   b   c   d   e   f   g   h
+    -----------------------------------------------------------------
+16 |   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
+15 |  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31
+14 |  32  33  34  35  36  37  38  39  40  41  42  43  44  45  46  47
+13 |  48  49  50  51  52  53  54  55  56  57  58  59  60  61  62  63
+12 |  64  65  66  67  68  69  70  71  72  73  74  75  76  77  78  79
+11 |  80  81  82  83  84  85  86  87  88  89  90  91  92  93  94  95
+10 |  96  97  98  99 100 101 102 103 104 105 106 107 108 109 110 111
+ 9 | 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127
+ 8 | 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143
+ 7 | 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159
+ 6 | 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175
+ 5 | 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191
+ 4 | 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207
+ 3 | 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223
+ 2 | 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239
+ 1 | 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255
+    -----------------------------------------------------------------
+      a   b   c   d   e   f   g   h   a   b   c   d   e   f   g   h
 
+
+8 x 8 board
+      a   b   c   d   e   f   g   h
+    -------------------------------
+ 8 |   0   1   2   3   4   5   6   7
+ 7 |  16  17  18  19  20  21  22  23
+ 6 |  32  33  34  35  36  37  38  39
+ 5 |  48  49  50  51  52  53  54  55
+ 4 |  64  65  66  67  68  69  70  71
+ 3 |  80  81  82  83  84  85  86  87
+ 2 |  96  97  98  99 100 101 102 103
+ 1 | 112 113 114 115 116 117 118 119
+    -------------------------------
+      a   b   c   d   e   f   g   h
+'''
 
 # Testing for the Position class
     
 p = Position(E4E5_FEN)
 print(p)
+print('whos_turn:', p.whos_turn)
 print('zobrist_key:', p.properties.zobrist_key)
 print('Kingside_rights:', p.properties.castling_rights.kingside_rights)
 print('Queenside_rights:',p.properties.castling_rights.queenside_rights)
@@ -361,5 +451,33 @@ print('ep square index:', p.properties.ep_square)
 print('move_played:', p.properties.move_played)
 print('promote_from:', p.properties.promote_from)
 print('captured_piece:', p.properties.captured_piece)
+print('rook_origins:', p.rook_origins)
+p.to_string()
 
+move1 = Move(115, 55, "Queen", move_type = "Quiet")
+p.make_move(move1)
+print('whos_turn:', p.whos_turn)
+print('zobrist_key:', p.properties.zobrist_key)
+print('Kingside_rights:', p.properties.castling_rights.kingside_rights)
+print('Queenside_rights:',p.properties.castling_rights.queenside_rights)
+print('ep square index:', p.properties.ep_square)
+print('move_played:', p.properties.move_played)
+print('promote_from:', p.properties.promote_from)
+print('captured_piece:', p.properties.captured_piece)
+print('rook_origins:', p.rook_origins)
+
+
+p.to_string()
+
+p.unmake_move()
+
+print('whos_turn:', p.whos_turn)
+print('zobrist_key:', p.properties.zobrist_key)
+print('Kingside_rights:', p.properties.castling_rights.kingside_rights)
+print('Queenside_rights:',p.properties.castling_rights.queenside_rights)
+print('ep square index:', p.properties.ep_square)
+print('move_played:', p.properties.move_played)
+print('promote_from:', p.properties.promote_from)
+print('captured_piece:', p.properties.captured_piece)
+print('rook_origins:', p.rook_origins)
 p.to_string()
