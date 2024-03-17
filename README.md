@@ -1,5 +1,5 @@
 # chessBot
-IN PROGRESS
+IN PROGRESS - CURRENTLY WORKING ON A CONVERSION TO EITHER RUST OR C# DUE TO SPEEDUPS AND BETTER HANDLING OF 256-BIT INTEGERS NEEDED TO STORE 16x16 BITBOARDS.
 
 This is a complete chess app that allows for 2-player and 1-player chess options with the best chess bot I could come up with using a mix of personal and publicly available ideas
 
