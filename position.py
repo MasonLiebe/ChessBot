@@ -30,6 +30,18 @@ class Position:
     # properties: PositionProperties object
 
     def __init__(self, fen = STARTING_FEN):
+        self.dims = None
+        self.bounds = None
+        self.num_players = None
+        self.whos_turn = None
+        self.movement_rules = None
+        self.pieces = None
+        self.occupied = None
+        self.properties = None
+        self.zob = None
+        self.king_indices = [None, None]
+        self.rook_origins = None
+
         self.from_fen(fen)
         self.set_rook_origins()
     
@@ -62,6 +74,8 @@ class Position:
                 else:
                     index = to_index(x, y)
                     piece = CHAR_TO_PIECE[c.lower()]
+                    if piece == 'King':
+                        self.king_indices[int(not c.isupper())] = index
                     is_white = c.isupper()
                     pieceSet = self.pieces[0] if is_white else self.pieces[1]
                     pieceSet.place_piece_at_index(piece, index)
@@ -147,21 +161,6 @@ class Position:
         self.bounds - bounds
     
     def make_move(self, move: Move):
-        # takes in a move object and modifies position to make the move
-        # move is a Move object, info can be retrieved with these methods::
-        # move.get_from() - index
-        # move.get_to() - index
-        # move.get_is_capture() - bool
-        # move.get_move_type() - MoveType
-        # move.get_target - index
-        # get_promotion_char
-        # 0: "Quiet",
-        # 1: "Capture",
-        # 2: "QueensideCastle",
-        # 3: "KingsideCastle",
-        # 4: "Promotion",
-        # 5: "PromotionCapture",
-        # 6: "Null"
 
         # Before properties are changed, save the old_properties
         old_props = copy.deepcopy(self.properties)
@@ -169,34 +168,34 @@ class Position:
         # Grab the move properties
         from_index = move.get_from_index()
         to_index = move.get_to_index()
-        move_type = move.get_move_type()
+        move_type = move.get_move_type_int()
         moving_piece_type = move.get_moving_piece_type()
 
         # match the move type and move the pieces on the bitboards
         match move_type:
-            case 'Quiet': # quiet move
+            case 0: # quiet move
                 self.move_known_piece(from_index, to_index, moving_piece_type, self.whos_turn)
-            case 'Capture': # capture
+            case 1: # capture
                 self.move_known_piece(from_index, to_index, moving_piece_type, self.whos_turn)
                 self.remove_known_piece(to_index, move.get_target_piece_type(), self.whos_turn)
                 self.properties.captured_piece = (self.whos_turn, move.get_target_piece_type())
-            case 'QueensideCastle': # queenside castle
+            case 2: # queenside castle
                 self.move_known_piece(from_index, to_index, moving_piece_type, self.whos_turn) # move the king to its destination square
                 # move the rook to its destination square
                 rook_origin_index = self.rook_origins[str(self.whos_turn) + 'q']
                 self.move_known_piece(rook_origin_index, to_index + 1, "Rook", self.whos_turn) # 1 square to the right of the king
-            case 'KingsideCastle': # kingside castle
+            case 3: # kingside castle
                 self.move_known_piece(from_index, to_index, moving_piece_type, self.whos_turn)
                 # move the rook to its destination square
                 rook_origin_index = self.rook_origins[str(self.whos_turn) + 'k']
                 self.move_known_piece(rook_origin_index, to_index - 1, "Rook", self.whos_turn) # 1 square to the left of the king
-            case 'Promotion': # promotion
+            case 4: # promotion
                 # remove the piece
                 self.remove_known_piece(from_index, moving_piece_type, self.whos_turn)
                 # add the promoted_piece
                 self.place_known_piece(to_index, move.get_promotion_piece_type(), self.whos_turn)
                 self.properties.promote_from = moving_piece_type
-            case 'PromotionCapture': # promotion capture
+            case 5: # promotion capture
                 # remove the moving piece and the captured piece
                 self.remove_known_piece(from_index, moving_piece_type, self.whos_turn)
                 self.remove_known_piece(to_index, move.get_target_piece_type(), self.whos_turn)
@@ -204,7 +203,7 @@ class Position:
                 self.place_known_piece(to_index, move.get_promotion_piece_type(), self.whos_turn)
                 self.properties.promote_from = moving_piece_type
                 self.properties.captured_piece = (self.whos_turn, move.get_target_piece_type())
-            case 'Null': # null move
+            case 6: # null move
                 pass
         
         # update all of the properties in the self.position_properties object
@@ -236,6 +235,7 @@ class Position:
         
         # update castling rights if needed
         if moving_piece_type == "King":
+            self.king_indices[self.whos_turn] = to_index
             self.properties.castling_rights.disable_kingside_castle(self.whos_turn)
             self.properties.castling_rights.disable_queenside_castle(self.whos_turn)
         if moving_piece_type == "Rook":
@@ -264,28 +264,28 @@ class Position:
         moving_piece_type = move.get_moving_piece_type()
         self.whos_turn = (self.whos_turn + 1) % self.num_players
 
-        match move.get_move_type():
-            case 'Quiet':
+        match move.get_move_type_int():
+            case 0:
                 self.move_known_piece(to_index, from_index, moving_piece_type, self.whos_turn)
-            case 'Capture':
+            case 1:
                 self.move_known_piece(to_index, from_index, moving_piece_type, self.whos_turn)
                 self.place_known_piece(to_index, move.get_target_piece_type(), self.whos_turn)
-            case 'QueensideCastle':
+            case 2:
                 self.move_known_piece(to_index, from_index, moving_piece_type, self.whos_turn)
                 rook_origin_index = self.rook_origins[str(self.whos_turn) + 'q']
                 self.move_known_piece(to_index + 1, rook_origin_index, "Rook", self.whos_turn)
-            case 'KingsideCastle':
+            case 3:
                 self.move_known_piece(to_index, from_index, moving_piece_type, self.whos_turn)
                 rook_origin_index = self.rook_origins[str(self.whos_turn) + 'k']
                 self.move_known_piece(to_index - 1, rook_origin_index, "Rook", self.whos_turn)
-            case 'Promotion':
+            case 4:
                 self.remove_known_piece(to_index, move.get_promotion_piece_type(), self.whos_turn)
                 self.place_known_piece(from_index, moving_piece_type, self.whos_turn)
-            case 'PromotionCapture':
+            case 5:
                 self.remove_known_piece(to_index, move.get_promotion_piece_type(), self.whos_turn)
                 self.place_known_piece(to_index, move.get_target_piece_type(), self.whos_turn)
                 self.place_known_piece(from_index, moving_piece_type, self.whos_turn)
-            case 'Null':
+            case 6:
                 pass
         
         # revert the properties
@@ -444,48 +444,51 @@ class Position:
 
 # Testing for the Position class
     
-# p = Position(E4E5_FEN)
-# print(p)
-# print('whos_turn:', p.whos_turn)
-# print('zobrist_key:', p.properties.zobrist_key)
-# print('Kingside_rights:', p.properties.castling_rights.kingside_rights)
-# print('Queenside_rights:',p.properties.castling_rights.queenside_rights)
-# print('ep square index:', p.properties.ep_square)
-# print('move_played:', p.properties.move_played)
-# print('promote_from:', p.properties.promote_from)
-# print('captured_piece:', p.properties.captured_piece)
-# print('rook_origins:', p.rook_origins)
-# print('castle_rights', p.properties.castling_rights)
-# p.to_string()
+p = Position(E4E5_FEN)
+print(p)
+print('whos_turn:', p.whos_turn)
+print('zobrist_key:', p.properties.zobrist_key)
+print('Kingside_rights:', p.properties.castling_rights.kingside_rights)
+print('Queenside_rights:',p.properties.castling_rights.queenside_rights)
+print('ep square index:', p.properties.ep_square)
+print('move_played:', p.properties.move_played)
+print('promote_from:', p.properties.promote_from)
+print('captured_piece:', p.properties.captured_piece)
+print('rook_origins:', p.rook_origins)
+print('castle_rights', p.properties.castling_rights)
+print('king_indices:', p.king_indices)
+p.to_string()
 
-# move1 = Move(115, 55, "Queen", move_type = "Quiet")
-# move2 = Move(99, 67, "NPawn", move_type = "Quiet") # Pawn Move
-# move3 = Move(116, 100, "King", move_type = "Quiet") # King move
-# p.make_move(move3)
-# print('whos_turn:', p.whos_turn)
-# print('zobrist_key:', p.properties.zobrist_key)
-# print('Kingside_rights:', p.properties.castling_rights.kingside_rights)
-# print('Queenside_rights:',p.properties.castling_rights.queenside_rights)
-# print('ep square index:', p.properties.ep_square)
-# print('move_played:', p.properties.move_played)
-# print('promote_from:', p.properties.promote_from)
-# print('captured_piece:', p.properties.captured_piece)
-# print('rook_origins:', p.rook_origins)
-# print('castle_rights', p.properties.castling_rights)
+move1 = Move(115, 55, "Queen", move_type = "Quiet")
+move2 = Move(99, 67, "NPawn", move_type = "Quiet") # Pawn Move
+move3 = Move(116, 100, "King", move_type = "Quiet") # King move
+p.make_move(move3)
+print('whos_turn:', p.whos_turn)
+print('zobrist_key:', p.properties.zobrist_key)
+print('Kingside_rights:', p.properties.castling_rights.kingside_rights)
+print('Queenside_rights:',p.properties.castling_rights.queenside_rights)
+print('ep square index:', p.properties.ep_square)
+print('move_played:', p.properties.move_played)
+print('promote_from:', p.properties.promote_from)
+print('captured_piece:', p.properties.captured_piece)
+print('rook_origins:', p.rook_origins)
+print('castle_rights', p.properties.castling_rights)
+print('king_indices:', p.king_indices)
 
 
-# p.to_string()
+p.to_string()
 
-# p.unmake_move()
+p.unmake_move()
 
-# print('whos_turn:', p.whos_turn)
-# print('zobrist_key:', p.properties.zobrist_key)
-# print('Kingside_rights:', p.properties.castling_rights.kingside_rights)
-# print('Queenside_rights:',p.properties.castling_rights.queenside_rights)
-# print('ep square index:', p.properties.ep_square)
-# print('move_played:', p.properties.move_played)
-# print('promote_from:', p.properties.promote_from)
-# print('captured_piece:', p.properties.captured_piece)
-# print('rook_origins:', p.rook_origins)
-# print('castle_rights', p.properties.castling_rights)
-# p.to_string()
+print('whos_turn:', p.whos_turn)
+print('zobrist_key:', p.properties.zobrist_key)
+print('Kingside_rights:', p.properties.castling_rights.kingside_rights)
+print('Queenside_rights:',p.properties.castling_rights.queenside_rights)
+print('ep square index:', p.properties.ep_square)
+print('move_played:', p.properties.move_played)
+print('promote_from:', p.properties.promote_from)
+print('captured_piece:', p.properties.captured_piece)
+print('rook_origins:', p.rook_origins)
+print('castle_rights', p.properties.castling_rights)
+print('king_indices:', p.king_indices)
+p.to_string()

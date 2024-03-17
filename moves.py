@@ -52,6 +52,9 @@ class Move:
     def get_move_type(self) -> str:
         return intToMoveType[(self.move_data >> 24) & 7]
     
+    def get_move_type_int(self) -> int:
+        return (self.move_data >> 24) & 7
+    
     def get_moving_piece_type(self) -> int:
         return INT_TO_PIECE[(self.move_data >> 16) & 15]
     
