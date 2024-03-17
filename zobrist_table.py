@@ -6,7 +6,7 @@ from constants import *
 class ZobristTable:
     def __init__(self):
         self.rng = random.Random(5435651169991665628)
-        self.ep_zobrist = [self.rng.getrandbits(64) for _ in range(17)]
+        self.ep_zobrist = [self.rng.getrandbits(64) for _ in range(16)]
         self.zobrist = [[self._generate_randoms(256) for _ in range(13)] for _ in range(2)] # 2 players, 13 piece types, 256 squares
         self.to_move = self.rng.getrandbits(64)
         self.w_q_castle = self.rng.getrandbits(64)

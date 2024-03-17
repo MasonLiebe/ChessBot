@@ -30,17 +30,17 @@ class Position:
     # properties: PositionProperties object
 
     def __init__(self, fen = STARTING_FEN):
-        self.dims = None
-        self.bounds = None
-        self.num_players = None
-        self.whos_turn = None
-        self.movement_rules = None
-        self.pieces = None
-        self.occupied = None
-        self.properties = None
-        self.zob = None
-        self.king_indices = [None, None]
-        self.rook_origins = None
+        self.dims = None # Dimensions object
+        self.bounds = None # Bitboard representing the boundaries of the board
+        self.num_players = None # number of players in the game, u8
+        self.whos_turn = None # u8 representing the current player
+        self.movement_rules = None # Hashmap<PieceType, MovementPattern>
+        self.pieces = None # array of PieceSets representing each player
+        self.occupied = None # Bitboard representing all occupied squares
+        self.properties = None # PositionProperties object
+        self.zob = None # ZobristTable object
+        self.king_indices = [None, None] # indices of the kings
+        self.rook_origins = None # dict of rook origins for castling rights
 
         self.from_fen(fen)
         self.set_rook_origins()
@@ -148,7 +148,7 @@ class Position:
             self.add_piece(owner, piece_type, index)
         
         self.properties = PositionProperties(0, None, None, CastleRights(), None, None, None)
-        self.properties.zobrist_key = self.compute_zobrist()
+        self.compute_zobrist()
 
     def register_piecetype(self, char_rep: str, mpe: MovementPattern):
         self.movement_rules[CHAR_TO_PIECE[char_rep]] = mpe
@@ -288,6 +288,9 @@ class Position:
             case 6:
                 pass
         
+        if moving_piece_type == "King":
+            self.king_indices[self.whos_turn] = from_index
+        
         # revert the properties
         self.properties = self.properties.prev_properties
 
@@ -349,8 +352,6 @@ class Position:
         # en passant square
         if self.properties.ep_square is not None:
             self.properties.zobrist_key ^= self.zob.get_ep_zobrist_file(self.properties.ep_square % 16)
-        else:
-            self.properties.zobrist_key ^= self.zob.get_ep_zobrist_file(16)
         # pieces
         for pieceSet in self.pieces:
             for piece in [pieceSet.King, pieceSet.Queen, pieceSet.Bishop, pieceSet.Knight, pieceSet.Rook, pieceSet.Pawn, pieceSet.Custom1, pieceSet.Custom2, pieceSet.Custom3, pieceSet.Custom4, pieceSet.Custom5, pieceSet.Custom6, pieceSet.NPawn]:
@@ -443,7 +444,8 @@ class Position:
 '''
 
 # Testing for the Position class
-    
+import random
+random.seed(6)
 p = Position(E4E5_FEN)
 print(p)
 print('whos_turn:', p.whos_turn)
@@ -462,7 +464,7 @@ p.to_string()
 move1 = Move(115, 55, "Queen", move_type = "Quiet")
 move2 = Move(99, 67, "NPawn", move_type = "Quiet") # Pawn Move
 move3 = Move(116, 100, "King", move_type = "Quiet") # King move
-p.make_move(move3)
+p.make_move(move2)
 print('whos_turn:', p.whos_turn)
 print('zobrist_key:', p.properties.zobrist_key)
 print('Kingside_rights:', p.properties.castling_rights.kingside_rights)
@@ -474,6 +476,9 @@ print('captured_piece:', p.properties.captured_piece)
 print('rook_origins:', p.rook_origins)
 print('castle_rights', p.properties.castling_rights)
 print('king_indices:', p.king_indices)
+
+p.compute_zobrist()
+print("computed zobrist key:", p.properties.zobrist_key)
 
 
 p.to_string()
@@ -491,4 +496,10 @@ print('captured_piece:', p.properties.captured_piece)
 print('rook_origins:', p.rook_origins)
 print('castle_rights', p.properties.castling_rights)
 print('king_indices:', p.king_indices)
+
+# Test if zobrist hash computed is the same:
+p.compute_zobrist()
+print("computed zobrist key:", p.properties.zobrist_key)
+
+
 p.to_string()
