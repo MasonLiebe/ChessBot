@@ -1,4 +1,6 @@
 # chessBot
+IN PROGRESS
+
 This is a complete chess app that allows for 2-player and 1-player chess options with the best chess bot I could come up with using a mix of personal and publicly available ideas
 
 Aside from the mundane GUI, board representation, and game state handling features, here are the goals.
