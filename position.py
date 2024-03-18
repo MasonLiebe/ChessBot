@@ -12,12 +12,6 @@ from constants import *
 import copy
 
 
-class Dimensions():
-    # Represents the dimensions of the board
-    def __init__(self, width: int, height: int):
-        self.width = width
-        self.height = height
-
 class Position:
     # Represents a single position in chess
     # dimesnsion: Dimensions object
@@ -30,7 +24,8 @@ class Position:
     # properties: PositionProperties object
 
     def __init__(self, fen = STARTING_FEN):
-        self.dims = None # Dimensions object
+        self.width = None
+        self.height = None
         self.bounds = None # Bitboard representing the boundaries of the board
         self.num_players = None # number of players in the game, u8
         self.whos_turn = None # u8 representing the current player
@@ -49,10 +44,11 @@ class Position:
         # takes in a standard game fen and sets up the position
 
         # set dims to 8x8 and construct the bounds
-        self.dims = Dimensions(DEFAULT_WIDTH, DEFAULT_HEIGHT)
+        self.width = DEFAULT_WIDTH
+        self.height = DEFAULT_HEIGHT
         self.bounds = Bitboard(0)
-        self.bounds.set_col_bound(self.dims.width)
-        self.bounds.set_row_bound(self.dims.height)
+        self.bounds.set_col_bound(self.width)
+        self.bounds.set_row_bound(self.height)
         self.num_players = 2
 
         # Set up the piece sets (these by default contain empty pieces)
@@ -92,7 +88,7 @@ class Position:
         castle_rights = CastleRights()
         castle_rights.set_from_string(castling)
 
-        ep_square = to_index(FILE_TO_INT[en_passant[0]], self.dims.height - int(en_passant[1])) if en_passant != '-' else None
+        ep_square = to_index(FILE_TO_INT[en_passant[0]], self.height - int(en_passant[1])) if en_passant != '-' else None
         
         # set the Properties object
         self.properties = PositionProperties(0, None, None, castle_rights, ep_square, None, None)
@@ -134,9 +130,10 @@ class Position:
                             self.rook_origins['1k'] = rook_index
 
     
-    def custom_board(self, dims: Dimensions, bounds: Bitboard, movement_patterns, pieces: list[tuple[int, int, str]] ):
+    def custom_board(self, width, height, bounds: Bitboard, movement_patterns, pieces: list[tuple[int, int, str]] ):
         # Pieces tuples are (owner, index, piece_type)
-        self.dims = dims
+        self.width = width
+        self.height = height
         self.bounds = bounds
         self.num_players = 2
         self.whos_turn = 0
@@ -156,8 +153,9 @@ class Position:
     def get_movement_pattern(self, piece_type: str) -> MovementPattern:
         return self.movement_rules.get(piece_type, None)
 
-    def set_bounds(self, dims: Dimensions, bounds: Bitboard):
-        self.dimensions = dims
+    def set_bounds(self, width, height, bounds: Bitboard):
+        self.width = width
+        self.height = height
         self.bounds - bounds
     
     def make_move(self, move: Move):
@@ -176,9 +174,10 @@ class Position:
             case 0: # quiet move
                 self.move_known_piece(from_index, to_index, moving_piece_type, self.whos_turn)
             case 1: # capture
+                opponent = (self.whos_turn + 1) % self.num_players
                 self.move_known_piece(from_index, to_index, moving_piece_type, self.whos_turn)
-                self.remove_known_piece(to_index, move.get_target_piece_type(), self.whos_turn)
-                self.properties.captured_piece = (self.whos_turn, move.get_target_piece_type())
+                self.remove_known_piece(to_index, move.get_target_piece_type(), opponent)
+                self.properties.captured_piece = (opponent, move.get_target_piece_type())
             case 2: # queenside castle
                 self.move_known_piece(from_index, to_index, moving_piece_type, self.whos_turn) # move the king to its destination square
                 # move the rook to its destination square
@@ -197,8 +196,9 @@ class Position:
                 self.properties.promote_from = moving_piece_type
             case 5: # promotion capture
                 # remove the moving piece and the captured piece
+                opponent = (self.whos_turn + 1) % self.num_players
                 self.remove_known_piece(from_index, moving_piece_type, self.whos_turn)
-                self.remove_known_piece(to_index, move.get_target_piece_type(), self.whos_turn)
+                self.remove_known_piece(to_index, move.get_target_piece_type(), opponent)
                 # add the promoted piece
                 self.place_known_piece(to_index, move.get_promotion_piece_type(), self.whos_turn)
                 self.properties.promote_from = moving_piece_type
@@ -262,42 +262,52 @@ class Position:
         from_index = move.get_from_index()
         to_index = move.get_to_index()
         moving_piece_type = move.get_moving_piece_type()
+        opponent = self.whos_turn
         self.whos_turn = (self.whos_turn + 1) % self.num_players
 
         match move.get_move_type_int():
-            case 0:
+            case 0: # quiet move
                 self.move_known_piece(to_index, from_index, moving_piece_type, self.whos_turn)
-            case 1:
+            case 1: # capture
                 self.move_known_piece(to_index, from_index, moving_piece_type, self.whos_turn)
-                self.place_known_piece(to_index, move.get_target_piece_type(), self.whos_turn)
-            case 2:
+                self.place_known_piece(to_index, move.get_target_piece_type(), opponent)
+            case 2: # queenside castle
                 self.move_known_piece(to_index, from_index, moving_piece_type, self.whos_turn)
                 rook_origin_index = self.rook_origins[str(self.whos_turn) + 'q']
                 self.move_known_piece(to_index + 1, rook_origin_index, "Rook", self.whos_turn)
-            case 3:
+            case 3: # kingside castle
                 self.move_known_piece(to_index, from_index, moving_piece_type, self.whos_turn)
                 rook_origin_index = self.rook_origins[str(self.whos_turn) + 'k']
                 self.move_known_piece(to_index - 1, rook_origin_index, "Rook", self.whos_turn)
-            case 4:
+            case 4: # promotion
                 self.remove_known_piece(to_index, move.get_promotion_piece_type(), self.whos_turn)
                 self.place_known_piece(from_index, moving_piece_type, self.whos_turn)
-            case 5:
+            case 5: # promotion capture
                 self.remove_known_piece(to_index, move.get_promotion_piece_type(), self.whos_turn)
-                self.place_known_piece(to_index, move.get_target_piece_type(), self.whos_turn)
+                self.place_known_piece(to_index, move.get_target_piece_type(), opponent)
                 self.place_known_piece(from_index, moving_piece_type, self.whos_turn)
-            case 6:
+            case 6: # null move
                 pass
         
         if moving_piece_type == "King":
             self.king_indices[self.whos_turn] = from_index
         
+        if moving_piece_type == 'NPawn':
+            self.remove_known_piece(from_index, "Pawn", self.whos_turn)
+        
+        if self.properties.ep_square is not None:
+            self.properties.zobrist_key ^= self.zob.get_ep_zobrist_file(self.properties.ep_square % 16)
+
         # revert the properties
         self.properties = self.properties.prev_properties
 
+        if self.properties.ep_square is not None:
+            self.properties.zobrist_key ^= self.zob.get_ep_zobrist_file(self.properties.ep_square % 16)
+
 
     def to_string(self):
-        for y in range(self.dims.height):
-            for x in range(self.dims.width):
+        for y in range(self.height):
+            for x in range(self.width):
                 if self.pieces[0].occupied.get_coord(x, y):
                     print(self.pieces[0].piece_at(y * 16 + x).char_rep.upper(), end=' ')
                 elif self.pieces[1].occupied.get_coord(x, y):
@@ -377,7 +387,7 @@ class Position:
         return None
 
     def xy_in_bounds(self, x: int, y: int):
-        return not (x < 0 or x >= self.dims.width or y < 0 or y >= self.dims.height)
+        return not (x < 0 or x >= self.width or y < 0 or y >= self.height)
 
     def move_piece(self, from_index: int, to_index: int):
         # ONLY MOVES THIS PIECE, DOESN'T CAPTURE THE OTHER PIECE OR SET THE ZOBRIST KEY
@@ -464,6 +474,10 @@ p.to_string()
 move1 = Move(115, 55, "Queen", move_type = "Quiet")
 move2 = Move(99, 67, "NPawn", move_type = "Quiet") # Pawn Move
 move3 = Move(116, 100, "King", move_type = "Quiet") # King move
+move4 = Move(52, 67, "Pawn",target_piece_type="Pawn",  move_type="Capture") # Pawn Capture - AFTER MOVE 2
+
+
+
 p.make_move(move2)
 print('whos_turn:', p.whos_turn)
 print('zobrist_key:', p.properties.zobrist_key)
@@ -479,7 +493,26 @@ print('king_indices:', p.king_indices)
 
 p.compute_zobrist()
 print("computed zobrist key:", p.properties.zobrist_key)
+p.to_string()
 
+
+
+p.make_move(move4)
+print('whos_turn:', p.whos_turn)
+print('zobrist_key:', p.properties.zobrist_key)
+print('Kingside_rights:', p.properties.castling_rights.kingside_rights)
+print('Queenside_rights:',p.properties.castling_rights.queenside_rights)
+print('ep square index:', p.properties.ep_square)
+print('move_played:', p.properties.move_played)
+print('promote_from:', p.properties.promote_from)
+print('captured_piece:', p.properties.captured_piece)
+print('rook_origins:', p.rook_origins)
+print('castle_rights', p.properties.castling_rights)
+print('king_indices:', p.king_indices)
+
+
+p.compute_zobrist()
+print("computed zobrist key:", p.properties.zobrist_key)
 
 p.to_string()
 
@@ -503,3 +536,23 @@ print("computed zobrist key:", p.properties.zobrist_key)
 
 
 p.to_string()
+
+# Here are all of the bitboards for the pieces
+
+print('-----------------WHITE PIECES-----------------')
+
+print('KING:\n',p.pieces[0].King.bitboard)
+print('PAWN:\n',p.pieces[0].Pawn.bitboard)
+print('NPawn:\n',p.pieces[0].NPawn.bitboard)
+
+print('-----------------Black PIECES-----------------')
+
+print('KING:\n',p.pieces[1].King.bitboard)
+print('PAWN:\n',p.pieces[1].Pawn.bitboard)
+print('NPawn:\n',p.pieces[1].NPawn.bitboard)
+
+
+
+
+
+
