@@ -91,12 +91,28 @@ class Bitboard:
     def clear_index(self, index):
         self.value &= ~(1 << index)
     
-    def get_index(self, index):
+    def set_bit(self, index, value):
+        if value:
+            self.set_index(index)
+        else:
+            self.clear_index(index)
+
+    def bit(self, index):
         return (self.value >> index) & 1
     
+    def is_zero(self):
+        return self.value == 0
+    
+    def lowest_one(self):
+        # returns the index of the lowest 1 bit
+        return (self.value & -self.value).bit_length() - 1
+
     @classmethod
     def zero(cls):
         return Bitboard(0)
+    
+    def copy(self):
+        return Bitboard(self.value)
     
     def fill(self):
         self.value = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF

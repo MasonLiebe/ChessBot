@@ -4,7 +4,7 @@ DEFAULT_HEIGHT = 8
 
 # CHARACTER TO PIECE LOOKUPS
 CHAR_TO_PIECE = {'p': 'Pawn',
-             'z': 'NPawn', # New Pawn that can move 2 squares
+             'p': 'NPawn', # New Pawn that can move 2 squares
              'r': 'Rook',
              'n': 'Knight',
              'b': 'Bishop',
@@ -56,7 +56,7 @@ PIECE_TO_INT = {'Empty': 0,
 
 CHAR_TO_FILE_NAME = {   
                         'p': '/assets/pieces/black_pawn.png',
-                        'z': '/assets/pieces/black_pawn.png',
+                        'p': '/assets/pieces/black_pawn.png',
                         'r': '/assets/pieces/black_rook.png',
                         'n': '/assets/pieces/black_knight.png',
                         'b': '/assets/pieces/black_bishop.png',
@@ -70,7 +70,7 @@ CHAR_TO_FILE_NAME = {
                         'f': '/assets/pieces/black_custom5.png',
                         'g': '/assets/pieces/black_custom6.png',
                         'P': '/assets/pieces/white_pawn.png',
-                        'Z': '/assets/pieces/white_pawn.png',
+                        'p': '/assets/pieces/white_pawn.png',
                         'R': '/assets/pieces/white_rook.png',
                         'N': '/assets/pieces/white_knight.png',
                         'B': '/assets/pieces/white_bishop.png',
@@ -86,13 +86,11 @@ CHAR_TO_FILE_NAME = {
                     }
 
 # FENS
-STARTING_FEN = 'rnbqkbnr/zzzzzzzz/8/8/8/8/ZZZZZZZZZ/RNBQKBNR w KQkq - 0 1'
-E4E5_FEN = 'rnbqkbnr/zzzz1zzz/8/4p3/4P3/8/ZZZZ1ZZZ/RNBQKBNR w KQkq e6 0 1'
+STARTING_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+E4E5_FEN = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 1'
 JUST_KINGS_FEN = '8/8/8/8/8/8/8/4k3 w - - 0 1'
 EMPTY_FEN = '8/8/8/8/8/8/8/8 w - - 0 1'
-NINEBYNINE_FEN = 'rnbqkqbnr/zzzzzzzzz/9/9/9/9/9/ZZZZZZZZZ/RNBQKQBNR w KQkq - 0 1'
-NINEBYEIGHT_FEN = 'rnbqkqbnr/zzzzzzzzz/9/9/9/9/ZZZZZZZZZ/RNBQKQBNR w KQkq - 0 1'
-FOURBYFIVE_FEN = 'rqkr/zzzz/4/ZZZZ/RQKR w - - 0 1'
+
 
 # Board Information
 FILE_TO_INT = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7, 'i': 8, 'j': 9, 'k': 10, 'l': 11, 'm': 12, 'n': 13, 'o': 14, 'p': 15}

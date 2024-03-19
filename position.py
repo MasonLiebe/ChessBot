@@ -152,8 +152,9 @@ class Position:
 
         my_player_num = self.whos_turn
         move_ = self.properties.move_played
+        move_type = move_.get_move_type()
 
-        if move_.get_move_type() == MoveType.Null:
+        if move_type == 'Null':
             self.properties = self.properties.get_prev()
             return
 
@@ -162,22 +163,22 @@ class Position:
 
         self.move_piece(to, from_)
 
-        if move_.get_move_type() in [MoveType.PromotionCapture, MoveType.Promotion]:
+        if move_type in ['PromotionCapture', 'Promotion']:
             self._remove_piece(from_)
             self._add_piece(my_player_num, self.properties.promote_from, from_)
 
-        if move_.get_move_type() in [MoveType.Capture, MoveType.PromotionCapture]:
+        if move_type in ['Capture', 'PromotionCapture']:
             capt = move_.get_target()
             owner, pt = self.properties.captured_piece
             self._add_piece(owner, pt, capt)
 
-        elif move_.get_move_type() == MoveType.KingsideCastle:
+        elif move_type == 'KingsideCastle':
             rook_from = move_.get_target()
             x, y = from_index(move_.get_to())
             rook_to = to_index(x - 1, y)
             self.move_piece(rook_to, rook_from)
 
-        elif move_.get_move_type() == MoveType.QueensideCastle:
+        elif move_type == 'QueensideCastle':
             rook_from = move_.get_target()
             x, y = from_index(move_.get_to())
             rook_to = to_index(x + 1, y)
@@ -274,7 +275,7 @@ class Position:
                     x += int(c)
                     continue
 
-                index = bitboard.to_index(x, y)
+                index = to_index(x, y)
                 piece_map = {
                     'k': (w_pieces.king.bitboard, b_pieces.king.bitboard),
                     'q': (w_pieces.queen.bitboard, b_pieces.queen.bitboard),
@@ -440,3 +441,23 @@ class Position:
     def remove_piece(self, index: int):
         self._remove_piece(index)
         self.update_occupied()
+
+
+
+## Testing
+        
+pos = Position.default()
+print(pos.to_string())
+
+test_moves = {
+    1: Move.new(to_index(4, 1), to_index(4,3),move_type='Quiet'), # e4
+    2: Move.new(to_index(4, 6), to_index(4,4),move_type='Quiet'), # e5
+}
+
+for i in range(1, 3):
+    pos.make_move(test_moves[i])
+    print(pos.to_string())
+
+for i in range(1, 3):
+    pos.unmake_move()
+    print(pos.to_string())

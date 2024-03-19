@@ -1,4 +1,5 @@
 import unittest
+from unittest import *
 from bitboard import Bitboard
 from piece import Piece, PieceType
 from move import *
@@ -147,6 +148,21 @@ class TestCastleRights(unittest.TestCase):
         self.castle_rights.disable_queenside_castle(0)
         self.assertFalse(self.castle_rights.can_player_castle_queenside(0))
         self.assertTrue(self.castle_rights.can_player_castle_queenside(1))
+
+class TestPositionProperties(unittest.TestCase):
+    def setUp(self):
+        self.position_properties = PositionProperties()
+    
+    def test_initial_state(self):
+        self.assertEqual(self.position_properties.en_passant_target, 0)
+        self.assertEqual(self.position_properties.castle_rights.kingside_rights, 255)
+        self.assertEqual(self.position_properties.castle_rights.queenside_rights, 255)
+        self.assertEqual(self.position_properties.castle_rights.castled, 0)
+        self.assertIsNone(self.position_properties.move_played)
+        self.assertIsNone(self.position_properties.promote_from)
+        self.assertIsNone(self.position_properties.captured_piece)
+        self.assertIsNone(self.position_properties.prev_properties)
+
 
 if __name__ == '__main__':
     unittest.main()
