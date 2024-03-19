@@ -8,6 +8,7 @@ class Piece:
         self.piece_type = piece_type
         self.bitboard = bitboard
     
+    # Below are methods to create a blank piece of a certain type
     @classmethod
     def blank_custom(cls, player_num, char_rep):
         return cls(player_num, char_rep, char_rep, Bitboard.zero())

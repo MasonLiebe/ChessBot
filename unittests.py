@@ -2,6 +2,7 @@ import unittest
 from bitboard import Bitboard
 from piece import Piece, PieceType
 from move import *
+from position_properties import CastleRights, PositionProperties
 
 class TestPiece(unittest.TestCase):
     def test_blank_custom(self):
@@ -89,6 +90,63 @@ class TestMove(unittest.TestCase):
         move = Move.new(0, 1, 2, 'Capture', 'q')
         expected_str = "(from: A1, to:B1)"
         self.assertEqual(str(move), expected_str)
+
+class TestCastleRights(unittest.TestCase):
+    def setUp(self):
+        self.castle_rights = CastleRights()
+
+    def test_initial_state(self):
+        self.assertEqual(self.castle_rights.kingside_rights, 255)
+        self.assertEqual(self.castle_rights.queenside_rights, 255)
+        self.assertEqual(self.castle_rights.castled, 0)
+
+    def test_can_player_castle_kingside(self):
+        self.assertTrue(self.castle_rights.can_player_castle_kingside(0))
+        self.assertTrue(self.castle_rights.can_player_castle_kingside(7))
+        self.castle_rights.disable_kingside_castle(0)
+        self.assertFalse(self.castle_rights.can_player_castle_kingside(0))
+        self.assertTrue(self.castle_rights.can_player_castle_kingside(7))
+
+    def test_can_player_castle_queenside(self):
+        self.assertTrue(self.castle_rights.can_player_castle_queenside(0))
+        self.assertTrue(self.castle_rights.can_player_castle_queenside(7))
+        self.castle_rights.disable_queenside_castle(0)
+        self.assertFalse(self.castle_rights.can_player_castle_queenside(0))
+        self.assertTrue(self.castle_rights.can_player_castle_queenside(7))
+
+    def test_can_player_castle(self):
+        self.assertTrue(self.castle_rights.can_player_castle(0))
+        self.assertTrue(self.castle_rights.can_player_castle(7))
+        self.castle_rights.disable_kingside_castle(0)
+        self.assertTrue(self.castle_rights.can_player_castle(0))
+        self.castle_rights.disable_queenside_castle(0)
+        self.assertFalse(self.castle_rights.can_player_castle(0))
+        self.assertTrue(self.castle_rights.can_player_castle(7))
+
+    def test_did_player_castle(self):
+        self.assertFalse(self.castle_rights.did_player_castle(0))
+        self.assertFalse(self.castle_rights.did_player_castle(7))
+        self.castle_rights.set_player_castled(0)
+        self.assertTrue(self.castle_rights.did_player_castle(0))
+        self.assertFalse(self.castle_rights.did_player_castle(7))
+
+    def test_set_player_castled(self):
+        self.castle_rights.set_player_castled(0)
+        self.assertTrue(self.castle_rights.did_player_castle(0))
+        self.assertFalse(self.castle_rights.did_player_castle(1))
+        self.castle_rights.set_player_castled(7)
+        self.assertTrue(self.castle_rights.did_player_castle(0))
+        self.assertTrue(self.castle_rights.did_player_castle(7))
+
+    def test_disable_kingside_castle(self):
+        self.castle_rights.disable_kingside_castle(0)
+        self.assertFalse(self.castle_rights.can_player_castle_kingside(0))
+        self.assertTrue(self.castle_rights.can_player_castle_kingside(1))
+
+    def test_disable_queenside_castle(self):
+        self.castle_rights.disable_queenside_castle(0)
+        self.assertFalse(self.castle_rights.can_player_castle_queenside(0))
+        self.assertTrue(self.castle_rights.can_player_castle_queenside(1))
 
 if __name__ == '__main__':
     unittest.main()
