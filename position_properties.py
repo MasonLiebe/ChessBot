@@ -45,3 +45,14 @@ class PositionProperties:
 
     def get_prev(self) -> Optional['PositionProperties']:
         return self.prev_properties
+
+    def copy(self) -> 'PositionProperties':
+        new_props = PositionProperties()
+        new_props.zobrist_key = self.zobrist_key
+        new_props.move_played = self.move_played
+        new_props.promote_from = self.promote_from
+        new_props.castling_rights = self.castling_rights
+        new_props.ep_square = self.ep_square
+        new_props.captured_piece = self.captured_piece
+        new_props.prev_properties = self.prev_properties
+        return new_props
