@@ -56,9 +56,8 @@ class Bitboard:
     def get_index(self, index):
         return (self.value >> index) & 1
     
-    @classmethod
-    def zero(cls):
-        return Bitboard(0)
+    def zero(self):
+        self.value = 0
     
     def fill(self):
         self.value = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
