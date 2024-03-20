@@ -6,11 +6,14 @@ from piece_set import PieceSet
 from bitboard import Bitboard, from_index
 
 
+# Relative Centipawn Values provided by alpha zero in 2020
+# https://arxiv.org/pdf/2009.04374.pdf
+
 KING_SCORE = 9999
-QUEEN_SCORE = 900
-ROOK_SCORE = 500
-BISHOP_SCORE = 350
-KNIGHT_SCORE = 300
+QUEEN_SCORE = 950
+ROOK_SCORE = 563
+BISHOP_SCORE = 333
+KNIGHT_SCORE = 305
 PAWN_SCORE = 100
 CHECKMATED_SCORE = -99999
 CASTLING_BONUS = 400
@@ -98,44 +101,46 @@ class Evaluator:
 
     @staticmethod
     def score_movement_pattern(mp) -> int:
+        # Computes the value of a custom piece based on its movement pattern
+        # Values were set based on the known relative value of the standard pieces
         score = 0
         if mp.attack_north:
-            score += 60
+            score += 112
         if mp.translate_north:
-            score += 60
+            score += 37
         if mp.attack_east:
-            score += 60
+            score += 112
         if mp.translate_east:
-            score += 60
+            score += 37
         if mp.attack_south:
-            score += 60
+            score += 112
         if mp.translate_south:
-            score += 60
+            score += 37
         if mp.attack_west:
-            score += 60
+            score += 112
         if mp.translate_west:
-            score += 60
+            score += 37
         if mp.attack_northeast:
-            score += 60
+            score += 66
         if mp.translate_northeast:
-            score += 60
+            score += 22
         if mp.attack_northwest:
-            score += 60
+            score += 66
         if mp.translate_northwest:
-            score += 60
+            score += 22
         if mp.attack_southeast:
-            score += 60
+            score += 66
         if mp.translate_southeast:
-            score += 60
+            score += 22
         if mp.attack_southwest:
-            score += 60
+            score += 66
         if mp.translate_southwest:
-            score += 60
+            score += 22
 
         score += len(mp.translate_jump_deltas) * 18
         score += len(mp.attack_jump_deltas) * 18
         for d in mp.translate_sliding_deltas + mp.attack_sliding_deltas:
-            score += len(d) * 18
+            score += (len(d) ** .8) * 18 # Longer is better, but there are diminishing returns
 
         return score
 

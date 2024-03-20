@@ -435,3 +435,7 @@ class MoveGenerator:
                 continue
             nodes += 1
         return nodes
+
+# Testing
+    
+at = AttackTables()

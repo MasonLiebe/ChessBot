@@ -479,49 +479,49 @@ class Position:
 
 
 
-## Testing
+# ## Testing
         
-pos = Position.default()
-print(pos.to_string())
+# pos = Position.default()
+# print(pos.to_string())
 
-'''
-Board loc to index
-    0  1  2  3  4  5  6  7
-7  A8 B8 C8 D8 E8 F8 G8 H8 7
-6  A7 B7 C7 D7 E7 F7 G7 H7 6
-5  A6 B6 C6 D6 E6 F6 G6 H6 5
-4  A5 B5 C5 D5 E5 F5 G5 H5 4
-3  A4 B4 C4 D4 E4 F4 G4 H4 3
-2  A3 B3 C3 D3 E3 F3 G3 H3 2
-1  A2 B2 C2 D2 E2 F2 G2 H2 1
-0  A1 B1 C1 D1 E1 F1 G1 H1 0
-    0  1  2  3  4  5  6  7
-'''
+# '''
+# Board loc to index
+#     0  1  2  3  4  5  6  7
+# 7  A8 B8 C8 D8 E8 F8 G8 H8 7
+# 6  A7 B7 C7 D7 E7 F7 G7 H7 6
+# 5  A6 B6 C6 D6 E6 F6 G6 H6 5
+# 4  A5 B5 C5 D5 E5 F5 G5 H5 4
+# 3  A4 B4 C4 D4 E4 F4 G4 H4 3
+# 2  A3 B3 C3 D3 E3 F3 G3 H3 2
+# 1  A2 B2 C2 D2 E2 F2 G2 H2 1
+# 0  A1 B1 C1 D1 E1 F1 G1 H1 0
+#     0  1  2  3  4  5  6  7
+# '''
 
-test_moves = {
-    0: Move.new(to_index(4, 1), to_index(4, 3),move_type='Quiet'),  # e4
-    1: Move.new(to_index(4, 6), to_index(4, 4),move_type='Quiet'),  # e5
-    2: Move.new(to_index(3, 1), to_index(3, 3),move_type='Quiet'),  # d4
-    3: Move.new(to_index(4, 4), to_index(3, 3),target_loc=to_index(3, 3),move_type='Capture'),  # exd4
-    4: Move.new(to_index(6, 0), to_index(5, 2),move_type='Quiet'),  # NF3
-    5: Move.new(to_index(6, 7), to_index(5, 5),move_type='Quiet'),  # NF6
-    6: Move.new(to_index(5, 0), to_index(2, 3),move_type='Quiet'),  # Bc4
-    7: Move.new(to_index(5, 7), to_index(2, 4),move_type='Quiet'),  # Bc5
-    8: Move.new(to_index(4, 0), to_index(6, 0),target_loc=to_index(7, 0), move_type='KingsideCastle'),  # O-O
+# test_moves = {
+#     0: Move.new(to_index(4, 1), to_index(4, 3),move_type='Quiet'),  # e4
+#     1: Move.new(to_index(4, 6), to_index(4, 4),move_type='Quiet'),  # e5
+#     2: Move.new(to_index(3, 1), to_index(3, 3),move_type='Quiet'),  # d4
+#     3: Move.new(to_index(4, 4), to_index(3, 3),target_loc=to_index(3, 3),move_type='Capture'),  # exd4
+#     4: Move.new(to_index(6, 0), to_index(5, 2),move_type='Quiet'),  # NF3
+#     5: Move.new(to_index(6, 7), to_index(5, 5),move_type='Quiet'),  # NF6
+#     6: Move.new(to_index(5, 0), to_index(2, 3),move_type='Quiet'),  # Bc4
+#     7: Move.new(to_index(5, 7), to_index(2, 4),move_type='Quiet'),  # Bc5
+#     8: Move.new(to_index(4, 0), to_index(6, 0),target_loc=to_index(7, 0), move_type='KingsideCastle'),  # O-O
 
-}
+# }
 
-for i in range(9):
-    print(pos.whos_turn, str(test_moves[i]))
-    pos.make_move(test_moves[i])
-    print(pos.to_string())
-    print("En Passant Square:", pos.properties.ep_square)
-    print('-----------------')
+# for i in range(9):
+#     print(pos.whos_turn, str(test_moves[i]))
+#     pos.make_move(test_moves[i])
+#     print(pos.to_string())
+#     print("En Passant Square:", pos.properties.ep_square)
+#     print('-----------------')
 
-for i in range(9):
-    pos.unmake_move()
-    print(pos.whos_turn)
-    print(pos.to_string())
+# for i in range(9):
+#     pos.unmake_move()
+#     print(pos.whos_turn)
+#     print(pos.to_string())
 
 # dims = Dimensions(width=10, height=10)
 # pos = Position.custom(dims, Bitboard.zero(), {}, [(0, to_index(5, 0), PieceType.King), (1, to_index(5, 9), PieceType.King)])
