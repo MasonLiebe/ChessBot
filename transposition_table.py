@@ -5,6 +5,15 @@ from enum import Enum
 TABLE_SIZE = 1_500_000
 ENTRIES_PER_CLUSTER = 4
 
+
+'''
+This file handles the transposition table, which is a hash table that stores the values of positions that have been evaluated before.
+It is used to avoid re-evaluating the same position multiple times.  Eventually, the table will fill up and the oldest entries will be replaced. Alternatively, entries will be replaced once they are no longer evaluated at a high enough depth.
+
+The table is implemented as a list of clusters, where each cluster is a list of entries. Each entry stores the value of a position, as well as the depth at which it was evaluated. The table is indexed by the zobrist key of the position.
+'''
+
+
 class EntryFlag(Enum):
     ALPHA = 0
     EXACT = 1
@@ -12,6 +21,7 @@ class EntryFlag(Enum):
     NULL = 3
 
 class Entry:
+    # Stores the data for a single entry in the transposition table
     def __init__(self, key: int, flag: EntryFlag, value: int, move_: Move, depth: int, ancient: bool):
         self.key = key
         self.flag = flag

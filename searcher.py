@@ -32,7 +32,7 @@ class Searcher:
         entry = self.transposition_table.retrieve(position.get_zobrist())
         return entry.move_ if entry else None
 
-    def get_best_move_timeout(self, position: Position, eval: Evaluator, movegen: MoveGenerator, time_sec: int) -> (Move, int):
+    def get_best_move_timeout(self, position: Position, eval: Evaluator, movegen: MoveGenerator, time_sec: int):
         self.clear_heuristics()
         self.transposition_table.set_ancient()
         d = 1

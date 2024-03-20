@@ -19,12 +19,20 @@ CHECKMATED_SCORE = -99999
 CASTLING_BONUS = 400
 PST_MULTIPLIER = 5
 
+'''
+The Evaluator class is responsible for evaluating the position statically and returning a score.  This is used once the search reaches a maximum depth.  The evaluator uses a combination of material score and positional score to determine the score of a position.  The evaluator also uses a custom piece value table to store the value of custom pieces, and a piece square table to store the positional value of pieces.  Because of the general nature of this implementation, the evaluator is not optimized for traditional test, although it should
+generalize relatively well.
+
+There are some conceptual notes that are obvious that aren't accounted for.  For example, you might find that the evaluator doesn't account for the fact that a piece is pinned, or that a piece is attacking a square.  This is because the evaluator is only used at the end of the search, and the search should have already accounted for these things.  The evaluator is only used to give a rough estimate of the position, and is not used to make any decisions.  The search is responsible for making the decisions, and the evaluator is only used to give a rough estimate of the position.
+'''
+
 class Evaluator:
     def __init__(self):
         self.custom_piece_value_table: Dict[PieceType, int] = {}
         self.piece_square_table: Dict[PieceType, List[int]] = {}
 
     def evaluate(self, position: Position, movegen: MoveGenerator) -> int:
+        # sums the material and positional scores for each piece
         score = 0
         player_num = position.whos_turn
         total_material_score = 0
@@ -34,6 +42,7 @@ class Evaluator:
             score += side_multiplier * material_score
             total_material_score += material_score
 
+        # if it's an endgame, evaluation will be handled differently
         is_endgame = total_material_score < 2 * KING_SCORE + 2 * QUEEN_SCORE + 2 * ROOK_SCORE
         for ps in position.pieces:
             side_multiplier = 1 if ps.player_num == player_num else -1
@@ -45,6 +54,7 @@ class Evaluator:
         return score
 
     def get_material_score_for_pieceset(self, position: Position, piece_set: PieceSet) -> int:
+        # sums the material score
         material_score = 0
         material_score += piece_set.king.bitboard.count_ones() * KING_SCORE
         material_score += piece_set.queen.bitboard.count_ones() * QUEEN_SCORE
@@ -66,6 +76,8 @@ class Evaluator:
         return material_score
 
     def score_move(self, depth: int, history_moves: List[List[int]], killer_moves: List[List[Move]], position: Position, move_: Move) -> int:
+        # scores a move based on the history and killer moves, used to rank and prioritize moves to improve
+        # The efficiency of the alpha-beta pruning process
         if not move_.get_is_capture():
             return 9000 if move_ == killer_moves[depth][0] or move_ == killer_moves[depth][1] else history_moves[move_.get_from()][move_.get_to()]
 

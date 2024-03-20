@@ -2,6 +2,9 @@ from bitboard import Bitboard
 from piece import Piece
 
 class PieceSet:
+    '''
+    A class to represent a set of pieces for a player.
+    '''
     def __init__(self, player_num):
         self.occupied = Bitboard.zero()
         self.king = Piece.blank_king(player_num)

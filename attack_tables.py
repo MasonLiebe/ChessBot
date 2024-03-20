@@ -1,6 +1,22 @@
-from bitboard import Bitboard, to_index
+from typing import List
+from bitboard import Bitboard, to_index, from_index
 
+'''
+This file handles the valid move generation for each piece. It uses the bitboard representation
+of the board to generate the moves for each piece based on their movememnt patterns.
+'''
+
+'''
+The MaskHandler class can be quite confusing.  The idea here is to map out the set of squares
+That are in the same row, column, or diagonal as a given square.  This is done by creating lists
+of bitboards that represent the squares in a certain direction FROM the index of the square in question.
+
+For example, MaskHandler.north[16] will be a bitboard with all of the squares directly north of the 16th square
+marked as a 1. In this case, the 16th square is the 1st square in the 2nd row.  So the bitboard will have
+just the 0th square set to 1.
+'''
 class MaskHandler:
+    # Handles the bitboard masks for use with the attack tables
     def __init__(self):
         self.north = [Bitboard.zero() for _ in range(256)]
         self.east = [Bitboard.zero() for _ in range(256)]
@@ -12,13 +28,14 @@ class MaskHandler:
         self.southwest = [Bitboard.zero() for _ in range(256)]
         self.diagonals = [Bitboard.zero() for _ in range(256)]
         self.antidiagonals = [Bitboard.zero() for _ in range(256)]
-        self.left_masks = [Bitboard.zero() for _ in range(16)]
+        self.left_masks = [Bitboard.zero() for _ in range(16)] # masks for the left side of a certain column, (exclusive)
         self.right_masks = [Bitboard.zero() for _ in range(16)]
-        self.files = [Bitboard.zero() for _ in range(16)]
-        self.ranks = [Bitboard.zero() for _ in range(16)]
-        self.main_diagonal = Bitboard.zero()
-        self.zero = Bitboard.zero()
-
+        self.files = [Bitboard.zero() for _ in range(16)] # masks for just the file
+        self.ranks = [Bitboard.zero() for _ in range(16)] # masks for just a rank
+        self.main_diagonal = Bitboard.zero() # mask for the main diagonal
+        self.zero = Bitboard.zero() # a zero bitboard
+        
+        # Create the left and right masks
         cumulative_left = Bitboard.zero()
         cumulative_right = Bitboard.zero()
 
@@ -37,25 +54,31 @@ class MaskHandler:
             self.right_masks[i] = new_right
             self.left_masks[i] = new_left
 
+        # Iterate through indices and create the directional masks
         for x in range(16):
             for y in range(16):
                 index = to_index(x, y)
 
                 for j in range(y + 1, 16):
+                    # set the bits to the north of the current square
                     self.north[index].set_bit(to_index(x, j), True)
 
                 for j in range(y):
+                    # set the bits to the south of the current square
                     self.south[index].set_bit(to_index(x, j), True)
 
                 for j in range(x + 1, 16):
+                    # set the bits to the east of the current square
                     self.east[index].set_bit(to_index(j, y), True)
 
                 for j in range(x):
+                    # set the bits to the west of the current square
                     self.west[index].set_bit(to_index(j, y), True)
 
                 x2 = x + 1
                 y2 = y + 1
                 while x2 < 16 and y2 < 16:
+                    # set the bits to the northeast of the current square
                     self.northeast[index].set_bit(to_index(x2, y2), True)
                     x2 += 1
                     y2 += 1
@@ -63,6 +86,7 @@ class MaskHandler:
                 x2 = x - 1
                 y2 = y + 1
                 while x2 >= 0 and y2 < 16:
+                    # set the bits to the northwest of the current square
                     self.northwest[index].set_bit(to_index(x2, y2), True)
                     x2 -= 1
                     y2 += 1
@@ -70,6 +94,7 @@ class MaskHandler:
                 x2 = x + 1
                 y2 = y - 1
                 while x2 < 16 and y2 >= 0:
+                    # set the bits to the southeast of the current square
                     self.southeast[index].set_bit(to_index(x2, y2), True)
                     x2 += 1
                     y2 -= 1
@@ -77,15 +102,19 @@ class MaskHandler:
                 x2 = x - 1
                 y2 = y - 1
                 while x2 >= 0 and y2 >= 0:
+                    # set the bits to the southwest of the current square
                     self.southwest[index].set_bit(to_index(x2, y2), True)
                     x2 -= 1
                     y2 -= 1
 
+                # set the bits to the diagonal of the current square
                 self.diagonals[index] = self.northeast[index] ^ self.southwest[index]
                 self.antidiagonals[index] = self.northwest[index] ^ self.southeast[index]
 
+        # Create the main_diagonal mask
         self.main_diagonal = Bitboard.one() ^ self.northeast[0]
 
+        # Create the file and rank masks
         for i in range(16):
             file = Bitboard.zero()
             for y in range(16):
@@ -97,6 +126,7 @@ class MaskHandler:
                 rank.set_bit(to_index(x, i), True)
             self.ranks[i] = rank
 
+    # Mask getters
     def get_right_mask(self, num_cols):
         if num_cols == 0:
             return self.zero
@@ -146,6 +176,7 @@ class MaskHandler:
     def get_rank(self, n):
         return self.ranks[n]
 
+    # Shifters
     def shift_north(self, amt, bitboard):
         return bitboard << (amt * 16)
 
@@ -159,12 +190,13 @@ class MaskHandler:
         return (bitboard >> amt) & (~self.get_right_mask(amt))
 
 
-from typing import List
-from bitboard import Bitboard, to_index, from_index
-
+'''
+The AttackTables class is used to generate the attack tables for each piece.  It holds precomputed
+attack tables for the pieces, assuming a 16x16 size board, only for the standard pieceset.
+'''
 class AttackTables:
     def __init__(self):
-        self.slider_attacks: List[List[int]] = [[0] * 65536 for _ in range(16)]
+        self.slider_attacks: List[List[int]] = [[0] * 65536 for _ in range(16)] 
         self.knight_attacks: List[Bitboard] = [Bitboard.zero() for _ in range(256)]
         self.king_attacks: List[Bitboard] = [Bitboard.zero() for _ in range(256)]
         self.north_pawn_attacks: List[Bitboard] = [Bitboard.zero() for _ in range(256)]

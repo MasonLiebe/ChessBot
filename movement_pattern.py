@@ -1,5 +1,33 @@
 from typing import List, Tuple, Optional
 from bitboard import Bitboard, to_index, from_index
+'''
+These classes are used to represent the movement patterns of pieces. In the
+Position class, there is a dictionary of these pattern objects, indexed on 
+the piece type. From the perspective of the Position class, the MovementPattern
+class is the internal representation of a movement pattern, and the 
+MovementPatternExternal class is the external representation of a movement
+pattern. The MovementPatternExternal class is used to serialize the movement
+patterns to a JSON file, and the MovementPattern class is used to deserialize
+the movement patterns from a JSON file.
+
+SOME NOTES ABOUT THE MOVEMENT PATTERN ITEMS:
+The promotion squares are a list of x, y tuples that represent the squares that
+a piece can promote on. The promo_vals are the values that a piece can promote to.
+
+The attack_sliding_deltas are a list of lists of x, y tuples that represent different
+'sliding' moves a piece can make.  A sliding move is one where it's legality relies
+on the sequential emptiness of prior squares.  The only example of such a move in standard 
+chess is the Pawn's initial two-square move, where it requires the square in between to be empty.
+The x, y values are the offsets from the piece's current position.
+
+The jumping deltas are a list of jumping moves, whose legality does not depend on the emptiness
+of the squares in between.  The chanonical example of this in chess is the knight move.
+The x, y values are again the offsets from the piece's current position.
+
+The attack vs. translate items are used to destinguish whether a piece can attack in a certain
+direction, or whether it can only translate in that direction.  For example, a pawn can only attack
+diagonally, and it can only translate forward.
+'''
 
 class MovementPatternExternal:
     def __init__(self, promotion_squares: Optional[List[Tuple[int, int]]] = None,

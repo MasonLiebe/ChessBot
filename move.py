@@ -12,7 +12,7 @@ MoveType = {
     'Null': 6,
 }
 
-# MoveType = {
+# MoveTypeReversed = {
 #     0: 'Quiet',
 #     1: 'Capture',
 #     2: 'QueensideCastle',

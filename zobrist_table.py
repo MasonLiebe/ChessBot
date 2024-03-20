@@ -2,6 +2,14 @@ import random
 from typing import Dict, List, Tuple
 from piece import Piece, PieceType
 
+'''
+This class is used to generate zobrist keys for a position.  A zobrist key is a semi-unique number that represents a position.  It is used to store the values of positions that have been evaluated before, so that they do not need to be re-evaluated.  The zobrist key is used as an index in the transposition table.
+
+The way this works is you generate a random number for each square/piece combination, the EP square, the player to move, and the castling rights.  Then, to get the zobrist key for a position, you XOR together the random numbers for each piece on the board.  You also XOR together the random numbers for the player to move, the castling rights, and the en passant square.  The advantage to using XOR here is that it is its own inverse, so you can easily revert some transformation of the board by XORing the same random number again.
+
+This is a very efficient way to store the values of positions, and is used in many chess engines.
+'''
+
 class ZobristTable:
     def __init__(self):
         self.rng = random.Random(5435651169991665628)

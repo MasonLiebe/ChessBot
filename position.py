@@ -13,6 +13,9 @@ from constants import *
 
 @dataclass
 class Position:
+    '''
+    A class to represent a position on the board.
+    '''
     dimensions: Dimensions
     bounds: Bitboard
     num_players: int
@@ -25,9 +28,11 @@ class Position:
 
     @classmethod
     def default(cls) -> 'Position':
+        # Creates a new position with the default starting position.
         return cls.from_fen(STARTING_FEN)
 
     def register_piecetype(self, char_rep: str, mpe: MovementPatternExternal):
+        # Registers a custom piece type with a movement pattern.
         mp = external_mp_to_internal(mpe)
 
         for i, p in enumerate(self.pieces):
@@ -54,6 +59,7 @@ class Position:
                     raise ValueError("Too many custom pieces")
 
     def get_char_movementpattern_map(self) -> Dict[str, MovementPatternExternal]:
+        # Returns a map of piece type characters to their movement patterns.
         return_map = {}
         for piece_type, movement_pattern in self.movement_rules.items():
             if isinstance(piece_type, PieceType.Custom):
@@ -61,19 +67,22 @@ class Position:
         return return_map
 
     def get_movement_pattern(self, piece_type: PieceType) -> Optional[MovementPattern]:
+        # Returns the movement pattern for a piece type.
         return self.movement_rules.get(piece_type)
 
     def set_bounds(self, dims: Dimensions, bounds: Bitboard):
+        # Sets the bounds of the position.
         self.dimensions = dims
         self.bounds = bounds
 
     def make_move(self, move_: Move):
+        # Makes a move on the board.
         zobrist_table = self.ZOBRIST_TABLE
-        my_player_num = self.whos_turn
-        self.whos_turn = (self.whos_turn + 1) % self.num_players
+        my_player_num = self.whos_turn  # player who's making the move
+        self.whos_turn = (self.whos_turn + 1) % self.num_players # opponent becomes the next player
 
-        new_props = self.properties.copy()
-        new_props.zobrist_key ^= zobrist_table.get_to_move_zobrist(self.whos_turn)
+        new_props = self.properties.copy() # copy the properties to pass to the new position
+        new_props.zobrist_key ^= zobrist_table.get_to_move_zobrist(self.whos_turn) # invert the turn zonbrist signature
 
         move_type = move_.get_move_type()
 
@@ -84,6 +93,7 @@ class Position:
             self.properties = new_props
             return
 
+        # Handle the capture of a piece
         if move_type in ['Capture', 'PromotionCapture']:
             capt_index = move_.get_target()
             owner, captd = self.piece_at(capt_index)
@@ -93,6 +103,7 @@ class Position:
             new_props.captured_piece = (owner, captd_piece_type)
             self._remove_piece(capt_index)
 
+        # Handle castling
         elif move_type == 'KingsideCastle':
             rook_from = move_.get_target()
             x, y = from_index(move_.get_to())
@@ -111,6 +122,7 @@ class Position:
             self.move_piece(rook_from, rook_to)
             new_props.castling_rights.set_player_castled(my_player_num)
 
+        # Handle the movement of a piece - happens for all non-null moves
         from_ = move_.get_from()
         to = move_.get_to()
         from_piece = self.piece_at(from_)[1]
@@ -120,6 +132,7 @@ class Position:
 
         self.move_piece(from_, to)
 
+        # Handle promotion
         if move_type in ['PromotionCapture', 'Promotion']:
             new_props.promote_from = from_piece_type
             new_props.zobrist_key ^= zobrist_table.get_zobrist_sq_from_pt(from_piece_type, my_player_num, to)
@@ -131,10 +144,12 @@ class Position:
         x1, y1 = from_index(from_)
         x2, y2 = from_index(to)
 
+        # revert the ep square if needed
         if self.properties.ep_square is not None:
             epx, _ = from_index(self.properties.ep_square)
             new_props.zobrist_key ^= zobrist_table.get_ep_zobrist_file(epx)
 
+        # Handle en passant if 2-square pawn move
         if from_piece_type == PieceType.Pawn and abs(y2 - y1) == 2 and x1 == x2:
             if y2 > y1:
                 new_props.ep_square = to_index(x1, y2 - 1)
@@ -144,6 +159,7 @@ class Position:
         else:
             new_props.ep_square = None
 
+        # Handle castling rights
         if new_props.castling_rights.can_player_castle(my_player_num):
             if from_piece_type == PieceType.King:
                 new_props.zobrist_key ^= zobrist_table.get_castling_zobrist(my_player_num, True)
@@ -158,17 +174,20 @@ class Position:
                     new_props.castling_rights.disable_queenside_castle(my_player_num)
                     new_props.zobrist_key ^= zobrist_table.get_castling_zobrist(my_player_num, False)
 
+        # Update the properties
         new_props.prev_properties = self.properties
         new_props.move_played = move_
         self.properties = new_props
         self.update_occupied()
 
     def unmake_move(self):
+        # Reverts the last move made on the board.
         if self.whos_turn == 0:
             self.whos_turn = self.num_players - 1
         else:
             self.whos_turn = (self.whos_turn - 1) % self.num_players
 
+        # revert the properties of the position
         my_player_num = self.whos_turn
         move_ = self.properties.move_played
         move_type = move_.get_move_type()
@@ -182,6 +201,7 @@ class Position:
 
         self.move_piece(to, from_)
 
+        # Handle special moves
         if move_type in ['PromotionCapture', 'Promotion']:
             self._remove_piece(from_)
             self._add_piece(my_player_num, self.properties.promote_from, from_)
@@ -207,6 +227,7 @@ class Position:
         self.update_occupied()
 
     def to_string(self) -> str:
+        # Returns a string representation of the board.
         return_str = ""
         for y in range(self.dimensions.height - 1, -1, -1):
             return_str = f"{return_str} {y} "
@@ -228,6 +249,7 @@ class Position:
         return f"{return_str} \nZobrist Key: {self.properties.zobrist_key}"
 
     def pieces_as_tuples(self) -> List[Tuple[int, int, int, str]]:
+        # Returns a list of tuples representing the pieces on the board.
         tuples = []
         for i, ps in enumerate(self.pieces):
             for piece in ps.get_piece_refs():
@@ -240,6 +262,7 @@ class Position:
         return tuples
 
     def tiles_as_tuples(self) -> List[Tuple[int, int, str]]:
+        # Returns a list of tuples representing the tiles on the board.
         squares = []
         for x in range(self.dimensions.width):
             for y in range(self.dimensions.height):
@@ -252,13 +275,17 @@ class Position:
     
     @classmethod
     def custom(cls, dims: Dimensions, bounds: Bitboard, movement_patterns: Dict[str, MovementPatternExternal], pieces: List[Tuple[int, int, PieceType]]):
+        # Creates a new position with custom parameters.
+        # Movement patterns are represented as a dictionary of piece type characters to movement patterns for custom pieces.
         pos = Position.from_fen(EMPTY_FEN)
         pos.dimensions = dims
         pos.bounds = bounds
         
+        # Register the movement patterns
         for chr, mpe in movement_patterns.items():
             pos.register_piecetype(chr, mpe)
         
+        # Add the pieces
         for owner, index, piece_type in pieces:
             pos.add_piece(owner, piece_type, index)
         
@@ -266,8 +293,10 @@ class Position:
     
     @classmethod
     def from_fen(cls, fen: str) -> 'Position':
+        # Creates a new position from a FEN string.
         dims = Dimensions(width=DEFAULT_WIDTH, height=DEFAULT_HEIGHT)
 
+        # Initialize the pieces
         wb_pieces = []
         w_pieces = PieceSet.new(0)
         b_pieces = PieceSet.new(1)
@@ -282,6 +311,7 @@ class Position:
         can_w_castle_q = False
         can_b_castle_q = False
 
+        # Parse the FEN string and place all of the pieces
         for c in fen:
             if c == ' ':
                 field += 1
@@ -330,13 +360,14 @@ class Position:
                 # TODO: Implement EP square
                 continue
 
-
+        # Create the occupied bitboard
         occupied = Bitboard.zero()
         occupied |= w_pieces.occupied
         occupied |= b_pieces.occupied
         zobrist_table = ZobristTable()
         zobrist_key = 0
 
+        # set the zobrist key
         properties = PositionProperties.default()
         zobrist_key ^= zobrist_table.get_castling_zobrist(0, True)
         zobrist_key ^= zobrist_table.get_castling_zobrist(0, False)
@@ -391,6 +422,7 @@ class Position:
         return self.properties.zobrist_key
 
     def piece_at(self, index: int) -> Optional[Tuple[int, Piece]]:
+        # Returns the piece at a given index.
         for i, ps in enumerate(self.pieces):
             piece = ps.piece_at(index)
             if piece:
@@ -398,6 +430,7 @@ class Position:
         return None
 
     def piece_bb_at(self, index: int) -> Optional[Bitboard]:
+        # Returns the bitboard of the piece at a given index.
         piece_info = self.piece_at(index)
         if piece_info:
             _, piece = piece_info
@@ -405,11 +438,13 @@ class Position:
         return None
 
     def xy_in_bounds(self, x: int, y: int) -> bool:
+        # Returns whether a given x, y coordinate is in bounds.
         if x < self.dimensions.width and y < self.dimensions.height:
             return self.bounds.bit(to_index(x, y))
         return False
 
     def move_piece(self, from_: int, to: int):
+        # Moves a piece from one index to another.
         source_bb = self.piece_bb_at(from_)
         if source_bb:
             source_bb.set_bit(from_, False)
@@ -421,11 +456,13 @@ class Position:
             print("==")
 
     def _remove_piece(self, index: int):
+        # Removes a piece from the board at specified index.
         capd_bb = self.piece_bb_at(index)
         if capd_bb:
             capd_bb.set_bit(index, False)
 
     def _add_piece(self, owner: int, pt: PieceType, index: int):
+        # Adds a piece to the board at specified index.
         piece_map = {
             PieceType.King: self.pieces[owner].king.bitboard,
             PieceType.Queen: self.pieces[owner].queen.bitboard,
@@ -459,12 +496,14 @@ class Position:
             
 
     def update_occupied(self):
+        # Updates the occupied bitboard to reflect the current state of the board.
         self.occupied = Bitboard.zero()
         for ps in self.pieces:
             ps.update_occupied()
             self.occupied |= ps.occupied
 
     def add_piece(self, owner: int, pt: PieceType, index: int):
+        # Adds a piece to the board at specified index.
         new_props = self.properties.copy()
         zobrist_table = self.ZOBRIST_TABLE
         new_props.zobrist_key ^= zobrist_table.get_zobrist_sq_from_pt(pt, owner, index)
@@ -474,6 +513,7 @@ class Position:
         self.properties = new_props
 
     def remove_piece(self, index: int):
+        # Removes a piece from the board at specified index.
         self._remove_piece(index)
         self.update_occupied()
 

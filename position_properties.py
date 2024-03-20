@@ -2,6 +2,10 @@ from typing import Optional, Tuple
 from move import Move, PieceType
 
 class CastleRights:
+    '''
+    A class to repreesent the castling rights of a position.
+    0th bit is for white, 7th bit is for black.
+    '''
     def __init__(self):
         self.kingside_rights = 255
         self.queenside_rights = 255
@@ -30,6 +34,9 @@ class CastleRights:
 
 
 class PositionProperties:
+    '''
+    Stores the properties of a board that do not include the positions of the pieces.
+    '''
     def __init__(self):
         self.zobrist_key: int = 0
         self.move_played: Optional[Move] = None
