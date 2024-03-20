@@ -3,6 +3,9 @@ from position import Position
 from move_generator import MoveGenerator
 from evaluator import Evaluator
 from transposition_table import TranspositionTable, Entry, EntryFlag
+from datetime import datetime as instant
+from typing import Optional
+
 
 class Searcher:
     def __init__(self):
