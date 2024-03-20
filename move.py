@@ -91,6 +91,12 @@ class PieceType(Enum):
     Bishop = 'b'
     Knight = 'n'
     Pawn = 'p'
+    Custom1 = 'a'
+    Custom2 = 'c'
+    Custom3 = 'd'
+    Custom4 = 'e'
+    Custom5 = 'f'
+    Custom6 = 'g'
     
     @classmethod
     def from_char(cls, c):

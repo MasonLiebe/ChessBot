@@ -29,10 +29,29 @@ class Position:
 
     def register_piecetype(self, char_rep: str, mpe: MovementPatternExternal):
         mp = external_mp_to_internal(mpe)
-        self.movement_rules[PieceType.Custom(char_rep)] = mp
 
         for i, p in enumerate(self.pieces):
-            p.custom.append(Piece.blank_custom(i, char_rep))
+            match len(p.custom):
+                case 0:
+                    p.custom.append(Piece.blank_custom1(i))
+                    self.movement_rules[PieceType.Custom1] = mp
+                case 1:
+                    p.custom.append(Piece.blank_custom2(i))
+                    self.movement_rules[PieceType.Custom2] = mp
+                case 2:
+                    p.custom.append(Piece.blank_custom3(i))
+                    self.movement_rules[PieceType.Custom3] = mp
+                case 3:
+                    p.custom.append(Piece.blank_custom4(i))
+                    self.movement_rules[PieceType.Custom4] = mp
+                case 4:
+                    p.custom.append(Piece.blank_custom5(i))
+                    self.movement_rules[PieceType.Custom5] = mp
+                case 5:
+                    p.custom.append(Piece.blank_custom6(i))
+                    self.movement_rules[PieceType.Custom6] = mp
+                case _:
+                    raise ValueError("Too many custom pieces")
 
     def get_char_movementpattern_map(self) -> Dict[str, MovementPatternExternal]:
         return_map = {}
@@ -232,7 +251,7 @@ class Position:
         return squares
     
     @classmethod
-    def custom(dims: Dimensions, bounds: Bitboard, movement_patterns: Dict[str, MovementPatternExternal], pieces: List[Tuple[int, int, PieceType]]):
+    def custom(cls, dims: Dimensions, bounds: Bitboard, movement_patterns: Dict[str, MovementPatternExternal], pieces: List[Tuple[int, int, PieceType]]):
         pos = Position.from_fen(EMPTY_FEN)
         pos.dimensions = dims
         pos.bounds = bounds
@@ -413,15 +432,31 @@ class Position:
             PieceType.Rook: self.pieces[owner].rook.bitboard,
             PieceType.Bishop: self.pieces[owner].bishop.bitboard,
             PieceType.Knight: self.pieces[owner].knight.bitboard,
-            PieceType.Pawn: self.pieces[owner].pawn.bitboard
+            PieceType.Pawn: self.pieces[owner].pawn.bitboard,
         }
         if pt in piece_map:
             piece_map[pt].set_bit(index, True)
-        elif isinstance(pt, PieceType.Custom):
-            for c in self.pieces[owner].custom:
-                if pt.value == c.char_rep:
-                    c.bitboard.set_bit(index, True)
-                    break
+            return
+
+        try:
+            match pt:
+                case PieceType.Custom1:
+                    self.pieces[owner].custom[0].bitboard.set_bit(index, True)
+                case PieceType.Custom2:
+                    self.pieces[owner].custom[1].bitboard.set_bit(index, True)
+                case PieceType.Custom3:
+                    self.pieces[owner].custom[2].bitboard.set_bit(index, True)
+                case PieceType.Custom4:
+                    self.pieces[owner].custom[3].bitboard.set_bit(index, True)
+                case PieceType.Custom5:
+                    self.pieces[owner].custom[4].bitboard.set_bit(index, True)
+                case PieceType.Custom6:
+                    self.pieces[owner].custom[5].bitboard.set_bit(index, True)
+                case _:
+                    raise ValueError("Invalid PieceType")
+        except IndexError as e:
+            print("Unregistered Custom PieceType")
+            
 
     def update_occupied(self):
         self.occupied = Bitboard.zero()
@@ -461,3 +496,22 @@ for i in range(1, 3):
 for i in range(1, 3):
     pos.unmake_move()
     print(pos.to_string())
+
+# dims = Dimensions(width=10, height=10)
+# pos = Position.custom(dims, Bitboard.zero(), {}, [(0, to_index(5, 0), PieceType.King), (1, to_index(5, 9), PieceType.King)])
+
+# print(pos.to_string())
+
+# # create a custom piece
+# pos.register_piecetype('a', MovementPatternExternal())
+
+# print("LOOK HERE")
+# print(str(pos.movement_rules[PieceType.Custom1]))
+
+# pos.add_piece(1,PieceType.Rook,  to_index(5, 5))
+# pos.add_piece(0,PieceType.Custom1, to_index(5, 7))
+
+# print(pos.to_string())
+
+# print(pos.pieces[0].custom[0].bitboard)
+# print(pos.pieces[0].custom[0].char_rep)

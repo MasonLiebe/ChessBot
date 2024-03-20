@@ -36,3 +36,27 @@ class Piece:
     @classmethod
     def blank_queen(cls, player_num):
         return cls(player_num, 'q', PieceType.Queen, Bitboard.zero())
+    
+    @classmethod
+    def blank_custom1(cls, player_num):
+        return cls(player_num, 'a', PieceType.Custom1, Bitboard.zero())
+    
+    @classmethod
+    def blank_custom2(cls, player_num):
+        return cls(player_num, 'c', PieceType.Custom2, Bitboard.zero())
+    
+    @classmethod
+    def blank_custom3(cls, player_num):
+        return cls(player_num, 'd', PieceType.Custom3, Bitboard.zero())
+    
+    @classmethod
+    def blank_custom4(cls, player_num):
+        return cls(player_num, 'e', PieceType.Custom4, Bitboard.zero())
+    
+    @classmethod
+    def blank_custom5(cls, player_num):
+        return cls(player_num, 'f', PieceType.Custom5, Bitboard.zero())
+    
+    @classmethod
+    def blank_custom6(cls, player_num):
+        return cls(player_num, 'g', PieceType.Custom6, Bitboard.zero())

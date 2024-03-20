@@ -2,59 +2,107 @@ from typing import List, Tuple, Optional
 from bitboard import Bitboard, to_index, from_index
 
 class MovementPatternExternal:
-    def __init__(self):
-        self.promotion_squares: Optional[List[Tuple[int, int]]] = None
-        self.promo_vals: Optional[List[str]] = None
-        self.attack_sliding_deltas: List[List[Tuple[int, int]]] = []
-        self.attack_jump_deltas: List[Tuple[int, int]] = []
-        self.attack_north: bool = False
-        self.attack_south: bool = False
-        self.attack_east: bool = False
-        self.attack_west: bool = False
-        self.attack_northeast: bool = False
-        self.attack_northwest: bool = False
-        self.attack_southeast: bool = False
-        self.attack_southwest: bool = False
-        self.translate_jump_deltas: List[Tuple[int, int]] = []
-        self.translate_sliding_deltas: List[List[Tuple[int, int]]] = []
-        self.translate_north: bool = False
-        self.translate_south: bool = False
-        self.translate_east: bool = False
-        self.translate_west: bool = False
-        self.translate_northeast: bool = False
-        self.translate_northwest: bool = False
-        self.translate_southeast: bool = False
-        self.translate_southwest: bool = False
+    def __init__(self, promotion_squares: Optional[List[Tuple[int, int]]] = None,
+                 promo_vals: Optional[List[str]] = None,
+                 attack_sliding_deltas: List[List[Tuple[int, int]]] = None,
+                 attack_jump_deltas: List[Tuple[int, int]] = None,
+                 attack_north: bool = False,
+                 attack_south: bool = False,
+                 attack_east: bool = False,
+                 attack_west: bool = False,
+                 attack_northeast: bool = False,
+                 attack_northwest: bool = False,
+                 attack_southeast: bool = False,
+                 attack_southwest: bool = False,
+                 translate_jump_deltas: List[Tuple[int, int]] = None,
+                 translate_sliding_deltas: List[List[Tuple[int, int]]] = None,
+                 translate_north: bool = False,
+                 translate_south: bool = False,
+                 translate_east: bool = False,
+                 translate_west: bool = False,
+                 translate_northeast: bool = False,
+                 translate_northwest: bool = False,
+                 translate_southeast: bool = False,
+                 translate_southwest: bool = False):
+        self.promotion_squares = promotion_squares
+        self.promo_vals = promo_vals
+        self.attack_sliding_deltas = attack_sliding_deltas or []
+        self.attack_jump_deltas = attack_jump_deltas or []
+        self.attack_north = attack_north
+        self.attack_south = attack_south
+        self.attack_east = attack_east
+        self.attack_west = attack_west
+        self.attack_northeast = attack_northeast
+        self.attack_northwest = attack_northwest
+        self.attack_southeast = attack_southeast
+        self.attack_southwest = attack_southwest
+        self.translate_jump_deltas = translate_jump_deltas or []
+        self.translate_sliding_deltas = translate_sliding_deltas or []
+        self.translate_north = translate_north
+        self.translate_south = translate_south
+        self.translate_east = translate_east
+        self.translate_west = translate_west
+        self.translate_northeast = translate_northeast
+        self.translate_northwest = translate_northwest
+        self.translate_southeast = translate_southeast
+        self.translate_southwest = translate_southwest
+    
+    def __str__(self) -> str:
+        return f'MovementPatternExternal(promotion_squares={self.promotion_squares}, promo_vals={self.promo_vals}, attack_sliding_deltas={self.attack_sliding_deltas}, attack_jump_deltas={self.attack_jump_deltas}, attack_north={self.attack_north}, attack_south={self.attack_south}, attack_east={self.attack_east}, attack_west={self.attack_west}, attack_northeast={self.attack_northeast}, attack_northwest={self.attack_northwest}, attack_southeast={self.attack_southeast}, attack_southwest={self.attack_southwest}, translate_jump_deltas={self.translate_jump_deltas}, translate_sliding_deltas={self.translate_sliding_deltas}, translate_north={self.translate_north}, translate_south={self.translate_south}, translate_east={self.translate_east}, translate_west={self.translate_west}, translate_northeast={self.translate_northeast}, translate_northwest={self.translate_northwest}, translate_southeast={self.translate_southeast}, translate_southwest={self.translate_southwest})'
 
 class MovementPattern:
-    def __init__(self):
-        self.promotion_squares: Optional[Bitboard] = None
-        self.promo_vals: Optional[List[str]] = None
-        self.attack_sliding_deltas: List[List[Tuple[int, int]]] = []
-        self.attack_jump_deltas: List[Tuple[int, int]] = []
-        self.attack_north: bool = False
-        self.attack_south: bool = False
-        self.attack_east: bool = False
-        self.attack_west: bool = False
-        self.attack_northeast: bool = False
-        self.attack_northwest: bool = False
-        self.attack_southeast: bool = False
-        self.attack_southwest: bool = False
-        self.translate_jump_deltas: List[Tuple[int, int]] = []
-        self.translate_sliding_deltas: List[List[Tuple[int, int]]] = []
-        self.translate_north: bool = False
-        self.translate_south: bool = False
-        self.translate_east: bool = False
-        self.translate_west: bool = False
-        self.translate_northeast: bool = False
-        self.translate_northwest: bool = False
-        self.translate_southeast: bool = False
-        self.translate_southwest: bool = False
+    def __init__(self, promotion_squares: Optional[Bitboard] = None,
+                 promo_vals: Optional[List[str]] = None,
+                 attack_sliding_deltas: List[List[Tuple[int, int]]] = None,
+                 attack_jump_deltas: List[Tuple[int, int]] = None,
+                 attack_north: bool = False,
+                 attack_south: bool = False,
+                 attack_east: bool = False,
+                 attack_west: bool = False,
+                 attack_northeast: bool = False,
+                 attack_northwest: bool = False,
+                 attack_southeast: bool = False,
+                 attack_southwest: bool = False,
+                 translate_jump_deltas: List[Tuple[int, int]] = None,
+                 translate_sliding_deltas: List[List[Tuple[int, int]]] = None,
+                 translate_north: bool = False,
+                 translate_south: bool = False,
+                 translate_east: bool = False,
+                 translate_west: bool = False,
+                 translate_northeast: bool = False,
+                 translate_northwest: bool = False,
+                 translate_southeast: bool = False,
+                 translate_southwest: bool = False):
+        self.promotion_squares = promotion_squares
+        self.promo_vals = promo_vals
+        self.attack_sliding_deltas = attack_sliding_deltas or []
+        self.attack_jump_deltas = attack_jump_deltas or []
+        self.attack_north = attack_north
+        self.attack_south = attack_south
+        self.attack_east = attack_east
+        self.attack_west = attack_west
+        self.attack_northeast = attack_northeast
+        self.attack_northwest = attack_northwest
+        self.attack_southeast = attack_southeast
+        self.attack_southwest = attack_southwest
+        self.translate_jump_deltas = translate_jump_deltas or []
+        self.translate_sliding_deltas = translate_sliding_deltas or []
+        self.translate_north = translate_north
+        self.translate_south = translate_south
+        self.translate_east = translate_east
+        self.translate_west = translate_west
+        self.translate_northeast = translate_northeast
+        self.translate_northwest = translate_northwest
+        self.translate_southeast = translate_southeast
+        self.translate_southwest = translate_southwest
 
     def promotion_at(self, index: int) -> bool:
         if self.promotion_squares:
             return self.promotion_squares.bit(index)
         return False
+
+    def __str__(self) -> str:
+        return f'MovementPattern(promotion_squares={self.promotion_squares}, promo_vals={self.promo_vals}, attack_sliding_deltas={self.attack_sliding_deltas}, attack_jump_deltas={self.attack_jump_deltas}, attack_north={self.attack_north}, attack_south={self.attack_south}, attack_east={self.attack_east}, attack_west={self.attack_west}, attack_northeast={self.attack_northeast}, attack_northwest={self.attack_northwest}, attack_southeast={self.attack_southeast}, attack_southwest={self.attack_southwest}, translate_jump_deltas={self.translate_jump_deltas}, translate_sliding_deltas={self.translate_sliding_deltas}, translate_north={self.translate_north}, translate_south={self.translate_south}, translate_east={self.translate_east}, translate_west={self.translate_west}, translate_northeast={self.translate_northeast}, translate_northwest={self.translate_northwest}, translate_southeast={self.translate_southeast}, translate_southwest={self.translate_southwest})'
 
 def external_mp_to_internal(mpe: MovementPatternExternal) -> MovementPattern:
     promotion_squares = None
