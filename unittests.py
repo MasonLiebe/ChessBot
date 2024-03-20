@@ -163,6 +163,25 @@ class TestPositionProperties(unittest.TestCase):
         self.assertIsNone(self.position_properties.captured_piece)
         self.assertIsNone(self.position_properties.prev_properties)
 
+class TestPosition(unittest.TestCase):
+    def test_initial_state(self):
+        pass
+
+    def test_get_piece_at(self):
+        pass
+
+    def test_get_piece_refs(self):
+        pass
+
+    def test_update_occupied(self):
+        pass
+
+    def test_piece_at(self):
+        pass
+
+    def test_new(self):
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()
