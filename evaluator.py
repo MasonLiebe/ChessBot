@@ -157,6 +157,7 @@ class Evaluator:
         return score
 
     def get_positional_score(self, is_endgame: bool, position: Position, piece_set: PieceSet, movegen: MoveGenerator) -> int:
+        # Returns the positional score of a piece set
         score = 0
 
         for p in piece_set.get_piece_refs():

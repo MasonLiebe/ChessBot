@@ -112,7 +112,7 @@ class MaskHandler:
                 self.antidiagonals[index] = self.northwest[index] ^ self.southeast[index]
 
         # Create the main_diagonal mask
-        self.main_diagonal = Bitboard.one() ^ self.northeast[0]
+        self.main_diagonal = Bitboard(1) ^ self.northeast[0]
 
         # Create the file and rank masks
         for i in range(16):

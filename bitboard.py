@@ -86,9 +86,11 @@ class Bitboard:
             self.value |= (((1 << (16 - x)) - 1) << x) << (16 * y)
 
     def set_index(self, index):
+        index &= 255 # make sure index is in range
         self.value |= 1 << index
     
     def clear_index(self, index):
+        index &= 255 # make sure index is in range
         self.value &= ~(1 << index)
     
     def set_bit(self, index, value):
@@ -98,6 +100,7 @@ class Bitboard:
             self.clear_index(index)
 
     def bit(self, index):
+        index = index & 255 # make sure index is in range
         return (self.value >> index) & 1
     
     def is_zero(self):
@@ -115,7 +118,10 @@ class Bitboard:
         return Bitboard(self.value)
     
     def fill(self):
-        self.value = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        self.value = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFa
+    
+    def byte(self, index):
+        return (self.value >> (8 * index)) & 0xFF
 
     def __str__(self):
         binary = bin(self.value)[2:].zfill(256)
@@ -141,6 +147,8 @@ class Bitboard:
         return Bitboard(self.value | other.value)
     
     def __xor__(self, other):
+        if isinstance(other, int):
+            return Bitboard(self.value ^ other)
         return Bitboard(self.value ^ other.value)
     
     def __invert__(self):
@@ -151,7 +159,11 @@ class Bitboard:
     
     def __rshift__(self, n):
         return Bitboard(self.value >> n)
-
+    
+    def __mul__ (self, other):
+        if isinstance(other, int):
+            return Bitboard(self.value * other)
+        return Bitboard(self.value * other.value)
 
 def to_rank_file(x, y):
     return_string = ""

@@ -2,6 +2,9 @@ from bitboard import Bitboard
 from move import *
 
 class Piece:
+    '''
+    A class to represent a piece of a certain type, occupancy is represented as a bitboard.
+    '''
     def __init__(self, player_num, char_rep, piece_type, bitboard):
         self.player_num = player_num
         self.char_rep = char_rep
