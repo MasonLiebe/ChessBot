@@ -299,8 +299,8 @@ class AttackTables:
         rank_mask = self.masks.get_rank(y)
         rank_occupied = (occ & rank_mask).value
         rank_slider = 1 << loc_index
-        rank_attacks = Bitboard(self.get_slider_attacks(rank_occupied, rank_slider))
-        return rank_attacks & rank_mask
+        rank_attacks = self.get_slider_attacks(rank_occupied, rank_slider)
+        return rank_mask & rank_attacks
 
     def get_file_attack(self, loc_index, occ):
         x, y = from_index(loc_index)

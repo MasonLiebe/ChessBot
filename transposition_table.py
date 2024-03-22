@@ -2,7 +2,7 @@ from typing import List, Optional
 from move import Move
 from enum import Enum
 
-TABLE_SIZE = 1_500_000
+TABLE_SIZE = 1_000_000
 ENTRIES_PER_CLUSTER = 4
 
 

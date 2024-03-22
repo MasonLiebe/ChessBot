@@ -107,6 +107,9 @@ class Bitboard:
         # returns the index of the lowest 1 bit
         return (self.value & -self.value).bit_length() - 1
     
+    def count_ones(self):
+        return bin(self.value).count('1')
+    
     def reverse_bits(self):
         return Bitboard(int(format(self.value, '0256b')[::-1], 2))
     @classmethod

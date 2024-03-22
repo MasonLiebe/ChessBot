@@ -81,8 +81,8 @@ class Evaluator:
         if not move_.get_is_capture():
             return 9000 if move_ == killer_moves[depth][0] or move_ == killer_moves[depth][1] else history_moves[move_.get_from()][move_.get_to()]
 
-        attacker: PieceType = position.piece_at(move_.get_from()).piece_type
-        victim: PieceType = position.piece_at(move_.get_target())[1]
+        attacker: PieceType = position.piece_at(move_.get_from())[1].piece_type
+        victim: PieceType = position.piece_at(move_.get_target())[1].piece_type
 
         attack_score = self.get_material_score(attacker, position)
         victim_score = self.get_material_score(victim, position)
@@ -90,7 +90,7 @@ class Evaluator:
         return KING_SCORE + (victim_score - attack_score)
 
     def get_material_score(self, piece_type: PieceType, position: Position) -> int:
-        if isinstance(piece_type, PieceType.Custom):
+        if piece_type.is_custom():
             if piece_type in self.custom_piece_value_table:
                 return self.custom_piece_value_table[piece_type]
             else:

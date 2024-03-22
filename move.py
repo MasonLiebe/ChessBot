@@ -105,6 +105,9 @@ class PieceType(Enum):
             return cls(c)
         else:
             return c
+    
+    def is_custom(self):
+        return self in [PieceType.Custom1, PieceType.Custom2, PieceType.Custom3, PieceType.Custom4, PieceType.Custom5, PieceType.Custom6]
 
 class Dimensions:
     '''

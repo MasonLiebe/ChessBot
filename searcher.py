@@ -101,7 +101,7 @@ class Searcher:
             if num_legal_moves == 1:
                 score = -self.alphabeta(position, eval, movegen, depth - 1, -beta, -alpha, True)
             else:
-                if num_legal_moves > 4 and move_.get_move_type() == MoveType.Quiet and not is_pv and depth >= 5 and not in_check:
+                if num_legal_moves > 4 and move_.get_move_type() == 'Quiet' and not is_pv and depth >= 5 and not in_check:
                     reduced_depth = depth - 2
                     if num_legal_moves > 10:
                         reduced_depth = depth - 3

@@ -7,14 +7,20 @@ from bitboard import Bitboard, to_index, from_index, to_rank_file
 from movement_pattern import MovementPatternExternal
 from move import PieceType 
 from game import Game
-
+import time
 
 class Engine:
     def __init__(self, position = Position.default()):
+        timer = time.time()
         self.current_position: Position = position
+        print('position setup time:', time.time() - timer)
+        timer = time.time()
         self.move_generator: MoveGenerator = MoveGenerator()
+        print('move generator setup time:', time.time() - timer)
         self.evaluator: Evaluator = Evaluator()
+        print('evaluator setup time:', time.time() - timer)
         self.searcher: Searcher = Searcher()
+        print('searcher setup time:', time.time() - timer)
 
     @classmethod
     def default(cls) -> 'Engine':
@@ -30,7 +36,7 @@ class Engine:
         self.current_position.register_piecetype(char_rep, mpe)
 
     def add_piece(self, owner: int, piece_type: PieceType, x: int, y: int):
-        self.current_position.add_piece(0, PieceType.Custom('a'), to_index(x, y))
+        self.current_position.add_piece(owner, piece_type, to_index(x, y))
 
     def remove_piece(self, index: int):
         self.current_position.remove_piece(index)
@@ -169,19 +175,29 @@ class Engine:
 
 if __name__ == '__main__':
 
-    import time
+
     start = time.time()
     engine = Engine(Position.from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
     print(engine.current_position.to_string())
     print('engine_setup_time:', time.time() - start)
     
     start = time.time()
-    print(engine.perft(4))
-    print('perft4_time:', time.time() - start)
+    best_move_4 = engine.get_best_move(6)
+    print(best_move_4)
+    print('get_best_move_time:', time.time() - start)
+    
+    engine.make_move(*best_move_4)
+    print(engine.current_position.to_string())
 
-    start = time.time()
-    print(engine.perft(5))
-    print('perft5_time:', time.time() - start)
+    # start = time.time()
+    # print(engine.perft(4))
+    # print('perft4_time:', time.time() - start)
+
+
+
+    # start = time.time()
+    # print(engine.perft(5))
+    # print('perft5_time:', time.time() - start)
     
     # print(engine.perft(2))
     # print(engine.perft(3))
