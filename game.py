@@ -102,6 +102,3 @@ if __name__ == '__main__':
 
     game.make_move(mg, 4, 1, 4, 3)
     print(game.to_string())
-
-    print('bounds:\n', game.current_position.bounds)
-    

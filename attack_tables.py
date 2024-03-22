@@ -188,7 +188,21 @@ class MaskHandler:
 
     def shift_west(self, amt, bitboard):
         return (bitboard >> amt) & (~self.get_right_mask(amt))
-
+    
+    def shift_northeast(self, amt, bitboard):
+        return self.shift_east(amt, self.shift_north(amt, bitboard))
+    
+    def shift_northwest(self, amt, bitboard):
+        return self.shift_west(amt, self.shift_north(amt, bitboard))
+    
+    def shift_southeast(self, amt, bitboard):
+        return self.shift_east(amt, self.shift_south(amt, bitboard))
+    
+    def shift_southwest(self, amt, bitboard):
+        return self.shift_west(amt, self.shift_south(amt, bitboard))
+    
+    def shift_northeast(self, amt, bitboard):
+        return self.shift_east(amt, self.shift_north(amt, bitboard))
 
 '''
 The AttackTables class is used to generate the attack tables for each piece.  It holds precomputed
@@ -282,7 +296,7 @@ class AttackTables:
         occ_index = (second_byte << 8) ^ first_byte
         attack = self.slider_attacks[x][occ_index]
         return_bb = Bitboard(attack)
-        return self.masks.shift_north(y, return_bb) & occ
+        return self.masks.shift_north(y, return_bb) & ~self.masks.shift_north(y, occ)
 
     def get_file_attack(self, loc_index, occ):
         x, y = from_index(loc_index)
@@ -293,27 +307,45 @@ class AttackTables:
         attack = self.slider_attacks[rank_index][occ_index]
         return_bb = Bitboard(attack)
         last_file = self.masks.get_right_mask(1) & (return_bb * self.masks.get_main_diagonal())
-        return self.masks.shift_west(15 - x, last_file) & occ
-
+        return self.masks.shift_west(15 - x, last_file) & ~self.masks.shift_west(15 - x, occ)
+        
     def get_diagonal_attack(self, loc_index, occ):
-        x, _ = from_index(loc_index)
+        x, y = from_index(loc_index)
+        # Map the diagonal to the first rank
         masked_diag = occ & self.masks.get_diagonal(loc_index)
         last_rank_with_garbage = masked_diag * self.masks.get_file(0)
         first_rank = self.masks.shift_south(15, last_rank_with_garbage)
+        # Lookup the attack for the first rank
         occ_index = first_rank.byte(0) ^ (first_rank.byte(1) << 8)
         attack = self.slider_attacks[x][occ_index]
+        # Map attack back to diagonal
         return_bb = Bitboard(attack)
-        return return_bb * self.masks.get_file(0) & self.masks.get_diagonal(loc_index) & occ
-
+        mapped_attack = (return_bb * self.masks.get_file(0)) & self.masks.get_diagonal(loc_index)
+        # Remove moves beyond the first occupied square
+        if masked_diag:
+            first_blocker = masked_diag & -masked_diag
+            return mapped_attack & (first_blocker + -1)
+        else:
+            return mapped_attack
+    
     def get_antidiagonal_attack(self, loc_index, occ):
-        x, _ = from_index(loc_index)
+        x, y = from_index(loc_index)
+        # Map the diagonal to the first rank
         masked_diag = occ & self.masks.get_antidiagonal(loc_index)
         last_rank_with_garbage = masked_diag * self.masks.get_file(0)
         first_rank = self.masks.shift_south(15, last_rank_with_garbage)
+        # Lookup the attack for the first rank
         occ_index = first_rank.byte(0) ^ (first_rank.byte(1) << 8)
         attack = self.slider_attacks[x][occ_index]
+        # Map attack back to diagonal
         return_bb = Bitboard(attack)
-        return return_bb * self.masks.get_file(0) & self.masks.get_antidiagonal(loc_index) & occ
+        mapped_attack = (return_bb * self.masks.get_file(0)) & self.masks.get_antidiagonal(loc_index)
+        # Remove moves beyond the first occupied square
+        if masked_diag:
+            first_blocker = masked_diag & -masked_diag
+            return mapped_attack & (first_blocker + -1)
+        else:
+            return mapped_attack
 
     def get_knight_attack(self, loc_index, _occ, _enemies):
         return self.knight_attacks[loc_index].copy()
@@ -404,8 +436,6 @@ class AttackTables:
         return raw_attacks & ~occ
 
     def get_rook_attack(self, loc_index, occ, _enemies):
-        print('rook attack at', to_index(*from_index(loc_index)))
-        print(self.get_file_attack(loc_index, occ))
         return self.get_file_attack(loc_index, occ) ^ self.get_rank_attack(loc_index, occ)
 
     def get_bishop_attack(self, loc_index, occ, _enemies):

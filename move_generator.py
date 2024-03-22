@@ -451,4 +451,9 @@ class MoveGenerator:
 
 # Testing
     
-at = AttackTables()
+if __name__ == '__main__':
+    pos = Position.default()
+    mg = MoveGenerator()
+    pos.add_piece(0, PieceType.Bishop, to_index(4, 4))
+    print(pos.to_string())
+    print(mg.count_legal_moves(pos))

@@ -162,6 +162,21 @@ class Bitboard:
             return Bitboard(self.value * other)
         return Bitboard(self.value * other.value)
 
+    def __add__(self, other):
+        if isinstance(other, int):
+            return Bitboard(self.value + other)
+        return Bitboard(self.value + other.value)
+
+    def __sub__(self, other): 
+        if isinstance(other, int):
+            return Bitboard(self.value - other)
+        return Bitboard(self.value - other.value)
+
+
+    def __neg__(self):
+        # Be careful with this one, it's not a bitwise negation
+        return Bitboard(-self.value)
+
 def to_rank_file(x, y):
     return_string = ""
     return_string += chr(x + 65)

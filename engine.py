@@ -10,8 +10,8 @@ from game import Game
 
 
 class Engine:
-    def __init__(self):
-        self.current_position: Position = Position.default()
+    def __init__(self, position = Position.default()):
+        self.current_position: Position = position
         self.move_generator: MoveGenerator = MoveGenerator()
         self.evaluator: Evaluator = Evaluator()
         self.searcher: Searcher = Searcher()
@@ -168,7 +168,8 @@ class Engine:
 
 
 if __name__ == '__main__':
-    engine = Engine.default()
-    engine.current_position().to_string()
+
+    engine = Engine(Position.from_fen("rnbqkbnr/pppppppp/8/4B3/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
+    print(engine.current_position.to_string())
     
     print(engine.perft(1))
