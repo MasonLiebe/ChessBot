@@ -3,15 +3,13 @@ IN PROGRESS - CURRENTLY WORKING ON A CONVERSION TO EITHER RUST OR C# DUE TO SPEE
 
 This is a complete chess app that allows for 2-player and 1-player chess options with the best chess bot I could come up with using a mix of personal and publicly available ideas
 
-Aside from the mundane GUI, board representation, and game state handling features, here are the goals.
+Aside from the mundane GUI, board representation, and game state handling features
 
 Original Bitboard Architecture that will allow for custom game structures, rules, and custom pieces.
- - Self Capture Chess
- - No-Castle Chess
  - User-Created Custom Pieces
  - Custom starting positions and Board Sizes
 
-Chess Bot that will efficiently evaluate positions and suggest moves based on the following techinques:
+Chess Bot that efficiently evaluates positions and suggests moves based on the following techinques:
 
 - Zobrist Hashing
 - Transposition Tables
