@@ -86,11 +86,9 @@ class Bitboard:
             self.value |= (((1 << (16 - x)) - 1) << x) << (16 * y)
 
     def set_index(self, index):
-        index &= 255 # make sure index is in range
         self.value |= 1 << index
     
     def clear_index(self, index):
-        index &= 255 # make sure index is in range
         self.value &= ~(1 << index)
     
     def set_bit(self, index, value):
@@ -100,7 +98,6 @@ class Bitboard:
             self.clear_index(index)
 
     def bit(self, index):
-        index = index & 255 # make sure index is in range
         return (self.value >> index) & 1
     
     def is_zero(self):
@@ -175,7 +172,7 @@ def from_index(index):
     return (index % 16, index // 16)
 
 def to_index(x, y):
-    return 16 * y + x
+    return (16 * y + x) & 0xFF
 
 # # testing
 # if __name__ == '__main__':

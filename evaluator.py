@@ -82,7 +82,7 @@ class Evaluator:
             return 9000 if move_ == killer_moves[depth][0] or move_ == killer_moves[depth][1] else history_moves[move_.get_from()][move_.get_to()]
 
         attacker: PieceType = position.piece_at(move_.get_from()).piece_type
-        victim: PieceType = position.piece_at(move_.get_target()).piece_type
+        victim: PieceType = position.piece_at(move_.get_target())[1]
 
         attack_score = self.get_material_score(attacker, position)
         victim_score = self.get_material_score(victim, position)

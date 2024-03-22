@@ -274,13 +274,14 @@ class AttackTables:
 
     def get_rank_attack(self, loc_index, occ):
         x, y = from_index(loc_index)
+        # isolate the rank
         rank_only = self.masks.shift_south(y, occ)
         first_byte = rank_only.byte(0)
+        # shift the second byte to the left by 8 bits and xor it with the first byte
         second_byte = rank_only.byte(1)
         occ_index = (second_byte << 8) ^ first_byte
         attack = self.slider_attacks[x][occ_index]
-        return_bb = Bitboard.zero()
-        return_bb ^= attack
+        return_bb = Bitboard(attack)
         return self.masks.shift_north(y, return_bb)
 
     def get_file_attack(self, loc_index, occ):
@@ -380,6 +381,9 @@ class AttackTables:
                 raw_attacks &= ~self.masks.get_northwest(loc_index)
             elif not southeast:
                 raw_attacks &= ~self.masks.get_southeast(loc_index)
+        
+        # Remove moves that pass through friendly pieces
+        raw_attacks &= ~occ
 
         return raw_attacks
 

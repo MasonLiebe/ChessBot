@@ -22,7 +22,7 @@ class BitboardMoves:
         return self
 
     def __next__(self) -> Move:
-        if (to := self.moves.lowest_one()) is not None:
+        if (to := self.moves.lowest_one()) >= 0:
             promo_here = self.promotion_squares.bit(to) if self.promotion_squares else False
             capture_here = self.enemies.bit(to)
 
@@ -406,7 +406,7 @@ class MoveGenerator:
         if self.is_in_check_from_king(position, my_player_num):
             in_check = True
         for move_ in self.get_custom_psuedo_moves(position):
-            if move_.get_is_capture() and position.piece_at(move_.get_target()).piece_type == PieceType.King:
+            if move_.get_is_capture() and position.piece_at(move_.get_target())[1] == PieceType.King:
                 in_check = True
                 break
         position.unmake_move()
@@ -414,7 +414,7 @@ class MoveGenerator:
 
     def is_move_legal(self, move_: Move, position: Position) -> bool:
         if move_.get_move_type() in ['PromotionCapture', 'Capture']:
-            if position.piece_at(move_.get_target()).piece_type == PieceType.King:
+            if position.piece_at(move_.get_target())[1] == PieceType.King:
                 return False
         my_player_num = position.whos_turn
         legality = True
@@ -422,7 +422,7 @@ class MoveGenerator:
         if self.is_in_check_from_king(position, my_player_num):
             legality = False
         for move_ in self.get_custom_psuedo_moves(position):
-            if move_.get_is_capture() and position.piece_at(move_.get_target()).piece_type == PieceType.King:
+            if move_.get_is_capture() and position.piece_at(move_.get_target())[1] == PieceType.King:
                 legality = False
                 break
         position.unmake_move()
@@ -431,8 +431,11 @@ class MoveGenerator:
     def count_legal_moves(self, position: Position) -> int:
         nodes = 0
         for move_ in self.get_pseudo_moves(position):
+            print(position.piece_at(move_.get_from())[1].piece_type, move_, end=' ')
             if not self.is_move_legal(move_, position):
+                print('is not legal')
                 continue
+            print('is legal')
             nodes += 1
         return nodes
 

@@ -71,14 +71,16 @@ class Game:
         from_ = to_index(x1, y1)
         to = to_index(x2, y2)
         moves = move_generator.get_pseudo_moves(self.current_position)
+        print('We made it past get_pseudo_moves')
 
+        i = 0
         for move_ in moves:
             if not move_generator.is_move_legal(move_, self.current_position):
                 continue
             if move_.get_from() == from_ and move_.get_to() == to:
                 self.current_position.make_move(move_)
                 return True
-
+        
         return False
 
     def undo(self):
@@ -87,12 +89,16 @@ class Game:
     def get_whos_turn(self) -> int:
         return self.current_position.whos_turn
     
+    
+if __name__ == '__main__':
+    game = Game.default()
+    mg = MoveGenerator()
 
-game = Game.default()
+    print(game.get_width())
+    print(game.get_height())
+    print(game.to_string())
 
-print(game.get_width())
-print(game.get_height())
-print(game.to_string())
+    print(mg.count_legal_moves(game.current_position))
 
-game.make_move(MoveGenerator(), 4, 1, 4, 3)
-print(game.to_string())
+    game.make_move(mg, 4, 1, 4, 3)
+    print(game.to_string())
