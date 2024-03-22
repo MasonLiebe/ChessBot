@@ -12,11 +12,11 @@ from piece import Piece
 class BitboardMoves:
     def __init__(self, enemies: Bitboard, moves: Bitboard, source_index: int,
                  promotion_squares: Optional[Bitboard], promo_vals: Optional[List[str]]):
-        self.enemies = enemies
-        self.moves = moves
-        self.source_index = source_index
-        self.promotion_squares = promotion_squares
-        self.promo_vals = promo_vals
+        self.enemies = enemies # Bitboard of enemy pieces
+        self.moves = moves # Bitboard of possible move destinations
+        self.source_index = source_index # Index of the piece making the moves
+        self.promotion_squares = promotion_squares # Bitboard of promotion squares
+        self.promo_vals = promo_vals # List of promotion values
         self.current_promo_vals: Optional[List[str]] = None
 
     def __iter__(self):
@@ -441,11 +441,8 @@ class MoveGenerator:
     def count_legal_moves(self, position: Position) -> int:
         nodes = 0
         for move_ in self.get_pseudo_moves(position):
-            print(position.piece_at(move_.get_from())[1].piece_type, move_, end=' ')
             if not self.is_move_legal(move_, position):
-                print('is not legal')
                 continue
-            print('is legal')
             nodes += 1
         return nodes
 
@@ -454,6 +451,5 @@ class MoveGenerator:
 if __name__ == '__main__':
     pos = Position.default()
     mg = MoveGenerator()
-    pos.add_piece(0, PieceType.Bishop, to_index(4, 4))
     print(pos.to_string())
-    print(mg.count_legal_moves(pos))
+    print(mg.count_legal_moves(pos))         

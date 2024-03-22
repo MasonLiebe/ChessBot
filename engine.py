@@ -169,7 +169,20 @@ class Engine:
 
 if __name__ == '__main__':
 
-    engine = Engine(Position.from_fen("rnbqkbnr/pppppppp/8/4B3/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
+    import time
+    start = time.time()
+    engine = Engine(Position.from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
     print(engine.current_position.to_string())
+    print('engine_setup_time:', time.time() - start)
     
-    print(engine.perft(1))
+    start = time.time()
+    print(engine.perft(4))
+    print('perft4_time:', time.time() - start)
+
+    start = time.time()
+    print(engine.perft(5))
+    print('perft5_time:', time.time() - start)
+    
+    # print(engine.perft(2))
+    # print(engine.perft(3))
+    # print(engine.perft(4))

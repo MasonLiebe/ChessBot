@@ -286,66 +286,43 @@ class AttackTables:
 
                 self.slider_attacks[i][occ] = right_attack ^ left_attack
 
+    def reverse_bits(self, n):
+        n &= 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        return int(format(n, '0256b')[::-1], 2)
+
+    def get_slider_attacks(self, occ, s):
+        # little bit of math involved LOL - 45 mins on this line
+        return ((occ) - 2 * s) ^ self.reverse_bits(self.reverse_bits(occ) - 2 * self.reverse_bits(s))
+    
     def get_rank_attack(self, loc_index, occ):
         x, y = from_index(loc_index)
-        # isolate the rank
-        rank_only = self.masks.shift_south(y, occ)
-        first_byte = rank_only.byte(0)
-        # shift the second byte to the left by 8 bits and xor it with the first byte
-        second_byte = rank_only.byte(1)
-        occ_index = (second_byte << 8) ^ first_byte
-        attack = self.slider_attacks[x][occ_index]
-        return_bb = Bitboard(attack)
-        return self.masks.shift_north(y, return_bb) & ~self.masks.shift_north(y, occ)
+        rank_mask = self.masks.get_rank(y)
+        rank_occupied = (occ & rank_mask).value
+        rank_slider = 1 << loc_index
+        rank_attacks = Bitboard(self.get_slider_attacks(rank_occupied, rank_slider))
+        return rank_attacks & rank_mask
 
     def get_file_attack(self, loc_index, occ):
         x, y = from_index(loc_index)
-        a_shifted = self.masks.shift_west(x, occ) & self.masks.get_file(0)
-        first_rank = self.masks.shift_south(15, a_shifted * self.masks.get_main_diagonal())
-        occ_index = first_rank.byte(0) ^ (first_rank.byte(1) << 8)
-        rank_index = 15 - y
-        attack = self.slider_attacks[rank_index][occ_index]
-        return_bb = Bitboard(attack)
-        last_file = self.masks.get_right_mask(1) & (return_bb * self.masks.get_main_diagonal())
-        return self.masks.shift_west(15 - x, last_file) & ~self.masks.shift_west(15 - x, occ)
-        
+        file_mask = self.masks.get_file(x)
+        file_occupied = (occ & file_mask).value
+        file_slider = 1 << loc_index
+        file_attacks = Bitboard(self.get_slider_attacks(file_occupied, file_slider))
+        return file_attacks & file_mask
+
     def get_diagonal_attack(self, loc_index, occ):
-        x, y = from_index(loc_index)
-        # Map the diagonal to the first rank
-        masked_diag = occ & self.masks.get_diagonal(loc_index)
-        last_rank_with_garbage = masked_diag * self.masks.get_file(0)
-        first_rank = self.masks.shift_south(15, last_rank_with_garbage)
-        # Lookup the attack for the first rank
-        occ_index = first_rank.byte(0) ^ (first_rank.byte(1) << 8)
-        attack = self.slider_attacks[x][occ_index]
-        # Map attack back to diagonal
-        return_bb = Bitboard(attack)
-        mapped_attack = (return_bb * self.masks.get_file(0)) & self.masks.get_diagonal(loc_index)
-        # Remove moves beyond the first occupied square
-        if masked_diag:
-            first_blocker = masked_diag & -masked_diag
-            return mapped_attack & (first_blocker + -1)
-        else:
-            return mapped_attack
-    
+        diag_mask = self.masks.get_diagonal(loc_index)
+        diag_occupied = (occ & diag_mask).value
+        diag_slider = 1 << loc_index
+        diag_attacks = Bitboard(self.get_slider_attacks(diag_occupied, diag_slider))
+        return diag_attacks & diag_mask
+
     def get_antidiagonal_attack(self, loc_index, occ):
-        x, y = from_index(loc_index)
-        # Map the diagonal to the first rank
-        masked_diag = occ & self.masks.get_antidiagonal(loc_index)
-        last_rank_with_garbage = masked_diag * self.masks.get_file(0)
-        first_rank = self.masks.shift_south(15, last_rank_with_garbage)
-        # Lookup the attack for the first rank
-        occ_index = first_rank.byte(0) ^ (first_rank.byte(1) << 8)
-        attack = self.slider_attacks[x][occ_index]
-        # Map attack back to diagonal
-        return_bb = Bitboard(attack)
-        mapped_attack = (return_bb * self.masks.get_file(0)) & self.masks.get_antidiagonal(loc_index)
-        # Remove moves beyond the first occupied square
-        if masked_diag:
-            first_blocker = masked_diag & -masked_diag
-            return mapped_attack & (first_blocker + -1)
-        else:
-            return mapped_attack
+        diag_mask = self.masks.get_antidiagonal(loc_index)
+        diag_occupied = (occ & diag_mask).value
+        diag_slider = 1 << loc_index
+        diag_attacks = Bitboard(self.get_slider_attacks(diag_occupied, diag_slider))
+        return diag_attacks & diag_mask
 
     def get_knight_attack(self, loc_index, _occ, _enemies):
         return self.knight_attacks[loc_index].copy()
@@ -442,4 +419,53 @@ class AttackTables:
         return self.get_diagonal_attack(loc_index, occ) ^ self.get_antidiagonal_attack(loc_index, occ)
 
     def get_queen_attack(self, loc_index, occ, enemies):
+
         return self.get_rook_attack(loc_index, occ, enemies) ^ self.get_bishop_attack(loc_index, occ, enemies)
+    
+
+# testing
+    
+if __name__ == '__main__':
+    from move_generator import *
+    from bitboard import *
+
+    at = AttackTables()
+
+    occupancy = Bitboard(0)
+    # occupancy.set_bit(to_index(1, 3), True)
+    # occupancy.set_bit(to_index(2, 3), True)
+    occupancy.set_bit(to_index(4, 3), True)
+    # occupancy.set_bit(to_index(7, 3), True)
+    occupancy.set_bit(to_index(4, 1), True)
+    occupancy.set_bit(to_index(4, 8), True)
+    occupancy.set_bit(to_index(4, 6), True)
+    occupancy.set_bit(to_index(4, 0), True)
+    occupancy.set_col_bound(8)
+    occupancy.set_row_bound(8)
+
+    loc_occ = to_index(4, 3)
+    
+    '''
+        0 0 0 0 1 0 0 0 1 1 1 1 1 1 1 1
+        0 0 0 0 1 0 0 0 1 1 1 1 1 1 1 1
+        0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1
+        0 1 1 0 X 0 0 1 1 1 1 1 1 1 1 1
+        0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1
+        0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1
+        0 0 0 0 1 0 0 0 1 1 1 1 1 1 1 1
+        0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+    '''
+    print(occupancy)
+
+    print("rank_possibilities\n", at.get_rank_attack(loc_occ, occupancy))
+    print("file_possibilities\n", at.get_file_attack(loc_occ, occupancy))
+    print('diag_possibilities\n', at.get_diagonal_attack(loc_occ, occupancy))
+    print('anti_diag_possibilities\n', at.get_antidiagonal_attack(loc_occ, occupancy))

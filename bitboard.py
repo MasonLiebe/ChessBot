@@ -106,7 +106,9 @@ class Bitboard:
     def lowest_one(self):
         # returns the index of the lowest 1 bit
         return (self.value & -self.value).bit_length() - 1
-
+    
+    def reverse_bits(self):
+        return Bitboard(int(format(self.value, '0256b')[::-1], 2))
     @classmethod
     def zero(cls):
         return Bitboard(0)
@@ -138,6 +140,8 @@ class Bitboard:
         return self.value != other.value
     
     def __and__(self, other):
+        if isinstance(other, int):
+            return Bitboard(self.value & other)
         return Bitboard(self.value & other.value)
     
     def __or__(self, other):
