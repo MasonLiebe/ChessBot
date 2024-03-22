@@ -243,7 +243,7 @@ class Position:
                     return_str += "."
                 return_str += " "
             return_str += "\n"
-        return_str += " "
+        return_str += "  "
         for x in range(self.dimensions.width):
             return_str = f"{return_str} {x}"
         return f"{return_str} \nZobrist Key: {self.properties.zobrist_key}"

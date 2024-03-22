@@ -52,7 +52,7 @@ For example, here are the indexes for an 8x8 board:
 class Bitboard:
 
     def __init__(self, value=0):
-        self.value = value
+        self.value = value & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
     
     def set_coord(self, x, y):
         if not (0 <= x < 16 and 0 <= y < 16):
@@ -115,7 +115,7 @@ class Bitboard:
         return Bitboard(self.value)
     
     def fill(self):
-        self.value = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFa
+        self.value = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
     
     def byte(self, index):
         return (self.value >> (8 * index)) & 0xFF
@@ -152,7 +152,7 @@ class Bitboard:
         return Bitboard(~self.value)
     
     def __lshift__(self, n):
-        return Bitboard(self.value << n)
+        return Bitboard(self.value << n )
     
     def __rshift__(self, n):
         return Bitboard(self.value >> n)

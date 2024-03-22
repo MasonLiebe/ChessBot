@@ -282,7 +282,7 @@ class AttackTables:
         occ_index = (second_byte << 8) ^ first_byte
         attack = self.slider_attacks[x][occ_index]
         return_bb = Bitboard(attack)
-        return self.masks.shift_north(y, return_bb)
+        return self.masks.shift_north(y, return_bb) & occ
 
     def get_file_attack(self, loc_index, occ):
         x, y = from_index(loc_index)
@@ -291,10 +291,9 @@ class AttackTables:
         occ_index = first_rank.byte(0) ^ (first_rank.byte(1) << 8)
         rank_index = 15 - y
         attack = self.slider_attacks[rank_index][occ_index]
-        return_bb = Bitboard.zero()
-        return_bb ^= attack
+        return_bb = Bitboard(attack)
         last_file = self.masks.get_right_mask(1) & (return_bb * self.masks.get_main_diagonal())
-        return self.masks.shift_west(15 - x, last_file)
+        return self.masks.shift_west(15 - x, last_file) & occ
 
     def get_diagonal_attack(self, loc_index, occ):
         x, _ = from_index(loc_index)
@@ -303,9 +302,8 @@ class AttackTables:
         first_rank = self.masks.shift_south(15, last_rank_with_garbage)
         occ_index = first_rank.byte(0) ^ (first_rank.byte(1) << 8)
         attack = self.slider_attacks[x][occ_index]
-        return_bb = Bitboard.zero()
-        return_bb ^= attack
-        return return_bb * self.masks.get_file(0) & self.masks.get_diagonal(loc_index)
+        return_bb = Bitboard(attack)
+        return return_bb * self.masks.get_file(0) & self.masks.get_diagonal(loc_index) & occ
 
     def get_antidiagonal_attack(self, loc_index, occ):
         x, _ = from_index(loc_index)
@@ -314,9 +312,8 @@ class AttackTables:
         first_rank = self.masks.shift_south(15, last_rank_with_garbage)
         occ_index = first_rank.byte(0) ^ (first_rank.byte(1) << 8)
         attack = self.slider_attacks[x][occ_index]
-        return_bb = Bitboard.zero()
-        return_bb ^= attack
-        return return_bb * self.masks.get_file(0) & self.masks.get_antidiagonal(loc_index)
+        return_bb = Bitboard(attack)
+        return return_bb * self.masks.get_file(0) & self.masks.get_antidiagonal(loc_index) & occ
 
     def get_knight_attack(self, loc_index, _occ, _enemies):
         return self.knight_attacks[loc_index].copy()
@@ -352,42 +349,63 @@ class AttackTables:
     def get_south_pawn_attack_raw(self, loc_index):
         return self.south_pawn_attacks[loc_index]
 
-    def get_sliding_moves_bb(self, loc_index, occ, north, east, south, west, northeast, northwest, southeast, southwest):
-        raw_attacks = Bitboard.zero()
-        if north or south:
-            raw_attacks |= self.get_file_attack(loc_index, occ)
-            if not north:
-                raw_attacks &= ~self.masks.get_north(loc_index)
-            elif not south:
-                raw_attacks &= ~self.masks.get_south(loc_index)
+    # def get_sliding_moves_bb(self, loc_index, occ, north, east, south, west, northeast, northwest, southeast, southwest):
+    #     raw_attacks = Bitboard.zero()
+    #     if north or south:
+    #         raw_attacks |= self.get_file_attack(loc_index, occ)
+    #         if not north:
+    #             raw_attacks &= ~self.masks.get_north(loc_index)
+    #         elif not south:
+    #             raw_attacks &= ~self.masks.get_south(loc_index)
 
-        if east or west:
-            raw_attacks |= self.get_rank_attack(loc_index, occ)
-            if not east:
-                raw_attacks &= ~self.masks.get_east(loc_index)
-            elif not west:
-                raw_attacks &= ~self.masks.get_west(loc_index)
+    #     if east or west:
+    #         raw_attacks |= self.get_rank_attack(loc_index, occ)
+    #         if not east:
+    #             raw_attacks &= ~self.masks.get_east(loc_index)
+    #         elif not west:
+    #             raw_attacks &= ~self.masks.get_west(loc_index)
 
-        if northeast or southwest:
-            raw_attacks |= self.get_diagonal_attack(loc_index, occ)
-            if not northeast:
-                raw_attacks &= ~self.masks.get_northeast(loc_index)
-            elif not southwest:
-                raw_attacks &= ~self.masks.get_southwest(loc_index)
+    #     if northeast or southwest:
+    #         raw_attacks |= self.get_diagonal_attack(loc_index, occ)
+    #         if not northeast:
+    #             raw_attacks &= ~self.masks.get_northeast(loc_index)
+    #         elif not southwest:
+    #             raw_attacks &= ~self.masks.get_southwest(loc_index)
 
-        if northwest or southeast:
-            raw_attacks |= self.get_antidiagonal_attack(loc_index, occ)
-            if not northwest:
-                raw_attacks &= ~self.masks.get_northwest(loc_index)
-            elif not southeast:
-                raw_attacks &= ~self.masks.get_southeast(loc_index)
+    #     if northwest or southeast:
+    #         raw_attacks |= self.get_antidiagonal_attack(loc_index, occ)
+    #         if not northwest:
+    #             raw_attacks &= ~self.masks.get_northwest(loc_index)
+    #         elif not southeast:
+    #             raw_attacks &= ~self.masks.get_southeast(loc_index)
         
-        # Remove moves that pass through friendly pieces
-        raw_attacks &= ~occ
+    #     # Remove moves that pass through friendly pieces
 
-        return raw_attacks
+    #     return raw_attacks
+
+    def get_sliding_moves_bb(self, loc_index, occ, enemies, north, east, south, west, northeast, northwest, southeast, southwest):
+        raw_attacks = Bitboard.zero()
+
+        def process_direction(get_attack_func, get_mask_func, direction_flag):
+            nonlocal raw_attacks
+            if direction_flag:
+                attacks = get_attack_func(loc_index, occ)
+                raw_attacks |= attacks & get_mask_func(loc_index)
+
+        process_direction(self.get_file_attack, self.masks.get_north, north)
+        process_direction(self.get_file_attack, self.masks.get_south, south)
+        process_direction(self.get_rank_attack, self.masks.get_east, east)
+        process_direction(self.get_rank_attack, self.masks.get_west, west)
+        process_direction(self.get_diagonal_attack, self.masks.get_northeast, northeast)
+        process_direction(self.get_diagonal_attack, self.masks.get_southwest, southwest)
+        process_direction(self.get_antidiagonal_attack, self.masks.get_northwest, northwest)
+        process_direction(self.get_antidiagonal_attack, self.masks.get_southeast, southeast)
+
+        return raw_attacks & ~occ
 
     def get_rook_attack(self, loc_index, occ, _enemies):
+        print('rook attack at', to_index(*from_index(loc_index)))
+        print(self.get_file_attack(loc_index, occ))
         return self.get_file_attack(loc_index, occ) ^ self.get_rank_attack(loc_index, occ)
 
     def get_bishop_attack(self, loc_index, occ, _enemies):
