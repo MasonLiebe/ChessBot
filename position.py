@@ -426,7 +426,7 @@ class Position:
         for i, ps in enumerate(self.pieces):
             piece = ps.piece_at(index)
             if piece:
-                return (i, piece)
+                return i, piece
         return None
 
     def piece_bb_at(self, index: int) -> Optional[Bitboard]:

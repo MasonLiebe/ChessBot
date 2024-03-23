@@ -15,6 +15,7 @@ class EngineGameGUI(tk.Tk):
         self.rows = engine.current_position.dimensions.height
         self.cols = engine.current_position.dimensions.width
         self.users_turn = True
+        self.selected_piece = None
 
         # create the canvas and core gui elements
         self.cell_size = cell_size
@@ -25,6 +26,8 @@ class EngineGameGUI(tk.Tk):
         self.highlighted_squares = [] # Tracks the highlighted squares for valid moves
         self.undo_move_button = tk.Button(self, text="Undo Move", command=self.undo_move)
         self.undo_move_button.grid(row=3, column=0, columnspan=1)
+        self.play_bot_button = tk.Button(self, text="Play Bot", command=self.play_bot)
+        self.play_bot_button.grid(row=4, column=0, columnspan=1)
 
         # load the piece images and draw the board
         self.load_piece_images()
@@ -82,8 +85,8 @@ class EngineGameGUI(tk.Tk):
         # get the row and column clicked and returns as a tuple
         if not self.users_turn:
             return
-        col = event.x // self.cell_size
-        row = event.y // self.cell_size
+        col = event.y // self.cell_size
+        row = event.x // self.cell_size
 
         if self.selected_piece:
             # If a piece is already selected, have the engine move the piece
@@ -92,51 +95,46 @@ class EngineGameGUI(tk.Tk):
                 self.update_board()
                 self.users_turn = False
             else:
-                self.selected_piece = False
                 self.valid_moves = []
-                self.clear_highlights()
-        
+                self.highlighted_squares = []
+            self.selected_piece = False
+            return 
         #  otherwise select the piece, and have the engine highlight the legal moves
-        if engine.current_position.get_piece_at(to_index(row, col)).owner == engine.current_position.to_move:
+        if engine.current_position.piece_at(to_index(row, col))[0] == engine.current_position.whos_turn:
             self.selected_piece = (row, col)
             self.highlight_legal_moves(row, col)
-
-        return
     
     def highlight_legal_moves(self, row, col):
         """Highlights legal moves for the selected piece."""
-        self.clear_highlights()
+        self.highlighted_squares = []
         self.valid_moves = self.engine.moves_from(row, col)
         for move in self.valid_moves:
             self.highlight_square(move[0], move[1])
 
     def highlight_square(self, row, col, color="blue"):
         """Highlight a square to indicate it's a legal move."""
-        x1 = col * self.cell_size
-        y1 = row * self.cell_size
+        x1 = row * self.cell_size
+        y1 = col * self.cell_size
         x2 = x1 + self.cell_size
         y2 = y1 + self.cell_size
         # Create a rectangle with a specific color or outline to indicate highlight
         square = self.canvas.create_rectangle(x1, y1, x2, y2, outline=color, width=5, tags="highlight")
         self.highlighted_squares.append(square)
 
-    def play_bot(self, row, col):
+    def play_bot(self):
         """Loop that alternates between the player and the bot."""
-        while True:
-            if self.users_turn:
-                self.selected_piece = False
-                self.users_turn = False
-            else:
-                self.engine_move()
-                self.users_turn = True
-            
-            if self.engine.current_position.is_game_over():
-                messagebox.showinfo("Game Over", f"{self.engine.current_position.get_winner()} wins!")
-                break
+        if not self.users_turn:
+            self.engine_move()
+            self.users_turn = True
+
+        # if self.engine.current_position:
+        #     messagebox.showinfo("Game Over", "Checkmate!")
 
     def engine_move(self):
         """Makes the engine move and updates the board."""
-        self.engine.play_best_move(4)
+        print('called function')
+        self.engine.play_best_move(5)
+        print('engine_made_it)here')
         self.update_board()
         
     # button functions

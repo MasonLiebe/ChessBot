@@ -178,10 +178,11 @@ class Engine:
         for x in range(self.current_position.dimensions.width):
             for y in range(self.current_position.dimensions.height):
                 index = to_index(x, y)
-                piece = self.current_position.piece_at(index)
-                print(piece)
-                if piece is not None:
-                    pieces.append((piece.owner, x, y, piece.piece_type))
+                pos_info = self.current_position.piece_at(index)
+                if pos_info is not None:
+                    owner, piece = pos_info
+                    color = 'white' if owner == 0 else 'black'
+                    pieces.append((color, x, y, piece.piece_type.name))
         return pieces
 
 

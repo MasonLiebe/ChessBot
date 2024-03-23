@@ -179,6 +179,7 @@ class Evaluator:
 
     @staticmethod
     def get_positional_score_vec(position: Position, piece: PieceSet, movegen: MoveGenerator) -> List[int]:
+        # Returns a vector of positional scores for each square on the board
         return_vec = [0] * 256
         total_entries = 0
         sum_ = 0
