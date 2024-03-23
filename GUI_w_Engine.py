@@ -4,27 +4,25 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 from engine import Engine
+from bitboard import to_index
 
 
-class CustomChessGUI(tk.Tk):
+class EngineGameGUI(tk.Tk):
     def __init__(self, engine, cell_size=60):
         super().__init__()
         # initialize variables
         self.engine = engine
-        self.cell_size = cell_size
+        self.rows = engine.current_position.dimensions.height
+        self.cols = engine.current_position.dimensions.width
+        self.users_turn = True
 
         # create the canvas and core gui elements
-        self.canvas = tk.Canvas(self, height=self.game.rows * cell_size,
-                                width=self.game.cols * cell_size)
+        self.cell_size = cell_size
+        self.canvas = tk.Canvas(self, height=self.rows * cell_size,
+                                width=self.cols * cell_size)
         self.canvas.grid(row=0, column=0, columnspan=1)
         self.piece_images = {} # Stores the piece images due to tkinter garbage collection
         self.highlighted_squares = [] # Tracks the highlighted squares for valid moves
-        self.game_state_label = tk.Label(self, text="Game State: " + self.game.game_state)
-        self.game_state_label.grid(row=1, column=0, columnspan=1)
-        self.move_count_label = tk.Label(self, text="Move Count: " + str(self.game.move_count))
-        self.move_count_label.grid(row=1, column=1, columnspan=1)
-        self.reset_game_button = tk.Button(self, text="Reset Game", command=self.reset_game)
-        self.reset_game_button.grid(row=2, column=0, columnspan=1)
         self.undo_move_button = tk.Button(self, text="Undo Move", command=self.undo_move)
         self.undo_move_button.grid(row=3, column=0, columnspan=1)
 
@@ -42,8 +40,8 @@ class CustomChessGUI(tk.Tk):
     ### Methods for handling the board drawing and updating
 
     def draw_board(self):
-        for row in range(self.game.rows):
-            for col in range(self.game.cols):
+        for row in range(self.rows):
+            for col in range(self.cols):
                 x1 = col * self.cell_size
                 y1 = row * self.cell_size
                 x2 = x1 + self.cell_size
@@ -54,8 +52,8 @@ class CustomChessGUI(tk.Tk):
     def load_piece_images(self):
         pieces = ['white-pawn', 'white-bishop', 'white-knight', 'white-rook', 'white-queen', 'white-king',
                   'black-pawn', 'black-bishop', 'black-knight', 'black-rook', 'black-queen', 'black-king',
-                  'white_custom1', 'white_custom2', 'white_custom3', 'white_custom4', 'white_custom5', 'white_custom6',
-                  'black_custom1', 'black_custom2', 'black_custom3', 'black_custom4', 'black_custom5', 'black_custom6']
+                  'white-custom1', 'white-custom2', 'white-custom3', 'white-custom4', 'white-custom5', 'white-custom6',
+                  'black-custom1', 'black-custom2', 'black-custom3', 'black-custom4', 'black-custom5', 'black-custom6']
         for piece in pieces:
             path = f'./assets/pieces/{piece}.png'
             img = Image.open(path)
@@ -70,47 +68,47 @@ class CustomChessGUI(tk.Tk):
         """Places the piece images on the board according to the game state."""
         self.canvas.delete("all")
         self.draw_board()
-
-        for row in range(self.game.rows):
-            for col in range(self.game.cols):
-                piece = self.game.board[row][col]
-                if not (isinstance(piece, Empty) or isinstance(piece, enPassant)):
-                    piece_name = piece.__class__.__name__.lower()
-                    color = 'white' if piece.color == 'w' else 'black'
-                    self.canvas.create_image((col + .5) * self.cell_size, (row + .5) * self.cell_size, image=self.piece_images[f'{color}-{piece_name}'], anchor="c")
-
-        self.game_state_label.config(text="Game State: " + self.game.game_state)
-
+        for piece in self.engine.get_pieces():
+            owner, x, y, piece_type = piece
+            piece_name = f'{owner}-{piece_type.lower()}'
+            img = self.piece_images[piece_name]
+            x1 = x * self.cell_size
+            y1 = y * self.cell_size
+            self.canvas.create_image(x1, y1, image=img, anchor="nw")
     
     ### Methods for handling the user inputs to the chess board
     
     def canvas_clicked(self, event):
         # get the row and column clicked and returns as a tuple
+        if not self.users_turn:
+            return
         col = event.x // self.cell_size
         row = event.y // self.cell_size
-        print(f"Clicked on row {row}, col {col}")
-        print(f"Selected piece location: {self.selected_piece_location}")
+
+        if self.selected_piece:
+            # If a piece is already selected, have the engine move the piece
+            if (row, col) in self.valid_moves:
+                self.engine.make_move(self.selected_piece[0], self.selected_piece[1], row, col)
+                self.update_board()
+                self.users_turn = False
+            else:
+                self.selected_piece = False
+                self.valid_moves = []
+                self.clear_highlights()
         
-        if self.selected_piece_location:
-            self.game.execute_move(self.selected_piece_location, (row, col))
-            self.selected_piece_location = None
-            self.update_board()
-        elif not(isinstance(self.game.board[row][col], Empty) or isinstance(self.game.board[row][col], enPassant)): # clicked on an actual piece
-            self.selected_piece_location = (row, col)
+        #  otherwise select the piece, and have the engine highlight the legal moves
+        if engine.current_position.get_piece_at(to_index(row, col)).owner == engine.current_position.to_move:
+            self.selected_piece = (row, col)
             self.highlight_legal_moves(row, col)
-        else:
-            # Clicked on an empty square or outside legal moves
-            self.selected_piece = None
-            self.update_board()
+
+        return
     
     def highlight_legal_moves(self, row, col):
         """Highlights legal moves for the selected piece."""
-        piece = self.game.board[row][col]
-        self.highlight_square(row, col, color="green")
-        if piece and piece.color == self.game.turn:
-            legal_moves = piece.get_legal_moves(self.game)
-            for move in legal_moves:
-                self.highlight_square(move[0], move[1])
+        self.clear_highlights()
+        self.valid_moves = self.engine.moves_from(row, col)
+        for move in self.valid_moves:
+            self.highlight_square(move[0], move[1])
 
     def highlight_square(self, row, col, color="blue"):
         """Highlight a square to indicate it's a legal move."""
@@ -121,25 +119,34 @@ class CustomChessGUI(tk.Tk):
         # Create a rectangle with a specific color or outline to indicate highlight
         square = self.canvas.create_rectangle(x1, y1, x2, y2, outline=color, width=5, tags="highlight")
         self.highlighted_squares.append(square)
+
+    def play_bot(self, row, col):
+        """Loop that alternates between the player and the bot."""
+        while True:
+            if self.users_turn:
+                self.selected_piece = False
+                self.users_turn = False
+            else:
+                self.engine_move()
+                self.users_turn = True
+            
+            if self.engine.current_position.is_game_over():
+                messagebox.showinfo("Game Over", f"{self.engine.current_position.get_winner()} wins!")
+                break
+
+    def engine_move(self):
+        """Makes the engine move and updates the board."""
+        self.engine.play_best_move(4)
+        self.update_board()
         
     # button functions
-    def reset_game(self):
-        self.game.reset_game()
-        self.update_board()
-    
     def undo_move(self):
-        self.game.undo_move()
+        self.engine.undo()
         self.update_board()
+
 
 if __name__ == "__main__":
     # Example usage
-    custom_game = CustomGame(8, 8, starting_board = ['rnbqkbnr',
-                                                'pppppppp', 
-                                                '········', 
-                                                '········', 
-                                                '········', 
-                                                '········', 
-                                                'PPPPPPPP',
-                                                'RNBQKBNR'])
-    app = CustomChessGUI(custom_game)
+    engine = Engine()
+    app = EngineGameGUI(engine)
     app.mainloop()
