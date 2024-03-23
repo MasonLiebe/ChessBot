@@ -173,25 +173,36 @@ class Engine:
         self.current_position = Position.custom(Dimensions(width, height), bounds, movement_patterns, pieces)
 
 
+def play_test(engine):
+    while True:
+        print(engine.to_string())
+        print()
+        start = time.time()
+        if engine.to_move_in_check():
+            print("Check!")
+        x1, y1, x2, y2 = engine.get_best_move(6)
+        if x1 is None:
+            print("No legal moves!")
+            break
+        print(f"Playing move: {to_rank_file(x1, y1)}{to_rank_file(x2, y2)}")
+        engine.make_move(x1, y1, x2, y2)
+        print("Score:", engine.get_score())
+        print("Zobrist:", engine.get_zobrist())
+        print('time_taken:', time.time() - start)
+        print()
+
+
 if __name__ == '__main__':
 
 
     start = time.time()
-    engine = Engine(Position.from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
+    engine = Engine(Position.from_fen("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -"))
     print(engine.current_position.to_string())
     print('engine_setup_time:', time.time() - start)
-    
-    start = time.time()
-    best_move_4 = engine.get_best_move(6)
-    print(best_move_4)
-    print('get_best_move_time:', time.time() - start)
-    
-    engine.make_move(*best_move_4)
-    print(engine.current_position.to_string())
 
-    # start = time.time()
-    # print(engine.perft(4))
-    # print('perft4_time:', time.time() - start)
+    start = time.time()
+    print(engine.perft(4))
+    print('perft4_time:', time.time() - start)
 
 
 

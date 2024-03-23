@@ -3,7 +3,7 @@ from position import Position
 from move_generator import MoveGenerator
 from evaluator import Evaluator
 from transposition_table import TranspositionTable, Entry, EntryFlag
-from datetime import datetime as instant
+from datetime import time, timedelta as dt
 from typing import Optional
 
 
@@ -36,10 +36,10 @@ class Searcher:
         self.clear_heuristics()
         self.transposition_table.set_ancient()
         d = 1
-        start = instant.now()
-        max_time = instant.duration(seconds=time_sec)
+        start = time.now()
+        max_time = time.fromtimestamp(start.timestamp() + time_sec)
         while True:
-            if start.elapsed() >= max_time:
+            if time.now() >= max_time:
                 break
 
             alpha = -float('inf')
