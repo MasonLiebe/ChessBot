@@ -76,7 +76,7 @@ function pvs(node, depth, α, β, color) is
 
 Quiescence Search is employed to avoid the "horizon effect" by extending the search depth for positions with potential tactical operations like captures or checks, ensuring that the evaluation of a position doesn't overlook imminent threats or opportunities. This algorithm helps in providing more accurate evaluations by continuing the search until a "quiet" position is reached, where a static evaluation becomes reliable. The following pseudocode outlines the basic structure of Quiescence Search integrated within a typical search routine:
 
-'''plaintext
+```plaintext
 function quiescence_search(node, depth) is
     if node appears quiet or node is a terminal node or depth = 0 then
         return estimated value of node
@@ -95,10 +95,10 @@ function normal_search(node, depth) is
     else
         (recursively search node children with normal_search)
         return estimated value of children
-'''
+```
 
 Quiescence Search emulates human intuition in chess, allowing the engine to distinguish between moves requiring deeper investigation and those that can be evaluated as they stand. This differentiation ensures that the engine's move decisions are both efficient and tactically sound, enhancing its competitiveness and strategic depth.
 
-These sections detail two critical components of your chess engine's decision-making algorithms, highlighting the sophistication and thoughtfulness of its design.
+
 
 
