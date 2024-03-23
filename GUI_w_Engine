@@ -53,7 +53,9 @@ class CustomChessGUI(tk.Tk):
     
     def load_piece_images(self):
         pieces = ['white-pawn', 'white-bishop', 'white-knight', 'white-rook', 'white-queen', 'white-king',
-                'black-pawn', 'black-bishop', 'black-knight', 'black-rook', 'black-queen', 'black-king']
+                  'black-pawn', 'black-bishop', 'black-knight', 'black-rook', 'black-queen', 'black-king',
+                  'white_custom1', 'white_custom2', 'white_custom3', 'white_custom4', 'white_custom5', 'white_custom6',
+                  'black_custom1', 'black_custom2', 'black_custom3', 'black_custom4', 'black_custom5', 'black_custom6']
         for piece in pieces:
             path = f'./assets/pieces/{piece}.png'
             img = Image.open(path)
