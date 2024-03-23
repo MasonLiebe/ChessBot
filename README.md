@@ -4,7 +4,7 @@ CustomChess is a comprehensive chess application that offers both 2-player and 1
 
 Features of CustomChess include:
 
-- **Graphical User Interface (GUI):** A straightforward and functional interface allowing seamless interaction with the game.
+- **Graphical User Interface (GUI):** A straightforward and functional interface allowing seamless interaction with the game. (IN PROGRESS)
 - **Board Representation & Game State Management:** Robust under-the-hood mechanics ensuring accurate game play and state tracking.
 - **Original Bitboard Architecture:** Supports custom game structures, rules, and uniquely crafted chess pieces, enhancing the traditional chess experience. Due to a lack of strong options for handeling 256-bit unsigned integers, this involves a custom class to represent and handle all of the operations.  This is a major efficiency painpoint and a future optimization possibility.
   - **User-Created Custom Pieces:** Players can design and introduce their own pieces into the game, adding a personalized touch.
