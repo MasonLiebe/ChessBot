@@ -10,13 +10,19 @@ from typing import Optional
 class Searcher:
     def __init__(self):
         self.transposition_table = TranspositionTable()
+        # stores two killer moves for each ply
+        # indexed by killer_moves[depth][0] and killer_moves[depth][1]
         self.killer_moves = [[Move.null(), Move.null()] for _ in range(64)]
+        # stores the history heuristic values for each move
         self.history_moves = [[0] * 256 for _ in range(256)]
+
+        # tracks the number of nodes searched for efficiency analysis
         self.nodes_searched = 0
         self.nodes_fail_high_first = 0
         self.nodes_fail_high = 0
 
     def get_best_move(self, position: Position, eval: Evaluator, movegen: MoveGenerator, depth: int) -> Move:
+        # iterative deepening
         self.clear_heuristics()
         self.transposition_table.set_ancient()
         for d in range(1, depth + 1):
@@ -33,13 +39,14 @@ class Searcher:
         return entry.move_ if entry else None
 
     def get_best_move_timeout(self, position: Position, eval: Evaluator, movegen: MoveGenerator, time_sec: int):
+        # iterative deepening but with a time limit rather than a depth limit
         self.clear_heuristics()
         self.transposition_table.set_ancient()
         d = 1
-        start = time.now()
+        start = time.time()
         max_time = time.fromtimestamp(start.timestamp() + time_sec)
         while True:
-            if time.now() >= max_time:
+            if time.time() >= max_time:
                 break
 
             alpha = -float('inf')
@@ -57,12 +64,17 @@ class Searcher:
 
     def alphabeta(self, position: Position, eval: Evaluator, movegen: MoveGenerator,
                   depth: int, alpha: int, beta: int, do_null: bool) -> int:
+        # alpha-beta pruning algorithm with quiescence search
         self.nodes_searched += 1
 
+        # if we reach the maximum depth, we perform a quiescence search
         if depth <= 0:
             return self.quiesce(position, eval, movegen, 0, alpha, beta)
-
+        
+        # check if the current nod is a PV node (alpha != beta - 1)
         is_pv = alpha != beta - 1
+
+        # check if the current position is in the transposition table
         entry = self.transposition_table.retrieve(position.get_zobrist())
         if entry and entry.depth >= depth:
             if entry.flag == EntryFlag.EXACT:
@@ -78,29 +90,37 @@ class Searcher:
                 if not is_pv and alpha >= entry.value:
                     return alpha
 
+        # If not a PV node, try null move pruning
         if not is_pv:
             beta_result = self.try_null_move(position, eval, movegen, depth, alpha, beta, do_null)
             if beta_result is not None:
                 return beta_result
 
+        # Generate and score pseudo-legal moves if the current node is a PV node
         moves_and_score = self.get_scored_pseudo_moves(eval, movegen, position, depth)
         best_move = Move.null()
         num_legal_moves = 0
         old_alpha = alpha
         best_score = -float('inf')
         in_check = movegen.in_check(position)
+        # iterate over the scored moves
         for i in range(len(moves_and_score)):
+            # sort the moves by score
             Searcher.sort_moves(i, moves_and_score)
             move_ = moves_and_score[i][1]
 
+            # skip the move if it is not legal
             if not movegen.is_move_legal(move_, position):
                 continue
-
+            
+            # increment the number of legal moves and make the move
             num_legal_moves += 1
             position.make_move(move_)
+            # recursively call the alpha-beta algorithm
             if num_legal_moves == 1:
                 score = -self.alphabeta(position, eval, movegen, depth - 1, -beta, -alpha, True)
             else:
+                # perform late move reduction if the move is a quiet move
                 if num_legal_moves > 4 and move_.get_move_type() == 'Quiet' and not is_pv and depth >= 5 and not in_check:
                     reduced_depth = depth - 2
                     if num_legal_moves > 10:
@@ -109,6 +129,7 @@ class Searcher:
                 else:
                     score = alpha + 1
 
+                # re-search if the score failed high
                 if score > alpha:
                     score = -self.alphabeta(position, eval, movegen, depth - 1, -alpha - 1, -alpha, True)
                     if score > alpha and score < beta:
@@ -116,10 +137,12 @@ class Searcher:
 
             position.unmake_move()
 
+            # update the best score and best move
             if score > best_score:
                 best_score = score
                 best_move = move_
 
+                # update alpha and perfrom alpha-beta pruning
                 if score > alpha:
                     if score >= beta:
                         if num_legal_moves == 1:
@@ -141,7 +164,8 @@ class Searcher:
 
         if num_legal_moves == 0:
             return -99999 if movegen.in_check(position) else 0
-
+        
+        # store the search result in the transposition table
         if alpha != old_alpha:
             self.transposition_table.insert(position.get_zobrist(), Entry(
                 key=position.get_zobrist(),
@@ -165,12 +189,14 @@ class Searcher:
     def quiesce(self, position: Position, eval: Evaluator, movegen: MoveGenerator,
                 depth: int, alpha: int, beta: int) -> int:
         self.nodes_searched += 1
+        # evaluate the current position and prune
         score = eval.evaluate(position, movegen)
         if score >= beta:
             return beta
         if score > alpha:
             alpha = score
-
+        
+        # generate and score capture moves
         best_move = Move.null()
         num_legal_moves = 0
         moves_and_score = self.get_scored_capture_moves(eval, movegen, position, depth)

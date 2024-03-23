@@ -292,16 +292,18 @@ class AttackTables:
 
     def get_slider_attacks(self, occ, s):
         # little bit of math involved LOL - 45 mins on this line
+        # exercise for the reader?
         return ((occ) - 2 * s) ^ self.reverse_bits(self.reverse_bits(occ) - 2 * self.reverse_bits(s))
     
     def get_rank_attack(self, loc_index, occ):
-        x, y = from_index(loc_index)
-        rank_mask = self.masks.get_rank(y)
-        rank_occupied = (occ & rank_mask).value
-        rank_slider = 1 << loc_index
-        rank_attacks = self.get_slider_attacks(rank_occupied, rank_slider)
-        return rank_mask & rank_attacks
-
+        x, y = from_index(loc_index) # get the x and y coordinates of the square
+        rank_mask = self.masks.get_rank(y) # get the mask for the rank
+        rank_occupied = (occ & rank_mask).value # get the occupied squares on the rank
+        rank_slider = 1 << loc_index # get the slider mask (the square the piece is on)
+        rank_attacks = self.get_slider_attacks(rank_occupied, rank_slider) # get the attacks for the rank
+        return rank_mask & rank_attacks # return the attacks that are on the rank
+    
+    # All other sliding functions work similarly
     def get_file_attack(self, loc_index, occ):
         x, y = from_index(loc_index)
         file_mask = self.masks.get_file(x)
@@ -358,41 +360,8 @@ class AttackTables:
     def get_south_pawn_attack_raw(self, loc_index):
         return self.south_pawn_attacks[loc_index]
 
-    # def get_sliding_moves_bb(self, loc_index, occ, north, east, south, west, northeast, northwest, southeast, southwest):
-    #     raw_attacks = Bitboard.zero()
-    #     if north or south:
-    #         raw_attacks |= self.get_file_attack(loc_index, occ)
-    #         if not north:
-    #             raw_attacks &= ~self.masks.get_north(loc_index)
-    #         elif not south:
-    #             raw_attacks &= ~self.masks.get_south(loc_index)
-
-    #     if east or west:
-    #         raw_attacks |= self.get_rank_attack(loc_index, occ)
-    #         if not east:
-    #             raw_attacks &= ~self.masks.get_east(loc_index)
-    #         elif not west:
-    #             raw_attacks &= ~self.masks.get_west(loc_index)
-
-    #     if northeast or southwest:
-    #         raw_attacks |= self.get_diagonal_attack(loc_index, occ)
-    #         if not northeast:
-    #             raw_attacks &= ~self.masks.get_northeast(loc_index)
-    #         elif not southwest:
-    #             raw_attacks &= ~self.masks.get_southwest(loc_index)
-
-    #     if northwest or southeast:
-    #         raw_attacks |= self.get_antidiagonal_attack(loc_index, occ)
-    #         if not northwest:
-    #             raw_attacks &= ~self.masks.get_northwest(loc_index)
-    #         elif not southeast:
-    #             raw_attacks &= ~self.masks.get_southeast(loc_index)
-        
-    #     # Remove moves that pass through friendly pieces
-
-    #     return raw_attacks
-
     def get_sliding_moves_bb(self, loc_index, occ, enemies, north, east, south, west, northeast, northwest, southeast, southwest):
+        # Get the raw attacks for each direction and combines them into one bitboard of attacks
         raw_attacks = Bitboard.zero()
 
         def process_direction(get_attack_func, get_mask_func, direction_flag):
