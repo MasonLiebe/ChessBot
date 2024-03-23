@@ -23,6 +23,7 @@ For position evaluation, the bot employs a nuanced scoring system. It begins wit
 Moreover, CustomChess introduces an innovative approach to evaluating custom pieces by estimating their centipawn value and positional multipliers. This estimation leverages published research on the relative value of specific piece capabilities determined by AlphaZero, accessible [here](https://arxiv.org/pdf/2009.04374.pdf).
 
 ![v2200](https://github.com/MasonLiebe/ChessBot/assets/149519733/1884a189-2226-43b3-8655-bcd85e2f0372)
+
 CustomChess vs. 2200-Rated Noam on Chess.com
 
 # What is Zobrist Hashing?
