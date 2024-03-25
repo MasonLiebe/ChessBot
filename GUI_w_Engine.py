@@ -3,8 +3,7 @@ from os import name
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
-from engine import Engine
-from bitboard import to_index
+import engine as eng
 
 
 class EngineGameGUI(tk.Tk):
@@ -100,7 +99,7 @@ class EngineGameGUI(tk.Tk):
             self.selected_piece = False
             return 
         #  otherwise select the piece, and have the engine highlight the legal moves
-        if engine.current_position.piece_at(to_index(row, col))[0] == engine.current_position.whos_turn:
+        if engine.current_position.piece_at(eng.cg.to_index(row, col))[0] == engine.current_position.whos_turn:
             self.selected_piece = (row, col)
             self.highlight_legal_moves(row, col)
     
@@ -145,6 +144,6 @@ class EngineGameGUI(tk.Tk):
 
 if __name__ == "__main__":
     # Example usage
-    engine = Engine()
+    engine = eng.Engine()
     app = EngineGameGUI(engine)
     app.mainloop()

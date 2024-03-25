@@ -1,11 +1,11 @@
 import unittest
 from unittest import *
-from bitboard import Bitboard
-from piece import Piece, PieceType
-from move import *
-from position_properties import CastleRights, PositionProperties
-from position import Position
-from engine import Engine
+from .bitboard import Bitboard
+from .piece import Piece, PieceType
+from .move import *
+from .position_properties import CastleRights, PositionProperties
+from .position import Position
+from engine.engine import Engine
 
 class TestPiece(unittest.TestCase):
     def test_blank_custom(self):

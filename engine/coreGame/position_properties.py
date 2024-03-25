@@ -1,5 +1,5 @@
 from typing import Optional, Tuple
-from move import Move, PieceType
+from .move import Move, PieceType
 
 class CastleRights:
     '''

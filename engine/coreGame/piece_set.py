@@ -1,5 +1,5 @@
-from bitboard import Bitboard
-from piece import Piece
+from .bitboard import Bitboard
+from .piece import Piece
 
 class PieceSet:
     '''

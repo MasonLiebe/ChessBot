@@ -1,6 +1,6 @@
 import random
 from typing import Dict, List, Tuple
-from piece import Piece, PieceType
+from .piece import Piece, PieceType
 
 '''
 This class is used to generate zobrist keys for a position.  A zobrist key is a semi-unique number that represents a position.  It is used to store the values of positions that have been evaluated before, so that they do not need to be re-evaluated.  The zobrist key is used as an index in the transposition table.

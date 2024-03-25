@@ -1,13 +1,13 @@
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
-from bitboard import *
-from piece_set import PieceSet
-from position_properties import PositionProperties
-from movement_pattern import MovementPattern, MovementPatternExternal, external_mp_to_internal, internal_mp_to_external
-from piece import Piece
-from move import PieceType, Dimensions, Move, MoveType
-from zobrist_table import ZobristTable
-from constants import *
+from .bitboard import *
+from .piece_set import PieceSet
+from .position_properties import PositionProperties
+from .movement_pattern import MovementPattern, MovementPatternExternal, external_mp_to_internal, internal_mp_to_external
+from .piece import Piece
+from .move import PieceType, Dimensions, Move, MoveType
+from .zobrist_table import ZobristTable
+from .constants import *
 
 
 

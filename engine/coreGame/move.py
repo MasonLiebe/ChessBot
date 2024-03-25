@@ -1,5 +1,5 @@
-from bitboard import *
-from constants import *
+from .bitboard import *
+from .constants import *
 from enum import Enum
 
 MoveType = {

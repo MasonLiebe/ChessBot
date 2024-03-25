@@ -1,9 +1,9 @@
 from typing import Dict, List 
-from position import Position
-from move_generator import MoveGenerator
-from move import Move, PieceType
-from piece_set import PieceSet
-from bitboard import Bitboard, from_index
+from .position import Position
+from .move_generator import MoveGenerator
+from .move import Move, PieceType
+from .piece_set import PieceSet
+from .bitboard import Bitboard, from_index
 
 
 # Relative Centipawn Values provided by alpha zero in 2020

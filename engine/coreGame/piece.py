@@ -1,5 +1,5 @@
-from bitboard import Bitboard
-from move import *
+from .bitboard import Bitboard
+from .move import *
 
 class Piece:
     '''

@@ -1,5 +1,5 @@
 from typing import List
-from bitboard import Bitboard, to_index, from_index
+from .bitboard import Bitboard, to_index, from_index
 
 '''
 This file handles the valid move generation for each piece. It uses the bitboard representation

@@ -1,23 +1,19 @@
+from . import coreGame as cg
+from .searcher import Searcher
+from .game import Game
+
 from typing import List, Tuple, Dict, Optional
-from position import Position, Dimensions
-from move_generator import MoveGenerator
-from evaluator import Evaluator
-from searcher import Searcher
-from bitboard import Bitboard, to_index, from_index, to_rank_file
-from movement_pattern import MovementPatternExternal
-from move import PieceType 
-from game import Game
 import time
 
 class Engine:
-    def __init__(self, position = Position.default()):
+    def __init__(self, position = cg.Position.default()):
         timer = time.time()
-        self.current_position: Position = position
+        self.current_position: cg.Position = position
         print('position setup time:', time.time() - timer)
         timer = time.time()
-        self.move_generator: MoveGenerator = MoveGenerator()
+        self.move_generator: cg.MoveGenerator = cg.MoveGenerator()
         print('move generator setup time:', time.time() - timer)
-        self.evaluator: Evaluator = Evaluator()
+        self.evaluator: cg.Evaluator = cg.Evaluator()
         print('evaluator setup time:', time.time() - timer)
         self.searcher: Searcher = Searcher()
         print('searcher setup time:', time.time() - timer)
@@ -32,18 +28,18 @@ class Engine:
     def get_score(self) -> int:
         return self.evaluator.evaluate(self.current_position, self.move_generator)
 
-    def register_piecetype(self, char_rep: str, mpe: MovementPatternExternal):
+    def register_piecetype(self, char_rep: str, mpe: cg.MovementPatternExternal):
         self.current_position.register_piecetype(char_rep, mpe)
 
-    def add_piece(self, owner: int, piece_type: PieceType, x: int, y: int):
-        self.current_position.add_piece(owner, piece_type, to_index(x, y))
+    def add_piece(self, owner: int, piece_type: cg.PieceType, x: int, y: int):
+        self.current_position.add_piece(owner, piece_type, cg.to_index(x, y))
 
     def remove_piece(self, index: int):
         self.current_position.remove_piece(index)
 
     def make_move(self, x1: int, y1: int, x2: int, y2: int) -> bool:
-        from_ = to_index(x1, y1)
-        to = to_index(x2, y2)
+        from_ = cg.to_index(x1, y1)
+        to = cg.to_index(x2, y2)
 
         moves = self.move_generator.get_pseudo_moves(self.current_position)
         for move_ in moves:
@@ -63,10 +59,10 @@ class Engine:
     @classmethod
     def from_fen(cls, fen: str) -> 'Engine':
         return cls(
-            move_generator=MoveGenerator(),
-            evaluator=Evaluator(),
+            move_generator=cg.MoveGenerator(),
+            evaluator=cg.Evaluator(),
             searcher=Searcher(),
-            current_position=Position.from_fen(fen)
+            current_position=cg.Position.from_fen(fen)
         )
 
     def perft(self, depth: int) -> int:
@@ -95,13 +91,13 @@ class Engine:
             if not self.move_generator.is_move_legal(move_, self.current_position):
                 continue
 
-            x, y = from_index(move_.get_from())
-            x2, y2 = from_index(move_.get_to())
+            x, y = cg.from_index(move_.get_from())
+            x2, y2 = cg.from_index(move_.get_to())
             self.current_position.make_move(move_)
             plus = self.perft(depth - 1)
             nodes += plus
             self.current_position.unmake_move()
-            printing.append(f"{to_rank_file(x, y)}{to_rank_file(x2, y2)}: {plus}")
+            printing.append(f"{cg.to_rank_file(x, y)}{cg.to_rank_file(x2, y2)}: {plus}")
         printing.sort()
         for s in printing:
             print(s)
@@ -110,8 +106,8 @@ class Engine:
     def play_best_move(self, depth: int) -> bool:
         best = self.searcher.get_best_move(self.current_position, self.evaluator, self.move_generator, depth)
         if best:
-            x1, y1 = from_index(best.get_from())
-            x2, y2 = from_index(best.get_to())
+            x1, y1 = cg.from_index(best.get_from())
+            x2, y2 = cg.from_index(best.get_to())
             return self.make_move(x1, y1, x2, y2)
         else:
             return False
@@ -119,8 +115,8 @@ class Engine:
     def get_best_move(self, depth: int) -> Optional[Tuple[int, int, int, int]]:
         best = self.searcher.get_best_move(self.current_position, self.evaluator, self.move_generator, depth)
         if best:
-            x1, y1 = from_index(best.get_from())
-            x2, y2 = from_index(best.get_to())
+            x1, y1 = cg.from_index(best.get_from())
+            x2, y2 = cg.from_index(best.get_to())
             return x1, y1, x2, y2
         else:
             return None
@@ -129,8 +125,8 @@ class Engine:
         result = self.searcher.get_best_move_timeout(self.current_position, self.evaluator, self.move_generator, max_sec)
         if result:
             best, depth = result
-            x1, y1 = from_index(best.get_from())
-            x2, y2 = from_index(best.get_to())
+            x1, y1 = cg.from_index(best.get_from())
+            x2, y2 = cg.from_index(best.get_to())
             return self.make_move(x1, y1, x2, y2), depth
         else:
             return False, 0
@@ -139,8 +135,8 @@ class Engine:
         result = self.searcher.get_best_move_timeout(self.current_position, self.evaluator, self.move_generator, max_sec)
         if result:
             best, depth = result
-            x1, y1 = from_index(best.get_from())
-            x2, y2 = from_index(best.get_to())
+            x1, y1 = cg.from_index(best.get_from())
+            x2, y2 = cg.from_index(best.get_to())
             return (x1, y1, x2, y2), depth
         else:
             return None
@@ -156,28 +152,28 @@ class Engine:
     def to_move_in_check(self) -> bool:
         return self.move_generator.in_check(self.current_position)
 
-    def set_state(self, movement_patterns: Dict[str, MovementPatternExternal],
+    def set_state(self, movement_patterns: Dict[str, cg.MovementPatternExternal],
                   valid_squares: List[Tuple[int, int]], pieces: List[Tuple[int, int, int, str]]):
         assert Game.each_owner_contains_k(pieces)
         width = 0
         height = 0
-        bounds = Bitboard.zero()
+        bounds = cg.Bitboard.zero()
         for sq in valid_squares:
             if sq[0] >= width:
                 width = sq[0] + 1
             if sq[1] >= height:
                 height = sq[1] + 1
-            bounds.set_bit(to_index(sq[0], sq[1]), True)
+            bounds.set_bit(cg.to_index(sq[0], sq[1]), True)
 
-        pieces = [(owner, to_index(x, y), PieceType.from_char(pce_chr)) for owner, x, y, pce_chr in pieces]
-        self.current_position = Position.custom(Dimensions(width, height), bounds, movement_patterns, pieces)
+        pieces = [(owner, cg.to_index(x, y), cg.PieceType.from_char(pce_chr)) for owner, x, y, pce_chr in pieces]
+        self.current_position = cg.Position.custom(cg.Dimensions(width, height), bounds, movement_patterns, pieces)
 
     def get_pieces(self):
         # returns a list of tuples of the form (owner, x, y, piece_char)
         pieces = []
         for x in range(self.current_position.dimensions.width):
             for y in range(self.current_position.dimensions.height):
-                index = to_index(x, y)
+                index = cg.to_index(x, y)
                 pos_info = self.current_position.piece_at(index)
                 if pos_info is not None:
                     owner, piece = pos_info
@@ -209,7 +205,7 @@ if __name__ == '__main__':
 
 
     start = time.time()
-    engine = Engine(Position.default())
+    engine = Engine(cg.Position.default())
     print(engine.current_position.to_string())
     print('engine_setup_time:', time.time() - start)
 

@@ -1,5 +1,5 @@
 from typing import List, Optional
-from move import Move
+from . import coreGame as cg
 from enum import Enum
 
 TABLE_SIZE = 1_000_000
@@ -22,7 +22,7 @@ class EntryFlag(Enum):
 
 class Entry:
     # Stores the data for a single entry in the transposition table
-    def __init__(self, key: int, flag: EntryFlag, value: int, move_: Move, depth: int, ancient: bool):
+    def __init__(self, key: int, flag: EntryFlag, value: int, move_: cg.Move, depth: int, ancient: bool):
         self.key = key
         self.flag = flag
         self.value = value
@@ -32,7 +32,7 @@ class Entry:
 
     @classmethod
     def null(cls) -> 'Entry':
-        return cls(0, EntryFlag.NULL, 0, Move.null(), 0, True)
+        return cls(0, EntryFlag.NULL, 0, cg.Move.null(), 0, True)
 
 class Cluster:
     def __init__(self):

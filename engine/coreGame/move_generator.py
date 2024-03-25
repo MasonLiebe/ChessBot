@@ -1,12 +1,12 @@
-from bitboard import Bitboard
-from move import Move, MoveType, PieceType
-from typing import Optional, List
-from attack_tables import AttackTables, MaskHandler
-from bitboard import Bitboard, from_index, to_index
-from position import Position
-from typing import List, Tuple, Iterator
+from .bitboard import Bitboard
+from .move import Move, MoveType, PieceType
+from .attack_tables import AttackTables, MaskHandler
+from .bitboard import Bitboard, from_index, to_index
+from .position import Position
+from .piece import Piece
+
 from itertools import chain
-from piece import Piece
+from typing import Optional, List, Tuple, Iterator
 
 # Iterator that converts a Bitboard of move possibilities to Move objects
 class BitboardMoves:

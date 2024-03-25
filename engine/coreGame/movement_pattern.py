@@ -1,5 +1,5 @@
 from typing import List, Tuple, Optional
-from bitboard import Bitboard, to_index, from_index
+from .bitboard import Bitboard, to_index, from_index
 '''
 These classes are used to represent the movement patterns of pieces. In the
 Position class, there is a dictionary of these pattern objects, indexed on 

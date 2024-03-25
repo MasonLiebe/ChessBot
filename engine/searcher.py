@@ -1,8 +1,5 @@
-from move import Move, MoveType
-from position import Position
-from move_generator import MoveGenerator
-from evaluator import Evaluator
-from transposition_table import TranspositionTable, Entry, EntryFlag
+from . import coreGame as cg
+from .transposition_table import TranspositionTable, Entry, EntryFlag
 from datetime import time, timedelta as dt
 from typing import Optional
 
@@ -12,7 +9,7 @@ class Searcher:
         self.transposition_table = TranspositionTable()
         # stores two killer moves for each ply
         # indexed by killer_moves[depth][0] and killer_moves[depth][1]
-        self.killer_moves = [[Move.null(), Move.null()] for _ in range(64)]
+        self.killer_moves = [[cg.Move.null(), cg.Move.null()] for _ in range(64)]
         # stores the history heuristic values for each move
         self.history_moves = [[0] * 256 for _ in range(256)]
 
@@ -21,7 +18,7 @@ class Searcher:
         self.nodes_fail_high_first = 0
         self.nodes_fail_high = 0
 
-    def get_best_move(self, position: Position, eval: Evaluator, movegen: MoveGenerator, depth: int) -> Move:
+    def get_best_move(self, position: cg.Position, eval: cg.Evaluator, movegen: cg.MoveGenerator, depth: int) -> cg.Move:
         # iterative deepening
         self.clear_heuristics()
         self.transposition_table.set_ancient()
@@ -38,7 +35,7 @@ class Searcher:
         entry = self.transposition_table.retrieve(position.get_zobrist())
         return entry.move_ if entry else None
 
-    def get_best_move_timeout(self, position: Position, eval: Evaluator, movegen: MoveGenerator, time_sec: int):
+    def get_best_move_timeout(self, position: cg.Position, eval: cg.Evaluator, movegen: cg.MoveGenerator, time_sec: int):
         # iterative deepening but with a time limit rather than a depth limit
         self.clear_heuristics()
         self.transposition_table.set_ancient()
@@ -62,7 +59,7 @@ class Searcher:
         entry = self.transposition_table.retrieve(position.get_zobrist())
         return (entry.move_, d) if entry else None
 
-    def alphabeta(self, position: Position, eval: Evaluator, movegen: MoveGenerator,
+    def alphabeta(self, position: cg.Position, eval: cg.Evaluator, movegen: cg.MoveGenerator,
                   depth: int, alpha: int, beta: int, do_null: bool) -> int:
         # alpha-beta pruning algorithm with quiescence search
         self.nodes_searched += 1
@@ -98,7 +95,7 @@ class Searcher:
 
         # Generate and score pseudo-legal moves if the current node is a PV node
         moves_and_score = self.get_scored_pseudo_moves(eval, movegen, position, depth)
-        best_move = Move.null()
+        best_move = cg.Move.null()
         num_legal_moves = 0
         old_alpha = alpha
         best_score = -float('inf')
@@ -186,7 +183,7 @@ class Searcher:
             ))
         return alpha
 
-    def quiesce(self, position: Position, eval: Evaluator, movegen: MoveGenerator,
+    def quiesce(self, position: cg.Position, eval: cg.Evaluator, movegen: cg.MoveGenerator,
                 depth: int, alpha: int, beta: int) -> int:
         self.nodes_searched += 1
         # evaluate the current position and prune
@@ -197,7 +194,7 @@ class Searcher:
             alpha = score
         
         # generate and score capture moves
-        best_move = Move.null()
+        best_move = cg.Move.null()
         num_legal_moves = 0
         moves_and_score = self.get_scored_capture_moves(eval, movegen, position, depth)
         for i in range(len(moves_and_score)):
@@ -238,7 +235,7 @@ class Searcher:
     def clear_heuristics(self):
         for i in range(len(self.killer_moves)):
             for j in range(len(self.killer_moves[i])):
-                self.killer_moves[i][j] = Move.null()
+                self.killer_moves[i][j] = cg.Move.null()
         for i in range(len(self.history_moves)):
             for j in range(len(self.history_moves[i])):
                 self.history_moves[i][j] = 0
@@ -248,17 +245,17 @@ class Searcher:
         self.nodes_fail_high_first = 0
         self.nodes_fail_high = 0
 
-    def update_killers(self, depth: int, move_: Move):
+    def update_killers(self, depth: int, move_: cg.Move):
         if not move_.get_is_capture():
             if move_ != self.killer_moves[depth][0] and move_ != self.killer_moves[depth][1]:
                 self.killer_moves[depth][1] = self.killer_moves[depth][0]
                 self.killer_moves[depth][0] = move_
 
-    def update_history_heuristic(self, depth: int, move_: Move):
+    def update_history_heuristic(self, depth: int, move_: cg.Move):
         if not move_.get_is_capture():
             self.history_moves[move_.get_from()][move_.get_to()] += depth
 
-    def get_scored_pseudo_moves(self, eval: Evaluator, movegen: MoveGenerator, position: Position, depth: int) -> list:
+    def get_scored_pseudo_moves(self, eval: cg.Evaluator, movegen: cg.MoveGenerator, position: cg.Position, depth: int) -> list:
         moves_and_score = [(eval.score_move(depth, self.history_moves, self.killer_moves, position, mv), mv) for mv in movegen.get_pseudo_moves(position)]
 
         entry = self.transposition_table.retrieve(position.get_zobrist())
@@ -271,7 +268,7 @@ class Searcher:
 
         return moves_and_score
 
-    def get_scored_capture_moves(self, eval: Evaluator, movegen: MoveGenerator, position: Position, depth: int) -> list:
+    def get_scored_capture_moves(self, eval: cg.Evaluator, movegen: cg.MoveGenerator, position: cg.Position, depth: int) -> list:
         moves_and_score = [(eval.score_move(depth, self.history_moves, self.killer_moves, position, mv), mv) for mv in movegen.get_capture_moves(position)]
 
         entry = self.transposition_table.retrieve(position.get_zobrist())
@@ -284,11 +281,11 @@ class Searcher:
 
         return moves_and_score
 
-    def try_null_move(self, position: Position, eval: Evaluator, movegen: MoveGenerator,
+    def try_null_move(self, position: cg.Position, eval: cg.Evaluator, movegen: cg.MoveGenerator,
                       depth: int, alpha: int, beta: int, do_null: bool) -> Optional[int]:
         if do_null:
             if depth > 3 and eval.can_do_null_move(position) and not movegen.in_check(position):
-                position.make_move(Move.null())
+                position.make_move(cg.Move.null())
                 nscore = -self.alphabeta(position, eval, movegen, depth - 3, -beta, -beta + 1, False)
                 position.unmake_move()
                 if nscore >= beta:
