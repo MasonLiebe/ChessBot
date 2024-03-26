@@ -25,7 +25,7 @@ function BoardPanel({
         <input
           id="rows-slider"
           type="range"
-          min="1"
+          min="3"
           max="16"
           value={rows}
           onChange={onRowsChange}
@@ -36,7 +36,7 @@ function BoardPanel({
         <input
           id="columns-slider"
           type="range"
-          min="1"
+          min="3"
           max="16"
           value={columns}
           onChange={onColumnsChange}
