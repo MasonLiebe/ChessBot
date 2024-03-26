@@ -1,51 +1,66 @@
-import React, { useState } from 'react';
-
+import React, { useState, useEffect } from 'react';
 import './App.css';
-
 import Chessboard from './components/Chessboard/Chessboard';
+import BoardPanel from './components/BoardPanel/BoardPanel';
+import PieceSet from './components/PieceSet/PieceSet';
 
 function App() {
   const [rows, setRows] = useState(8);
   const [columns, setColumns] = useState(8);
+  const [isSquare, setIsSquare] = useState(true);
 
   const handleRowsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRows(parseInt(event.target.value));
+    const newRows = parseInt(event.target.value);
+    setRows(newRows);
+    if (isSquare) {
+      setColumns(newRows);
+    }
   };
 
   const handleColumnsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setColumns(parseInt(event.target.value));
+    const newColumns = parseInt(event.target.value);
+    setColumns(newColumns);
+    if (isSquare) {
+      setRows(newColumns);
+    }
   };
+
+  const handleSquareToggle = () => {
+    setIsSquare(!isSquare);
+    if (!isSquare) {
+      setRows(8);
+      setColumns(8);
+    }
+  };
+
+  useEffect(() => {
+    if (isSquare) {
+      setColumns(rows);
+    }
+  }, [isSquare, rows]);
 
   return (
     <div className="app">
-      <div className="chessboard-container">
-        <Chessboard rows={rows} columns={columns} />
-      </div>
-      <div className="slider-container">
-        <div className="slider">
-          <label htmlFor="rows-slider">Rows: {rows}</label>
-          <input
-            id="rows-slider"
-            type="range"
-            min="1"
-            max="16"
-            value={rows}
-            onChange={handleRowsChange}
-          />
+      <h1 className="app-title">Custom Chess Workshop</h1>
+      <div className="main-container">
+        <div className="chessboard-wrapper">
+          <PieceSet color="black" />
+          <div className="chessboard-container">
+            <Chessboard rows={rows} columns={columns} />
+          </div>
+          <PieceSet color="white" />
         </div>
-        <div className="slider">
-          <label htmlFor="columns-slider">Columns: {columns}</label>
-          <input
-            id="columns-slider"
-            type="range"
-            min="1"
-            max="16"
-            value={columns}
-            onChange={handleColumnsChange}
-          />
-        </div>
+        <BoardPanel
+          rows={rows}
+          columns={columns}
+          isSquare={isSquare}
+          onRowsChange={handleRowsChange}
+          onColumnsChange={handleColumnsChange}
+          onSquareToggle={handleSquareToggle}
+        />
       </div>
     </div>
   );
 }
+
 export default App;
