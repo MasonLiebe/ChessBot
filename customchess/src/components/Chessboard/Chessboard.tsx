@@ -8,7 +8,7 @@ interface ChessboardProps {
 }
 
 export default function Chessboard({ rows, columns }: ChessboardProps) {
-  const squareSize = Math.floor(800 / Math.max(rows, columns));
+  const squareSize = Math.floor(600 / Math.max(rows, columns));
   const boardWidth = columns * squareSize;
   const boardHeight = rows * squareSize;
 

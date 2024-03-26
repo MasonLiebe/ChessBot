@@ -44,11 +44,12 @@ function App() {
       <h1 className="app-title">Custom Chess Workshop</h1>
       <div className="main-container">
         <div className="chessboard-wrapper">
-          <PieceSet color="black" />
           <div className="chessboard-container">
+            <PieceSet color="black" />
             <Chessboard rows={rows} columns={columns} />
+            <PieceSet color="white" />
           </div>
-          <PieceSet color="white" />
+
         </div>
         <BoardPanel
           rows={rows}
