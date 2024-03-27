@@ -15,3 +15,7 @@
     height: 50px;
     cursor: pointer;
   }
+
+  .piece.selected {
+    border: 2px solid #f00;
+  }

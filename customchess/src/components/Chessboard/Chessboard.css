@@ -1,6 +1,13 @@
+
 .square {
-  width: 50px;
-  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.square.selected {
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 .white {
@@ -9,4 +16,19 @@
 
 .black {
   background-color: #b58863;
+}
+
+.piece {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.piece.dragging {
+  position: absolute;
+  pointer-events: none;
+  transform: translate(var(--mouse-x), var(--mouse-y));
+  z-index: 1;
 }

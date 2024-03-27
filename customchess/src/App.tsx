@@ -3,6 +3,7 @@ import './App.css';
 import Chessboard from './components/Chessboard/Chessboard';
 import BoardPanel from './components/BoardPanel/BoardPanel';
 import PieceSet from './components/PieceSet/PieceSet';
+import { standardBoard } from './constants';
 
 function App() {
   const [rows, setRows] = useState(8);
@@ -46,7 +47,7 @@ function App() {
         <div className="chessboard-wrapper">
           <div className="chessboard-container">
             <PieceSet color="black" />
-            <Chessboard rows={rows} columns={columns} />
+            <Chessboard rows={rows} columns={columns} pieces = {standardBoard} initialPieces= {standardBoard}/>
             <PieceSet color="white" />
           </div>
 
