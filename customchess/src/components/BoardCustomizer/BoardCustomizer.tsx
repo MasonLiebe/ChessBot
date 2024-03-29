@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import './Chessboard.css';
+import './BoardCustomizer.css';
+import { standardBoard } from '../../constants';
 
-interface ChessboardProps {
+interface BoardCustomizerProps {
   rows: number;
   columns: number;
   pieces: string; // 256 character string representing the board
@@ -40,8 +41,8 @@ const piece_to_image: PieceToImageMap = {
 };
 
 
-export default function Chessboard({ rows, columns, pieces: initialPieces }: ChessboardProps) {
-  const [pieces, setPieces] = useState(initialPieces);
+export default function BoardCustomizer({ rows, columns, pieces: initialPieces }: BoardCustomizerProps) {
+  const [pieces, setPieces] = useState(standardBoard.split(''));;
   const [selectedPiece, setSelectedPiece] = useState<{ index: number; piece: string } | null>(null);
 
   const squareSize = Math.floor(600 / Math.max(rows, columns));
@@ -51,15 +52,21 @@ export default function Chessboard({ rows, columns, pieces: initialPieces }: Che
   const handleClick = (index: number) => {
     if (selectedPiece) {
       // Move the selected piece to the clicked square
-      const updatedPieces = pieces.split('');
-      updatedPieces[selectedPiece.index] = ' ';
+      const updatedPieces = [...pieces];
+      updatedPieces[selectedPiece.index] = '.';
       updatedPieces[index] = selectedPiece.piece;
-      setPieces(updatedPieces.join(''));
+      
+      // Ensure the array has a length of 256
+      while (updatedPieces.length < 256) {
+        updatedPieces.push('.');
+      }
+      
+      setPieces(updatedPieces);
       setSelectedPiece(null);
     } else {
       // Select the piece on the clicked square
       const piece = pieces[index];
-      if (piece !== ' ') {
+      if (piece !== '.') {
         setSelectedPiece({ index, piece });
       }
     }
@@ -71,7 +78,7 @@ export default function Chessboard({ rows, columns, pieces: initialPieces }: Che
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < columns; col++) {
         const squareColor = (row + col) % 2 === 0 ? 'white' : 'black';
-        const index = (rows - row - 1) * 16 + col;
+        const index = (rows - row - 1) * 16 + columns - col - 1;
         const piece = pieces[index];
 
         squares.push(
@@ -84,7 +91,7 @@ export default function Chessboard({ rows, columns, pieces: initialPieces }: Che
             }}
             onClick={() => handleClick(index)}
           >
-            {piece !== ' ' && piece_to_image[piece] && (
+            {piece !== '.' && piece_to_image[piece] && (
               <img
                 src={`/assets/pieces/${piece_to_image[piece]}.png`}
                 alt={`${piece}`}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import Chessboard from './components/Chessboard/Chessboard';
+import BoardCustomizer from './components/BoardCustomizer/BoardCustomizer';
 import BoardPanel from './components/BoardPanel/BoardPanel';
 import PieceSet from './components/PieceSet/PieceSet';
 import { standardBoard } from './constants';
@@ -34,6 +34,11 @@ function App() {
     }
   };
 
+  const handlePieceSelect = (piece: string, color: string) => {
+    console.log(piece);
+    return 0;
+  };
+
   useEffect(() => {
     if (isSquare) {
       setColumns(rows);
@@ -46,11 +51,10 @@ function App() {
       <div className="main-container">
         <div className="chessboard-wrapper">
           <div className="chessboard-container">
-            <PieceSet color="black" />
-            <Chessboard rows={rows} columns={columns} pieces = {standardBoard} initialPieces= {standardBoard}/>
-            <PieceSet color="white" />
+            <PieceSet color="black" onPieceSelect={handlePieceSelect}/>
+            <BoardCustomizer rows={rows} columns={columns} pieces = {standardBoard} initialPieces= {standardBoard}/>
+            <PieceSet color="white" onPieceSelect={handlePieceSelect} />
           </div>
-
         </div>
         <BoardPanel
           rows={rows}

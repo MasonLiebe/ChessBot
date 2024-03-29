@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './PieceSet.css';
 
 interface PieceSetProps {
   color: 'black' | 'white';
+  onPieceSelect: (piece: string) => void;
 }
 
-function PieceSet({ color }: PieceSetProps) {
+function PieceSet({ color, onPieceSelect }: PieceSetProps) {
   const pieces = [
     'pawn',
     'knight',
@@ -20,6 +21,13 @@ function PieceSet({ color }: PieceSetProps) {
     'custom6',
   ];
 
+  const [selectedPiece, setSelectedPiece] = useState<string | null>(null);
+
+  const handlePieceClick = (piece: string) => {
+    setSelectedPiece(piece);
+    onPieceSelect(piece, color);
+  };
+
   return (
     <div className="piece-set">
       {pieces.map((piece) => (
@@ -27,7 +35,8 @@ function PieceSet({ color }: PieceSetProps) {
           key={piece}
           src={`/assets/pieces/${color}-${piece}.png`}
           alt={`${color} ${piece}`}
-          className="piece"
+          className={`piece ${selectedPiece === piece ? 'selected' : ''}`}
+          onClick={() => handlePieceClick(piece)}
         />
       ))}
     </div>
