@@ -9,6 +9,7 @@ interface PieceSetProps {
 
 function PieceSet({ color, selectedPiece, onPieceSelect }: PieceSetProps) {
   const pieces = [
+    'king', // 'king' is the first piece in the array
     'pawn',
     'knight',
     'bishop',
@@ -34,6 +35,7 @@ function PieceSet({ color, selectedPiece, onPieceSelect }: PieceSetProps) {
     'custom4': color === 'black' ? 'e' : 'E',
     'custom5': color === 'black' ? 'f' : 'F',
     'custom6': color === 'black' ? 'g' : 'G',
+    'king': color === 'black' ? 'k' : 'K',
   };
 
   const handlePieceClick = (piece: string) => {

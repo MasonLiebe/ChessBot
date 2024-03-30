@@ -93,7 +93,21 @@ function BoardPanel({
       </div>
       <button className="board-button" onClick={onClearBoard}>Clear Board</button>
       <button className="board-button" onClick={onResetBoard}>Reset Board</button>
-      <button className="board-button program-piece-btn" onClick={onProgramPiece}>Program Piece</button>
+      <button className="start-button" onClick={onResetBoard}>Start Game!</button>
+      <div className="selected-piece-box">
+        {selected && selected.piece ? (
+          <img
+            src={`/assets/pieces/${piece_to_image[selected.piece]}.png`}
+            alt={`${selected.color} ${selected.piece}`}
+            className="selected-piece"
+          />
+        ) : (
+          <div className="empty-box"></div>
+        )}
+      </div>
+      <div className="selected-piece-title">Selected Piece</div>
+      <button className="board-button program-piece-btn" onClick={onProgramPiece}>Program Selected Piece</button>
+
     </div>
   );
 }

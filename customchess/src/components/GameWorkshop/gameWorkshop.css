@@ -26,9 +26,10 @@ body {
   .app-title {
     color: #e2b714;
     font-size: 2rem;
-    margin-bottom: 20px;
+    margin-bottom: 60px;
     text-align: center;
-    font: Roboto;
+    font-family: "Raleway", sans-serif;
+    font-optical-sizing: auto;
   }
   
   @media (prefers-reduced-motion: no-preference) {
@@ -64,7 +65,7 @@ body {
   .slider-container {
     display: flex;
     gap: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     align-items: center;
   }
   
@@ -84,7 +85,7 @@ body {
   
   .chessboard-container {
     width: 830px;
-    height: 700px;
+    height: 760px;
     display: flex;
     justify-content: center;
     align-items: center;

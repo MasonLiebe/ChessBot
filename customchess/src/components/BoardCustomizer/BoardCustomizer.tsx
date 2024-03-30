@@ -42,7 +42,7 @@ const piece_to_image: PieceToImageMap = {
 
 
 export default function BoardCustomizer({ rows, columns, pieces, selected, onSquareClick }: BoardCustomizerProps) {
-  const squareSize = Math.floor(600 / Math.max(rows, columns));
+  const squareSize = Math.floor(690 / Math.max(rows, columns));
   const boardWidth = columns * squareSize;
   const boardHeight = rows * squareSize;
 
