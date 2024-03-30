@@ -9,6 +9,17 @@ function App() {
   const [rows, setRows] = useState(8);
   const [columns, setColumns] = useState(8);
   const [isSquare, setIsSquare] = useState(true);
+  const [pieces, setPieces] = useState<string[]>(standardBoard.split(''));
+  const [selectedPieceType, setSelectedPieceType] = useState<{ piece: string; color: string } | null>(null);
+  const [selectedBoardPiece, setSelectedBoardPiece] = useState<number | null>(null);
+
+  const handlePieceSelect = (piece: string | null, color: string) => {
+    if (piece) {
+      setSelectedPieceType({ piece, color });
+    } else {
+      setSelectedPieceType(null);
+    }
+  };
 
   const handleRowsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newRows = parseInt(event.target.value);
@@ -34,9 +45,28 @@ function App() {
     }
   };
 
-  const handlePieceSelect = (piece: string, color: string) => {
-    console.log(piece);
-    return 0;
+  const handleBoardClick = (index: number) => {
+    console.log(index);
+    if (selectedBoardPiece !== null) {
+      // Move the selected board piece to the clicked square
+      const updatedPieces = [...pieces];
+      updatedPieces[index] = pieces[selectedBoardPiece];
+      updatedPieces[selectedBoardPiece] = '.';
+      setPieces(updatedPieces);
+      setSelectedBoardPiece(null);
+    } else if (selectedPieceType) {
+      // Place the selected piece type on the clicked square
+      const updatedPieces = [...pieces];
+      console.log(selectedPieceType.piece);
+      updatedPieces[index] = selectedPieceType.piece;
+      setPieces(updatedPieces);
+      setSelectedPieceType(null);
+    } else {
+      // Select the clicked board piece
+      if (pieces[index] !== '.') {
+        setSelectedBoardPiece(index);
+      }
+    }
   };
 
   useEffect(() => {
@@ -51,9 +81,14 @@ function App() {
       <div className="main-container">
         <div className="chessboard-wrapper">
           <div className="chessboard-container">
-            <PieceSet color="black" onPieceSelect={handlePieceSelect}/>
-            <BoardCustomizer rows={rows} columns={columns} pieces = {standardBoard} initialPieces= {standardBoard}/>
-            <PieceSet color="white" onPieceSelect={handlePieceSelect} />
+            <PieceSet color="black" selectedPiece={selectedPieceType} onPieceSelect={handlePieceSelect} />
+            <BoardCustomizer
+              rows={rows}
+              columns={columns}
+              pieces={pieces}
+              onSquareClick={handleBoardClick}
+            />
+            <PieceSet color="white" selectedPiece={selectedPieceType} onPieceSelect={handlePieceSelect} />
           </div>
         </div>
         <BoardPanel

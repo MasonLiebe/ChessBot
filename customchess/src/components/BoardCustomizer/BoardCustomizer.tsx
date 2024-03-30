@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './BoardCustomizer.css';
-import { standardBoard } from '../../constants';
 
 interface BoardCustomizerProps {
   rows: number;
   columns: number;
-  pieces: string; // 256 character string representing the board
-  initialPieces: string;
+  pieces: string[]; // 256 character string representing the board
+  onSquareClick: (index: number) => void;
 }
 
 interface PieceToImageMap {
@@ -41,36 +40,10 @@ const piece_to_image: PieceToImageMap = {
 };
 
 
-export default function BoardCustomizer({ rows, columns, pieces: initialPieces }: BoardCustomizerProps) {
-  const [pieces, setPieces] = useState(standardBoard.split(''));;
-  const [selectedPiece, setSelectedPiece] = useState<{ index: number; piece: string } | null>(null);
-
+export default function BoardCustomizer({ rows, columns, pieces, onSquareClick }: BoardCustomizerProps) {
   const squareSize = Math.floor(600 / Math.max(rows, columns));
   const boardWidth = columns * squareSize;
   const boardHeight = rows * squareSize;
-
-  const handleClick = (index: number) => {
-    if (selectedPiece) {
-      // Move the selected piece to the clicked square
-      const updatedPieces = [...pieces];
-      updatedPieces[selectedPiece.index] = '.';
-      updatedPieces[index] = selectedPiece.piece;
-      
-      // Ensure the array has a length of 256
-      while (updatedPieces.length < 256) {
-        updatedPieces.push('.');
-      }
-      
-      setPieces(updatedPieces);
-      setSelectedPiece(null);
-    } else {
-      // Select the piece on the clicked square
-      const piece = pieces[index];
-      if (piece !== '.') {
-        setSelectedPiece({ index, piece });
-      }
-    }
-  };
 
   const renderSquares = () => {
     const squares = [];
@@ -84,12 +57,12 @@ export default function BoardCustomizer({ rows, columns, pieces: initialPieces }
         squares.push(
           <div
             key={`${row}-${col}`}
-            className={`square ${squareColor} ${selectedPiece?.index === index ? 'selected' : ''}`}
+            className={`square ${squareColor}`}
             style={{
               width: `${squareSize}px`,
               height: `${squareSize}px`,
             }}
-            onClick={() => handleClick(index)}
+            onClick={() => onSquareClick(index)}
           >
             {piece !== '.' && piece_to_image[piece] && (
               <img
