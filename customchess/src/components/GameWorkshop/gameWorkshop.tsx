@@ -5,7 +5,7 @@ import BoardPanel from '../BoardPanel/BoardPanel';
 import PieceSet from '../PieceSet/PieceSet';
 import { standardBoard } from '../../constants';
 
-function gameWorkshop() {
+export function GameWorkshop() {
   const [rows, setRows] = useState(8);
   const [columns, setColumns] = useState(8);
   const [isSquare, setIsSquare] = useState(true);
@@ -15,6 +15,7 @@ function gameWorkshop() {
 
   const handlePieceSelect = (piece: string | null, color: string) => {
     if (piece) {
+      setSelectedBoardPiece(null);
       setSelectedPieceType({ piece, color });
     } else {
       setSelectedPieceType(null);
@@ -98,10 +99,12 @@ function gameWorkshop() {
           onRowsChange={handleRowsChange}
           onColumnsChange={handleColumnsChange}
           onSquareToggle={handleSquareToggle}
+          onClearBoard={() => setPieces(Array(rows * columns).fill('.'))}
+          onResetBoard={() => setPieces(standardBoard.split(''))}
+          onProgramPiece={() => setSelectedPieceType(null)}
+          selected={selectedPieceType}
         />
       </div>
     </div>
   );
 }
-
-export default gameWorkshop;

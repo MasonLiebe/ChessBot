@@ -1,6 +1,37 @@
 import React from 'react';
 import './BoardPanel.css';
 
+interface PieceToImageMap {
+  [key: string]: string;
+}
+
+const piece_to_image: PieceToImageMap = {
+  'p': 'black-pawn',
+  'n': 'black-knight',
+  'b': 'black-bishop',
+  'r': 'black-rook',
+  'q': 'black-queen',
+  'k': 'black-king',
+  'a': 'black-custom1',
+  'c': 'black-custom2',
+  'd': 'black-custom3',
+  'e': 'black-custom4',
+  'f': 'black-custom5',
+  'g': 'black-custom6',
+  'P': 'white-pawn',
+  'N': 'white-knight',
+  'B': 'white-bishop',
+  'R': 'white-rook',
+  'Q': 'white-queen',
+  'K': 'white-king',
+  'A': 'white-custom1',
+  'C': 'white-custom2',
+  'D': 'white-custom3',
+  'E': 'white-custom4',
+  'F': 'white-custom5',
+  'G': 'white-custom6'
+};
+
 interface BoardPanelProps {
   rows: number;
   columns: number;
@@ -8,6 +39,10 @@ interface BoardPanelProps {
   onRowsChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onColumnsChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onSquareToggle: () => void;
+  onClearBoard: () => void;
+  onResetBoard: () => void;
+  onProgramPiece: () => void;
+  selected: { piece: string; color: string } | null;
 }
 
 function BoardPanel({
@@ -17,9 +52,14 @@ function BoardPanel({
   onRowsChange,
   onColumnsChange,
   onSquareToggle,
+  onClearBoard,
+  onResetBoard,
+  onProgramPiece,
+  selected,
 }: BoardPanelProps) {
   return (
     <div className="board-panel">
+      <div className="board-panel-title">Board Properties</div>
       <div className="slider">
         <label htmlFor="rows-slider">Rows: {rows}</label>
         <input
@@ -51,6 +91,9 @@ function BoardPanel({
           onChange={onSquareToggle}
         />
       </div>
+      <button className="board-button" onClick={onClearBoard}>Clear Board</button>
+      <button className="board-button" onClick={onResetBoard}>Reset Board</button>
+      <button className="board-button program-piece-btn" onClick={onProgramPiece}>Program Piece</button>
     </div>
   );
 }
