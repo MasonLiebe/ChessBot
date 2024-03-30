@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
-import BoardCustomizer from './components/BoardCustomizer/BoardCustomizer';
-import BoardPanel from './components/BoardPanel/BoardPanel';
-import PieceSet from './components/PieceSet/PieceSet';
-import { standardBoard } from './constants';
+import './GameWorkshop.css';
+import BoardCustomizer from '../BoardCustomizer/BoardCustomizer';
+import BoardPanel from '../BoardPanel/BoardPanel';
+import PieceSet from '../PieceSet/PieceSet';
+import { standardBoard } from '../../constants';
 
-function App() {
+function gameWorkshop() {
   const [rows, setRows] = useState(8);
   const [columns, setColumns] = useState(8);
   const [isSquare, setIsSquare] = useState(true);
@@ -104,4 +104,4 @@ function App() {
   );
 }
 
-export default App;
+export default gameWorkshop;

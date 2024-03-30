@@ -25,10 +25,3 @@
   cursor: pointer;
   transition: transform 0.2s;
 }
-
-.piece.dragging {
-  position: absolute;
-  pointer-events: none;
-  transform: translate(var(--mouse-x), var(--mouse-y));
-  z-index: 1;
-}
