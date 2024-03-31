@@ -1,0 +1,42 @@
+/* App.css */
+
+body {
+    background-color: #323437;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  
+  .app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .app-title {
+    color: #e2b714;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-family: "Raleway", sans-serif;
+    font-optical-sizing: auto;
+    
+  }
+  
+  .main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .piece-customizer-container {
+    width: 600px;
+    height: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }

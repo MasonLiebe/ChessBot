@@ -121,6 +121,7 @@
   align-items: center;
   border: 2px solid #fff;
   border-radius: 4px;
+  margin-top: 10px;
 }
 
 .selected-piece {

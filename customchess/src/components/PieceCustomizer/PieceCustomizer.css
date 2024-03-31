@@ -1,0 +1,50 @@
+
+.square {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  
+  .square.selected {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+  
+  .white {
+    background-color: #f0d9b5;
+  }
+  
+  .black {
+    background-color: #b58863;
+  }
+  
+  .piece {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .square.highlighted::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.7;
+    z-index: 1;
+  }
+  
+  .square.highlighted[data-highlight-color='red']::before {
+    background-color: red;
+  }
+  
+  .square.highlighted[data-highlight-color='blue']::before {
+    background-color: blue;
+  }
+  
+  .square.highlighted[data-highlight-color='purple']::before {
+    background-color: purple;
+  }

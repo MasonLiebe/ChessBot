@@ -89,7 +89,7 @@ export function GameWorkshop() {
               selected={selectedBoardPiece}
               onSquareClick={handleBoardClick}
             />
-            <PieceSet color="white" selectedPiece={selectedPieceType} onPieceSelect={handlePieceSelect} />
+            <PieceSet color="white" selectedPiece={selectedPieceType} onPieceSelect={handlePieceSelect}/>
           </div>
         </div>
         <BoardPanel
