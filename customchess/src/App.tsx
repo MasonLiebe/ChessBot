@@ -98,11 +98,10 @@ function App() {
     <div className="app">
       <h1 className="app-title">Custom Piece Workshop</h1>
       <div className="main-container">
-        <CustomPieceSet color="black" selectedPiece={selectedPiece} onPieceSelect={handlePieceSelect} />
         <div className="piece-customizer-container">
           <PieceCustomizer
             size={size}
-            piece={selectedPiece}
+            piece={String(selectedPiece.piece)}
             attack_north={attack_north}
             attack_east={attack_east}
             attack_south={attack_south}
@@ -148,6 +147,7 @@ function App() {
           onSizeChange={handleSizeChange}
         />
       </div>
+    <CustomPieceSet selectedPiece={selectedPiece} onPieceSelect={handlePieceSelect} />
     </div>
   );
 }

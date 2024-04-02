@@ -1,13 +1,13 @@
 import React from 'react';
-import './PieceSet.css';
+import './CustomPieceSet.css';
 
 interface PieceSetProps {
-  color: 'black' | 'white';
-  selectedPiece: { piece: string | null; color: string } | null;
+  selectedPiece: { piece: string | null; color: string };
   onPieceSelect: (piece: string | null, color: string) => void;
 }
 
-function PieceSet({ color, selectedPiece, onPieceSelect }: PieceSetProps) {
+function PieceSet({ selectedPiece, onPieceSelect }: PieceSetProps) {
+  const color = 'black'
   const pieces = [
     'custom1',
     'custom2',
