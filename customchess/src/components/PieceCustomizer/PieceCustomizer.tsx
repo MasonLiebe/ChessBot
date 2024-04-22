@@ -20,10 +20,10 @@ interface PieceCustomizerProps {
   translate_southWest: boolean;
   translate_northEast: boolean;
   translate_northWest: boolean;
-  attack_jumps: number[];
-  translate_jumps: number[];
-  attack_slides: number[][];
-  translate_slides: number[][];
+  attack_jumps: [number, number][];
+  translate_jumps: [number, number][];
+  attack_slides: [number, number][][];
+  translate_slides: [number, number][][];
   onSquareClick: (row: number, col: number) => void;
 }
 
@@ -187,6 +187,18 @@ function PieceCustomizer({
         const squareCol = col - centerIndex;
         const highlightColorValue = highlightColor(squareRow, squareCol);
   
+        const isTranslateJump = translate_jumps.some(jump => jump[0] === squareRow && jump[1] === squareCol);
+        const isAttackJump = attack_jumps.some(jump => jump[0] === squareRow && jump[1] === squareCol);
+  
+        let jumpSymbol = null;
+        if (isTranslateJump && isAttackJump) {
+          jumpSymbol = <div className="jump-symbol purple">X</div>;
+        } else if (isTranslateJump) {
+          jumpSymbol = <div className="jump-symbol blue">X</div>;
+        } else if (isAttackJump) {
+          jumpSymbol = <div className="jump-symbol red">X</div>;
+        }
+  
         squares.push(
           <div
             key={`${squareRow}-${squareCol}`}
@@ -207,6 +219,7 @@ function PieceCustomizer({
                 className="piece"
               />
             )}
+            {jumpSymbol}
           </div>
         );
       }

@@ -48,3 +48,25 @@
   .square.highlighted[data-highlight-color='purple']::before {
     background-color: purple;
   }
+
+  .jump-symbol {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 2;
+  }
+  
+  .jump-symbol.red {
+    color: red;
+  }
+  
+  .jump-symbol.blue {
+    color: blue;
+  }
+  
+  .jump-symbol.purple {
+    color: purple;
+  }

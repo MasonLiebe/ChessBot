@@ -22,10 +22,10 @@ function App() {
   const [translate_southWest, setTranslateSouthWest] = useState(false);
   const [translate_northEast, setTranslateNorthEast] = useState(false);
   const [translate_northWest, setTranslateNorthWest] = useState(false);
-  const [attack_jumps, setAttackJumps] = useState<string[]>([]);
-  const [translate_jumps, setTranslateJumps] = useState<string[]>([]);
-  const [attack_slides, setAttackSlides] = useState<string[][]>([[]]);
-  const [translate_slides, setTranslateSlides] = useState<string[][]>([[]]);
+  const [attack_jumps, setAttackJumps] = useState<[number, number][]>([]);
+  const [translate_jumps, setTranslateJumps] = useState<[number, number][]>([]);
+  const [attack_slides, setAttackSlides] = useState<[number, number][][]>([]);
+  const [translate_slides, setTranslateSlides] = useState<[number, number][][]>([]);
   const [isProgrammingAttackJumps, setIsProgrammingAttackJumps] = useState(false);
   const [isProgrammingTranslateJumps, setIsProgrammingTranslateJumps] = useState(false);
   const [isProgrammingAttackSlides, setIsProgrammingAttackSlides] = useState(false);
@@ -128,35 +128,60 @@ function App() {
 
   const handleSquareClick = (row: number, col: number) => {
     if (isProgrammingAttackJumps) {
-      const square = `${row},${col}`;
-      if (attack_jumps.includes(square)) {
-        setAttackJumps(attack_jumps.filter(s => s !== square));
+      const jumpCoord: [number, number] = [row, col];
+      const index = attack_jumps.findIndex(
+        jump => jump[0] === jumpCoord[0] && jump[1] === jumpCoord[1]
+      );
+  
+      if (index !== -1) {
+        setAttackJumps(attack_jumps.filter((_, i) => i !== index));
       } else {
-        setAttackJumps([...attack_jumps, square]);
+        setAttackJumps([...attack_jumps, jumpCoord]);
       }
-    } else if (isProgrammingTranslateJumps) {
-      const square = `${row},${col}`;
-      if (translate_jumps.includes(square)) {
-        setTranslateJumps(translate_jumps.filter(s => s !== square));
+    } 
+    if (isProgrammingTranslateJumps) {
+      const jumpCoord: [number, number] = [row, col];
+      const index = translate_jumps.findIndex(
+        jump => jump[0] === jumpCoord[0] && jump[1] === jumpCoord[1]
+      );
+  
+      if (index !== -1) {
+        setTranslateJumps(translate_jumps.filter((_, i) => i !== index));
       } else {
-        setTranslateJumps([...translate_jumps, square]);
-      }
-    } else if (isProgrammingAttackSlides) {
-      const square = `${row},${col}`;
-      if (attack_slides[0].includes(square)) {
-        setAttackSlides([attack_slides[0].filter(s => s !== square)]);
-      } else {
-        setAttackSlides([[...attack_slides[0], square]]);
-      }
-    } else if (isProgrammingTranslateSlides) {
-      const square = `${row},${col}`;
-      if (translate_slides[0].includes(square)) {
-        setTranslateSlides([translate_slides[0].filter(s => s !== square)]);
-      } else {
-        setTranslateSlides([[...translate_slides[0], square]]);
+        setTranslateJumps([...translate_jumps, jumpCoord]);
       }
     }
-  }
+    if (isProgrammingAttackSlides) {
+      const slideCoord: [number, number] = [row, col];
+      const slideIndex = attack_slides.findIndex(slide =>
+        slide.some(coord => coord[0] === slideCoord[0] && coord[1] === slideCoord[1])
+      );
+  
+      if (slideIndex !== -1) {
+        const updatedSlides = attack_slides.map((slide, i) =>
+          i === slideIndex ? slide.filter(coord => coord[0] !== slideCoord[0] || coord[1] !== slideCoord[1]) : slide
+        );
+        setAttackSlides(updatedSlides.filter(slide => slide.length > 0));
+      } else {
+        setAttackSlides([...attack_slides, [slideCoord]]);
+      }
+    } 
+    if (isProgrammingTranslateSlides) {
+      const slideCoord: [number, number] = [row, col];
+      const slideIndex = translate_slides.findIndex(slide =>
+        slide.some(coord => coord[0] === slideCoord[0] && coord[1] === slideCoord[1])
+      );
+  
+      if (slideIndex !== -1) {
+        const updatedSlides = translate_slides.map((slide, i) =>
+          i === slideIndex ? slide.filter(coord => coord[0] !== slideCoord[0] || coord[1] !== slideCoord[1]) : slide
+        );
+        setTranslateSlides(updatedSlides.filter(slide => slide.length > 0));
+      } else {
+        setTranslateSlides([...translate_slides, [slideCoord]]);
+      }
+    }
+  };
 
   return (
     <div className="app">
@@ -182,12 +207,13 @@ function App() {
             translate_southWest={translate_southWest}
             translate_northEast={translate_northEast}
             translate_northWest={translate_northWest}
-            attack_jumps={[]}
-            translate_jumps={[]}
+            attack_jumps={attack_jumps}
+            translate_jumps={translate_jumps}
             attack_slides={[[]]}
             translate_slides={[[]]}
             onSquareClick={handleSquareClick}
           />
+          <CustomPieceSet selectedPiece={selectedPiece} onPieceSelect={handlePieceSelect} />
         </div>
         <PiecePanel
           size={size}
@@ -219,7 +245,6 @@ function App() {
           onProgramTranslateSlidesClick={handleProgramTranslateSlidesClick}
         />
       </div>
-    <CustomPieceSet selectedPiece={selectedPiece} onPieceSelect={handlePieceSelect} />
     </div>
   );
 }
