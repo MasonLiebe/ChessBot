@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './PiecePanel.css';
+import { on } from 'events';
 
 
 interface PiecePanelProps {
@@ -22,6 +23,14 @@ interface PiecePanelProps {
   translate_northWest: boolean;
   onDirectionChange: (direction: string, isAttack: boolean) => void;
   onSizeChange: (size: number) => void;
+  isProgrammingAttackJumps: boolean;
+  isProgrammingTranslateJumps: boolean;
+  isProgrammingAttackSlides: boolean;
+  isProgrammingTranslateSlides: boolean;
+  onProgramAttackJumpsClick: () => void;
+  onProgramTranslateJumpsClick: () => void;
+  onProgramAttackSlidesClick: () => void;
+  onProgramTranslateSlidesClick: () => void;
 }
 
 function PiecePanel({
@@ -44,6 +53,15 @@ function PiecePanel({
   translate_northWest,
   onDirectionChange,
   onSizeChange,
+  isProgrammingAttackJumps,
+  isProgrammingTranslateJumps,
+  isProgrammingAttackSlides,
+  isProgrammingTranslateSlides,
+  onProgramAttackJumpsClick,
+  onProgramTranslateJumpsClick,
+  onProgramAttackSlidesClick,
+  onProgramTranslateSlidesClick
+
 }: PiecePanelProps) {
   const handleDirectionClick = (direction: string, isAttack: boolean) => {
     onDirectionChange(direction, isAttack);
@@ -57,15 +75,15 @@ function PiecePanel({
   return (
     <div className="piece-panel">
       <div className="direction-grid">
-        <div className= "row">
-          <div></div>
-          <div className="column-labels">
-            <div>Attack</div>
-          </div>
-          <div className="column-labels">
-            <div>Translate</div>
-          </div>
+      <div className="row">
+        <div className="row-label"></div>
+        <div className="column-labels">
+          <div>Attack</div>
         </div>
+        <div className="column-labels">
+          <div>Translate</div>
+        </div>
+      </div>
         <div className="direction-rows">
           <div className="row">
             <div className="row-label">North</div>
@@ -156,6 +174,32 @@ function PiecePanel({
             ></button>
           </div>
         </div>
+      </div>
+      <div className="program-buttons">
+        <button
+          className={isProgrammingAttackJumps ? 'active-attack' : ''}
+          onClick={onProgramAttackJumpsClick}
+        >
+          Program Attack Jumps
+        </button>
+        <button
+          className={isProgrammingTranslateJumps ? 'active-translate' : ''}
+          onClick={onProgramTranslateJumpsClick}
+        >
+          Program Translate Jumps
+        </button>
+        <button
+          className={isProgrammingAttackSlides ? 'active-attack' : ''}
+          onClick={onProgramAttackSlidesClick}
+        >
+          Program Attack Slides
+        </button>
+        <button
+          className={isProgrammingTranslateSlides ? 'active-translate' : ''}
+          onClick={onProgramTranslateSlidesClick}
+        >
+          Program Translate Slides
+        </button>
       </div>
       <div className="size-slider">
         <label htmlFor="size">Board Size: {size}</label>

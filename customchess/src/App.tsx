@@ -22,6 +22,14 @@ function App() {
   const [translate_southWest, setTranslateSouthWest] = useState(false);
   const [translate_northEast, setTranslateNorthEast] = useState(false);
   const [translate_northWest, setTranslateNorthWest] = useState(false);
+  const [attack_jumps, setAttackJumps] = useState<string[]>([]);
+  const [translate_jumps, setTranslateJumps] = useState<string[]>([]);
+  const [attack_slides, setAttackSlides] = useState<string[][]>([[]]);
+  const [translate_slides, setTranslateSlides] = useState<string[][]>([[]]);
+  const [isProgrammingAttackJumps, setIsProgrammingAttackJumps] = useState(false);
+  const [isProgrammingTranslateJumps, setIsProgrammingTranslateJumps] = useState(false);
+  const [isProgrammingAttackSlides, setIsProgrammingAttackSlides] = useState(false);
+  const [isProgrammingTranslateSlides, setIsProgrammingTranslateSlides] = useState(false);
   const [selectedPiece, setSelectedPiece] = useState<{ piece: string | null; color: string }>({piece: 'a', color: 'black'});
 
   const handleDirectionChange = (direction: string, isAttack: boolean) => {
@@ -94,6 +102,62 @@ function App() {
     setSelectedPiece({ piece, color });
   };
 
+  const handleProgramAttackJumpsClick = () => {
+    setIsProgrammingAttackSlides(false);
+    setIsProgrammingTranslateSlides(false);
+    setIsProgrammingAttackJumps(!isProgrammingAttackJumps);
+  }
+
+  const handleProgramTranslateJumpsClick = () => {
+    setIsProgrammingAttackSlides(false);
+    setIsProgrammingTranslateSlides(false);
+    setIsProgrammingTranslateJumps(!isProgrammingTranslateJumps);
+  }
+
+  const handleProgramAttackSlidesClick = () => {
+    setIsProgrammingAttackJumps(false);
+    setIsProgrammingTranslateJumps(false);
+    setIsProgrammingAttackSlides(!isProgrammingAttackSlides);
+  }
+
+  const handleProgramTranslateSlidesClick = () => {
+    setIsProgrammingAttackJumps(false);
+    setIsProgrammingTranslateJumps(false);
+    setIsProgrammingTranslateSlides(!isProgrammingTranslateSlides);
+  }
+
+  const handleSquareClick = (row: number, col: number) => {
+    if (isProgrammingAttackJumps) {
+      const square = `${row},${col}`;
+      if (attack_jumps.includes(square)) {
+        setAttackJumps(attack_jumps.filter(s => s !== square));
+      } else {
+        setAttackJumps([...attack_jumps, square]);
+      }
+    } else if (isProgrammingTranslateJumps) {
+      const square = `${row},${col}`;
+      if (translate_jumps.includes(square)) {
+        setTranslateJumps(translate_jumps.filter(s => s !== square));
+      } else {
+        setTranslateJumps([...translate_jumps, square]);
+      }
+    } else if (isProgrammingAttackSlides) {
+      const square = `${row},${col}`;
+      if (attack_slides[0].includes(square)) {
+        setAttackSlides([attack_slides[0].filter(s => s !== square)]);
+      } else {
+        setAttackSlides([[...attack_slides[0], square]]);
+      }
+    } else if (isProgrammingTranslateSlides) {
+      const square = `${row},${col}`;
+      if (translate_slides[0].includes(square)) {
+        setTranslateSlides([translate_slides[0].filter(s => s !== square)]);
+      } else {
+        setTranslateSlides([[...translate_slides[0], square]]);
+      }
+    }
+  }
+
   return (
     <div className="app">
       <h1 className="app-title">Custom Piece Workshop</h1>
@@ -122,7 +186,7 @@ function App() {
             translate_jumps={[]}
             attack_slides={[[]]}
             translate_slides={[[]]}
-            onSquareClick={(row, col) => console.log(`Clicked square: (${row}, ${col})`)}
+            onSquareClick={handleSquareClick}
           />
         </div>
         <PiecePanel
@@ -145,6 +209,14 @@ function App() {
           translate_northWest={translate_northWest}
           onDirectionChange={handleDirectionChange}
           onSizeChange={handleSizeChange}
+          isProgrammingAttackJumps={isProgrammingAttackJumps}
+          isProgrammingTranslateJumps={isProgrammingTranslateJumps}
+          isProgrammingAttackSlides={isProgrammingAttackSlides}
+          isProgrammingTranslateSlides={isProgrammingTranslateSlides}
+          onProgramAttackJumpsClick={handleProgramAttackJumpsClick}
+          onProgramTranslateJumpsClick={handleProgramTranslateJumpsClick}
+          onProgramAttackSlidesClick={handleProgramAttackSlidesClick}
+          onProgramTranslateSlidesClick={handleProgramTranslateSlidesClick}
         />
       </div>
     <CustomPieceSet selectedPiece={selectedPiece} onPieceSelect={handlePieceSelect} />
