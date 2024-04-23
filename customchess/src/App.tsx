@@ -5,6 +5,7 @@ import PiecePanel from './components/PiecePanel/PiecePanel';
 import CustomPieceSet from './components/CustomPIeceSet/CustomPieceSet';
 
 function App() {
+  
   const [size, setSize] = useState(15);
   const [attack_north, setAttackNorth] = useState(false);
   const [attack_east, setAttackEast] = useState(false);
@@ -31,6 +32,31 @@ function App() {
   const [isProgrammingAttackSlides, setIsProgrammingAttackSlides] = useState(false);
   const [isProgrammingTranslateSlides, setIsProgrammingTranslateSlides] = useState(false);
   const [selectedPiece, setSelectedPiece] = useState<{ piece: string | null; color: string }>({piece: 'a', color: 'black'});
+
+  interface MovementPattern {
+    attack_north: boolean;
+    attack_east: boolean;
+    attack_south: boolean;
+    attack_west: boolean;
+    attack_southEast: boolean;
+    attack_southWest: boolean;
+    attack_northEast: boolean;
+    attack_northWest: boolean;
+    translate_north: boolean;
+    translate_east: boolean;
+    translate_south: boolean;
+    translate_west: boolean;
+    translate_southEast: boolean;
+    translate_southWest: boolean;
+    translate_northEast: boolean;
+    translate_northWest: boolean;
+    attack_jumps: [number, number][];
+    translate_jumps: [number, number][];
+    attack_slides: [number, number][][];
+    translate_slides: [number, number][][];
+  }
+
+  const movementPatterns: Record<string, MovementPattern> = {};
 
   const handleDirectionChange = (direction: string, isAttack: boolean) => {
     if (isAttack) {
