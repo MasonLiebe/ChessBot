@@ -31,6 +31,7 @@ interface PiecePanelProps {
   onProgramTranslateJumpsClick: () => void;
   onProgramAttackSlidesClick: () => void;
   onProgramTranslateSlidesClick: () => void;
+  onSavePieceClick: () => void;
 }
 
 function PiecePanel({
@@ -60,8 +61,8 @@ function PiecePanel({
   onProgramAttackJumpsClick,
   onProgramTranslateJumpsClick,
   onProgramAttackSlidesClick,
-  onProgramTranslateSlidesClick
-
+  onProgramTranslateSlidesClick,
+  onSavePieceClick,
 }: PiecePanelProps) {
   const handleDirectionClick = (direction: string, isAttack: boolean) => {
     onDirectionChange(direction, isAttack);
@@ -201,6 +202,9 @@ function PiecePanel({
           Program Translate Slides
         </button>
       </div>
+      <button className="save-piece" onClick={onSavePieceClick}>
+        Save Piece
+      </button>
       <div className="size-slider">
         <label htmlFor="size">Board Size: {size}</label>
         <input
@@ -213,6 +217,7 @@ function PiecePanel({
           onChange={handleSizeChange}
         />
       </div>
+
     </div>
   );
 }

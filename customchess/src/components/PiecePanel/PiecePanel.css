@@ -125,3 +125,19 @@ label {
   background-color: #0000ff; /* Blue */
   color: #fff;
 }
+
+.save-piece {
+  font-family: "Raleway", sans-serif;;
+  font-optical-sizing: auto;
+  font-size: 1.2rem;
+  color: #000;
+  background-color: #4eba5e;
+  border: none;
+  width: 170px;
+  height: 75px;
+  border-radius: 10px;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.3s, transform 0.5s; /* Smooth background and press 
+  effect */
+}

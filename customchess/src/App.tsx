@@ -23,8 +23,8 @@ function App() {
   const [translate_southWest, setTranslateSouthWest] = useState(false);
   const [translate_northEast, setTranslateNorthEast] = useState(false);
   const [translate_northWest, setTranslateNorthWest] = useState(false);
-  const [attack_jumps, setAttackJumps] = useState<[number, number][]>([]);
-  const [translate_jumps, setTranslateJumps] = useState<[number, number][]>([]);
+  const [attack_jumps, setAttackJumps] = useState<[number, number][]>([[-4, 0], [-4, 2], [-4, -2], [-2, 0], [-2, 2], [-2, -2], [-2, 4], [-2, -4], [-3, 1], [-3, 3], [-3, -1], [-3, -3], [-1, 1], [-1, 3], [-1, -1], [-1, -3], [0, 4], [0, -4], [0, 2], [0, -2], [1, 1], [1, 3], [1, -1], [1, -3], [3, 1], [3, 3], [3, -1], [3, -3], [4, 0], [4, 2], [4, -2], [2, 0], [2, 2], [2, -2], [2, -4], [2, 4]]);
+  const [translate_jumps, setTranslateJumps] = useState<[number, number][]>([[-4, 0], [-4, 2], [-4, -2], [-2, 0], [-2, 2], [-2, -2], [-2, 4], [-2, -4], [-3, 1], [-3, 3], [-3, -1], [-3, -3], [-1, 1], [-1, 3], [-1, -1], [-1, -3], [0, 4], [0, -4], [0, 2], [0, -2], [1, 1], [1, 3], [1, -1], [1, -3], [3, 1], [3, 3], [3, -1], [3, -3], [4, 0], [4, 2], [4, -2], [2, 0], [2, 2], [2, -2], [2, -4], [2, 4]]);
   const [attack_slides, setAttackSlides] = useState<[number, number][][]>([]);
   const [translate_slides, setTranslateSlides] = useState<[number, number][][]>([]);
   const [isProgrammingAttackJumps, setIsProgrammingAttackJumps] = useState(false);
@@ -56,7 +56,149 @@ function App() {
     translate_slides: [number, number][][];
   }
 
-  const movementPatterns: Record<string, MovementPattern> = {};
+  let movementPatterns = [] as MovementPattern[];
+
+  let patternA: MovementPattern = {
+    attack_north: false,
+    attack_east: false,
+    attack_south: false,
+    attack_west: false,
+    attack_southEast: false,
+    attack_southWest: false,
+    attack_northEast: false,
+    attack_northWest: false,
+    translate_north: false,
+    translate_east: false,
+    translate_south: false,
+    translate_west: false,
+    translate_southEast: false,
+    translate_southWest: false,
+    translate_northEast: false,
+    translate_northWest: false,
+    attack_jumps: [[-4, 0], [-4, 2], [-4, -2], [-2, 0], [-2, 2], [-2, -2], [-2, 4], [-2, -4], [-3, 1], [-3, 3], [-3, -1], [-3, -3], [-1, 1], [-1, 3], [-1, -1], [-1, -3], [0, 4], [0, -4], [0, 2], [0, -2], [1, 1], [1, 3], [1, -1], [1, -3], [3, 1], [3, 3], [3, -1], [3, -3], [4, 0], [4, 2], [4, -2], [2, 0], [2, 2], [2, -2], [2, -4], [2, 4]],
+    translate_jumps: [[-4, 0], [-4, 2], [-4, -2], [-2, 0], [-2, 2], [-2, -2], [-2, 4], [-2, -4], [-3, 1], [-3, 3], [-3, -1], [-3, -3], [-1, 1], [-1, 3], [-1, -1], [-1, -3], [0, 4], [0, -4], [0, 2], [0, -2], [1, 1], [1, 3], [1, -1], [1, -3], [3, 1], [3, 3], [3, -1], [3, -3], [4, 0], [4, 2], [4, -2], [2, 0], [2, 2], [2, -2],[2, -4], [2, 4]],
+    attack_slides: [],
+    translate_slides: [],
+  };
+
+  let patternB: MovementPattern = {
+    attack_north: false,
+    attack_east: false,
+    attack_south: false,
+    attack_west: false,
+    attack_southEast: false,
+    attack_southWest: false,
+    attack_northEast: false,
+    attack_northWest: false,
+    translate_north: false,
+    translate_east: false,
+    translate_south: false,
+    translate_west: false,
+    translate_southEast: false,
+    translate_southWest: false,
+    translate_northEast: false,
+    translate_northWest: false,
+    attack_jumps: [[-2, 2], [-2, 1], [-2, 0],[-2,-1], [-2, -2], [-1, 2], [-1, 1], [-1, 0], [-1, -1], [-1, -2], [0, 2], [0, 1], [0, -1], [0, -2], [1, 2], [1, 1], [1, 0], [1, -1], [1, -2], [2, 2], [2, 1], [2, 0], [2, -1], [2, -2]],
+    translate_jumps: [[-2, 2], [-2, 1], [-2, 0],[-2,-1], [-2, -2], [-1, 2], [-1, 1], [-1, 0], [-1, -1], [-1, -2], [0, 2], [0, 1], [0, -1], [0, -2], [1, 2], [1, 1], [1, 0], [1, -1], [1, -2], [2, 2], [2, 1], [2, 0], [2, -1], [2, -2]],
+    attack_slides: [],
+    translate_slides: [],
+  };
+
+  let patternC: MovementPattern = {
+    attack_north: true,
+    attack_east: true,
+    attack_south: true,
+    attack_west: true,
+    attack_southEast: true,
+    attack_southWest: true,
+    attack_northEast: true,
+    attack_northWest: true,
+    translate_north: true,
+    translate_east: true,
+    translate_south: true,
+    translate_west: true,
+    translate_southEast: true,
+    translate_southWest: true,
+    translate_northEast: true,
+    translate_northWest: true,
+    attack_jumps: [[-2, 1], [-2, -1], [-1, 2], [-1, -2], [1, 2], [1, -2], [2, 1], [2, -1]],
+    translate_jumps: [[-2, 1], [-2, -1], [-1, 2], [-1, -2], [1, 2], [1, -2], [2, 1], [2, -1]],
+    attack_slides: [],
+    translate_slides: [],
+  };
+
+  let patternD: MovementPattern = {
+    attack_north: true,
+    attack_east: true,
+    attack_south: true,
+    attack_west: true,
+    attack_southEast: true,
+    attack_southWest: true,
+    attack_northEast: true,
+    attack_northWest: true,
+    translate_north: true,
+    translate_east: true,
+    translate_south: false,
+    translate_west: true,
+    translate_southEast: false,
+    translate_southWest: false,
+    translate_northEast: true,
+    translate_northWest: true,
+    attack_jumps: [],
+    translate_jumps: [],
+    attack_slides: [],
+    translate_slides: [],
+  };
+
+  let patternE: MovementPattern = {
+    attack_north: true,
+    attack_east: true,
+    attack_south: true,
+    attack_west: true,
+    attack_southEast: false,
+    attack_southWest: false,
+    attack_northEast: false,
+    attack_northWest: false,
+    translate_north: true,
+    translate_east: true,
+    translate_south: true,
+    translate_west: true,
+    translate_southEast: false,
+    translate_southWest: false,
+    translate_northEast: false,
+    translate_northWest: false,
+    attack_jumps: [[3, 4], [3, -4], [4, 3], [4, -3], [-3, 4], [-3, -4], [-4, 3], [-4, -3], [5, 12], [5, -12], [12, 5], [12, -5], [-5, 12], [-5, -12], [-12, 5], [-12, -5]],
+    translate_jumps: [[3, 4], [3, -4], [4, 3], [4, -3], [-3, 4], [-3, -4], [-4, 3], [-4, -3], [5, 12], [5, -12], [12, 5], [12, -5], [-5, 12], [-5, -12], [-12, 5], [-12, -5]],
+    attack_slides: [],
+    translate_slides: [],
+  };
+
+  let patternF: MovementPattern = {
+    attack_north: true,
+    attack_east: true,
+    attack_south: true,
+    attack_west: true,
+    attack_southEast: false,
+    attack_southWest: false,
+    attack_northEast: false,
+    attack_northWest: false,
+    translate_north: true,
+    translate_east: true,
+    translate_south: true,
+    translate_west: true,
+    translate_southEast: false,
+    translate_southWest: false,
+    translate_northEast: false,
+    translate_northWest: false,
+    attack_jumps: [[-2, 1], [-2, -1], [-1, 2], [-1, -2], [1, 2], [1, -2], [2, 1], [2, -1]],
+    translate_jumps: [[-2, 1], [-2, -1], [-1, 2], [-1, -2], [1, 2], [1, -2], [2, 1], [2, -1]],
+    attack_slides: [],
+    translate_slides: [],
+  };
+
+  movementPatterns.push(patternA, patternB, patternC, patternD, patternE, patternF);
+
+  let activePatternIndex = 0;
 
   const handleDirectionChange = (direction: string, isAttack: boolean) => {
     if (isAttack) {
@@ -125,7 +267,48 @@ function App() {
   };
 
   const handlePieceSelect = (piece: string | null, color: string) => {
+    console.log(piece, color);
     setSelectedPiece({ piece, color });
+    if (piece === 'a') {
+      activePatternIndex = 0;
+    }
+    if (piece === 'c') {
+      activePatternIndex = 1;
+    }
+    if (piece === 'd') {
+      activePatternIndex = 2;
+    }
+    if (piece === 'e') {
+      activePatternIndex = 3;
+    }
+    if (piece === 'f') {
+      activePatternIndex = 4;
+    }
+    if (piece === 'g') {
+      activePatternIndex = 5;
+    }
+
+    setAttackNorth(movementPatterns[activePatternIndex].attack_north);
+    setAttackEast(movementPatterns[activePatternIndex].attack_east);
+    setAttackSouth(movementPatterns[activePatternIndex].attack_south);
+    setAttackWest(movementPatterns[activePatternIndex].attack_west);
+    setAttackSouthEast(movementPatterns[activePatternIndex].attack_southEast);
+    setAttackSouthWest(movementPatterns[activePatternIndex].attack_southWest);
+    setAttackNorthEast(movementPatterns[activePatternIndex].attack_northEast);
+    setAttackNorthWest(movementPatterns[activePatternIndex].attack_northWest);
+    setTranslateNorth(movementPatterns[activePatternIndex].translate_north);
+    setTranslateEast(movementPatterns[activePatternIndex].translate_east);
+    setTranslateSouth(movementPatterns[activePatternIndex].translate_south);
+    setTranslateWest(movementPatterns[activePatternIndex].translate_west);
+    setTranslateSouthEast(movementPatterns[activePatternIndex].translate_southEast);
+    setTranslateSouthWest(movementPatterns[activePatternIndex].translate_southWest);
+    setTranslateNorthEast(movementPatterns[activePatternIndex].translate_northEast);
+    setTranslateNorthWest(movementPatterns[activePatternIndex].translate_northWest);
+    setAttackJumps(movementPatterns[activePatternIndex].attack_jumps);
+    setTranslateJumps(movementPatterns[activePatternIndex].translate_jumps);
+    setAttackSlides(movementPatterns[activePatternIndex].attack_slides);
+    setTranslateSlides(movementPatterns[activePatternIndex].translate_slides);
+    console.log(movementPatterns[activePatternIndex].attack_north);
   };
 
   const handleProgramAttackJumpsClick = () => {
@@ -150,6 +333,30 @@ function App() {
     setIsProgrammingAttackJumps(false);
     setIsProgrammingTranslateJumps(false);
     setIsProgrammingTranslateSlides(!isProgrammingTranslateSlides);
+  }
+
+  const handleSavePieceClick = () => {
+    movementPatterns[activePatternIndex].attack_north = attack_north;
+    movementPatterns[activePatternIndex].attack_east = attack_east;
+    movementPatterns[activePatternIndex].attack_south = attack_south;
+    movementPatterns[activePatternIndex].attack_west = attack_west;
+    movementPatterns[activePatternIndex].attack_southEast = attack_southEast;
+    movementPatterns[activePatternIndex].attack_southWest = attack_southWest;
+    movementPatterns[activePatternIndex].attack_northEast = attack_northEast;
+    movementPatterns[activePatternIndex].attack_northWest = attack_northWest;
+    movementPatterns[activePatternIndex].translate_north = translate_north;
+    movementPatterns[activePatternIndex].translate_east = translate_east;
+    movementPatterns[activePatternIndex].translate_south = translate_south;
+    movementPatterns[activePatternIndex].translate_west = translate_west;
+    movementPatterns[activePatternIndex].translate_southEast = translate_southEast;
+    movementPatterns[activePatternIndex].translate_southWest = translate_southWest;
+    movementPatterns[activePatternIndex].translate_northEast = translate_northEast;
+    movementPatterns[activePatternIndex].translate_northWest = translate_northWest;
+    movementPatterns[activePatternIndex].attack_jumps = attack_jumps;
+    movementPatterns[activePatternIndex].translate_jumps = translate_jumps;
+    movementPatterns[activePatternIndex].attack_slides = attack_slides;
+    movementPatterns[activePatternIndex].translate_slides = translate_slides;
+    console.log(movementPatterns[0].attack_north);
   }
 
   const handleSquareClick = (row: number, col: number) => {
@@ -207,6 +414,7 @@ function App() {
         setTranslateSlides([...translate_slides, [slideCoord]]);
       }
     }
+    console.log(attack_jumps);
   };
 
   return (
@@ -269,6 +477,7 @@ function App() {
           onProgramTranslateJumpsClick={handleProgramTranslateJumpsClick}
           onProgramAttackSlidesClick={handleProgramAttackSlidesClick}
           onProgramTranslateSlidesClick={handleProgramTranslateSlidesClick}
+          onSavePieceClick={handleSavePieceClick}
         />
       </div>
     </div>
