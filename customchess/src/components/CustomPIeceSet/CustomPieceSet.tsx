@@ -27,11 +27,7 @@ function PieceSet({ selectedPiece, onPieceSelect }: PieceSetProps) {
   };
 
   const handlePieceClick = (piece: string) => {
-    if (selectedPiece?.piece === piece_to_letter[piece] && selectedPiece?.color === color) {
-      onPieceSelect(null, color);
-    } else {
       onPieceSelect(piece_to_letter[piece], color);
-    }
   };
 
   return (

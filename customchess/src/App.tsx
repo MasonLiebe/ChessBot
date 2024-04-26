@@ -3,6 +3,7 @@ import './App.css';
 import PieceCustomizer from './components/PieceCustomizer/PieceCustomizer';
 import PiecePanel from './components/PiecePanel/PiecePanel';
 import CustomPieceSet from './components/CustomPIeceSet/CustomPieceSet';
+import { GameWorkshop } from './components/GameWorkshop/GameWorkshop';
 
 function App() {
   
@@ -198,68 +199,15 @@ function App() {
 
   movementPatterns.push(patternA, patternB, patternC, patternD, patternE, patternF);
 
+  const [selectedPattern, setSelectedPattern] = useState<MovementPattern>(patternA);
+
   let activePatternIndex = 0;
 
   const handleDirectionChange = (direction: string, isAttack: boolean) => {
-    if (isAttack) {
-      switch (direction) {
-        case 'north':
-          setAttackNorth(!attack_north);
-          break;
-        case 'east':
-          setAttackEast(!attack_east);
-          break;
-        case 'south':
-          setAttackSouth(!attack_south);
-          break;
-        case 'west':
-          setAttackWest(!attack_west);
-          break;
-        case 'southEast':
-          setAttackSouthEast(!attack_southEast);
-          break;
-        case 'southWest':
-          setAttackSouthWest(!attack_southWest);
-          break;
-        case 'northEast':
-          setAttackNorthEast(!attack_northEast);
-          break;
-        case 'northWest':
-          setAttackNorthWest(!attack_northWest);
-          break;
-        default:
-          break;
-      }
-    } else {
-      switch (direction) {
-        case 'north':
-          setTranslateNorth(!translate_north);
-          break;
-        case 'east':
-          setTranslateEast(!translate_east);
-          break;
-        case 'south':
-          setTranslateSouth(!translate_south);
-          break;
-        case 'west':
-          setTranslateWest(!translate_west);
-          break;
-        case 'southEast':
-          setTranslateSouthEast(!translate_southEast);
-          break;
-        case 'southWest':
-          setTranslateSouthWest(!translate_southWest);
-          break;
-        case 'northEast':
-          setTranslateNorthEast(!translate_northEast);
-          break;
-        case 'northWest':
-          setTranslateNorthWest(!translate_northWest);
-          break;
-        default:
-          break;
-      }
-    }
+    setSelectedPattern((prevPattern) => ({
+      ...prevPattern,
+      [`${isAttack ? 'attack' : 'translate'}_${direction}`]: !prevPattern[`${isAttack ? 'attack' : 'translate'}_${direction}` as keyof MovementPattern],
+    }));
   };
 
   const handleSizeChange = (newSize: number) => {
@@ -270,45 +218,23 @@ function App() {
     console.log(piece, color);
     setSelectedPiece({ piece, color });
     if (piece === 'a') {
-      activePatternIndex = 0;
+      setSelectedPattern(movementPatterns[0]);
     }
     if (piece === 'c') {
-      activePatternIndex = 1;
+      setSelectedPattern(movementPatterns[1]);
     }
     if (piece === 'd') {
-      activePatternIndex = 2;
+      setSelectedPattern(movementPatterns[2]);
     }
     if (piece === 'e') {
-      activePatternIndex = 3;
+      setSelectedPattern(movementPatterns[3]);
     }
     if (piece === 'f') {
-      activePatternIndex = 4;
+      setSelectedPattern(movementPatterns[4]);
     }
     if (piece === 'g') {
-      activePatternIndex = 5;
+      setSelectedPattern(movementPatterns[5]);
     }
-
-    setAttackNorth(movementPatterns[activePatternIndex].attack_north);
-    setAttackEast(movementPatterns[activePatternIndex].attack_east);
-    setAttackSouth(movementPatterns[activePatternIndex].attack_south);
-    setAttackWest(movementPatterns[activePatternIndex].attack_west);
-    setAttackSouthEast(movementPatterns[activePatternIndex].attack_southEast);
-    setAttackSouthWest(movementPatterns[activePatternIndex].attack_southWest);
-    setAttackNorthEast(movementPatterns[activePatternIndex].attack_northEast);
-    setAttackNorthWest(movementPatterns[activePatternIndex].attack_northWest);
-    setTranslateNorth(movementPatterns[activePatternIndex].translate_north);
-    setTranslateEast(movementPatterns[activePatternIndex].translate_east);
-    setTranslateSouth(movementPatterns[activePatternIndex].translate_south);
-    setTranslateWest(movementPatterns[activePatternIndex].translate_west);
-    setTranslateSouthEast(movementPatterns[activePatternIndex].translate_southEast);
-    setTranslateSouthWest(movementPatterns[activePatternIndex].translate_southWest);
-    setTranslateNorthEast(movementPatterns[activePatternIndex].translate_northEast);
-    setTranslateNorthWest(movementPatterns[activePatternIndex].translate_northWest);
-    setAttackJumps(movementPatterns[activePatternIndex].attack_jumps);
-    setTranslateJumps(movementPatterns[activePatternIndex].translate_jumps);
-    setAttackSlides(movementPatterns[activePatternIndex].attack_slides);
-    setTranslateSlides(movementPatterns[activePatternIndex].translate_slides);
-    console.log(movementPatterns[activePatternIndex].attack_north);
   };
 
   const handleProgramAttackJumpsClick = () => {
@@ -336,85 +262,53 @@ function App() {
   }
 
   const handleSavePieceClick = () => {
-    movementPatterns[activePatternIndex].attack_north = attack_north;
-    movementPatterns[activePatternIndex].attack_east = attack_east;
-    movementPatterns[activePatternIndex].attack_south = attack_south;
-    movementPatterns[activePatternIndex].attack_west = attack_west;
-    movementPatterns[activePatternIndex].attack_southEast = attack_southEast;
-    movementPatterns[activePatternIndex].attack_southWest = attack_southWest;
-    movementPatterns[activePatternIndex].attack_northEast = attack_northEast;
-    movementPatterns[activePatternIndex].attack_northWest = attack_northWest;
-    movementPatterns[activePatternIndex].translate_north = translate_north;
-    movementPatterns[activePatternIndex].translate_east = translate_east;
-    movementPatterns[activePatternIndex].translate_south = translate_south;
-    movementPatterns[activePatternIndex].translate_west = translate_west;
-    movementPatterns[activePatternIndex].translate_southEast = translate_southEast;
-    movementPatterns[activePatternIndex].translate_southWest = translate_southWest;
-    movementPatterns[activePatternIndex].translate_northEast = translate_northEast;
-    movementPatterns[activePatternIndex].translate_northWest = translate_northWest;
-    movementPatterns[activePatternIndex].attack_jumps = attack_jumps;
-    movementPatterns[activePatternIndex].translate_jumps = translate_jumps;
-    movementPatterns[activePatternIndex].attack_slides = attack_slides;
-    movementPatterns[activePatternIndex].translate_slides = translate_slides;
-    console.log(movementPatterns[0].attack_north);
+    const updatedMovementPatterns = [...movementPatterns];
+    updatedMovementPatterns[activePatternIndex] = selectedPattern;
+    movementPatterns = updatedMovementPatterns;
+    console.log(movementPatterns[activePatternIndex]);
+  };
+
+  const toggleJump = (jumps: [number, number][], jumpCoord: [number, number]): [number, number][] => {
+    const index = jumps.findIndex(
+      (jump) => jump[0] === jumpCoord[0] && jump[1] === jumpCoord[1]
+    );
+  
+    if (index !== -1) {
+      return jumps.filter((_, i) => i !== index);
+    } else {
+      return [...jumps, jumpCoord];
+    }
+  };
+  
+  function toggleSlide(attack_slides: [number, number][][], arg1: number[]): [number, number][][] {
+    throw new Error('Function not implemented.');
   }
 
   const handleSquareClick = (row: number, col: number) => {
     if (isProgrammingAttackJumps) {
-      const jumpCoord: [number, number] = [row, col];
-      const index = attack_jumps.findIndex(
-        jump => jump[0] === jumpCoord[0] && jump[1] === jumpCoord[1]
-      );
-  
-      if (index !== -1) {
-        setAttackJumps(attack_jumps.filter((_, i) => i !== index));
-      } else {
-        setAttackJumps([...attack_jumps, jumpCoord]);
-      }
-    } 
+      setSelectedPattern((prevPattern) => ({
+        ...prevPattern,
+        attack_jumps: toggleJump(prevPattern.attack_jumps, [row, col]),
+      }));
+    }
     if (isProgrammingTranslateJumps) {
-      const jumpCoord: [number, number] = [row, col];
-      const index = translate_jumps.findIndex(
-        jump => jump[0] === jumpCoord[0] && jump[1] === jumpCoord[1]
-      );
-  
-      if (index !== -1) {
-        setTranslateJumps(translate_jumps.filter((_, i) => i !== index));
-      } else {
-        setTranslateJumps([...translate_jumps, jumpCoord]);
-      }
+      setSelectedPattern((prevPattern) => ({
+        ...prevPattern,
+        translate_jumps: toggleJump(prevPattern.translate_jumps, [row, col]),
+      }));
     }
     if (isProgrammingAttackSlides) {
-      const slideCoord: [number, number] = [row, col];
-      const slideIndex = attack_slides.findIndex(slide =>
-        slide.some(coord => coord[0] === slideCoord[0] && coord[1] === slideCoord[1])
-      );
-  
-      if (slideIndex !== -1) {
-        const updatedSlides = attack_slides.map((slide, i) =>
-          i === slideIndex ? slide.filter(coord => coord[0] !== slideCoord[0] || coord[1] !== slideCoord[1]) : slide
-        );
-        setAttackSlides(updatedSlides.filter(slide => slide.length > 0));
-      } else {
-        setAttackSlides([...attack_slides, [slideCoord]]);
-      }
-    } 
-    if (isProgrammingTranslateSlides) {
-      const slideCoord: [number, number] = [row, col];
-      const slideIndex = translate_slides.findIndex(slide =>
-        slide.some(coord => coord[0] === slideCoord[0] && coord[1] === slideCoord[1])
-      );
-  
-      if (slideIndex !== -1) {
-        const updatedSlides = translate_slides.map((slide, i) =>
-          i === slideIndex ? slide.filter(coord => coord[0] !== slideCoord[0] || coord[1] !== slideCoord[1]) : slide
-        );
-        setTranslateSlides(updatedSlides.filter(slide => slide.length > 0));
-      } else {
-        setTranslateSlides([...translate_slides, [slideCoord]]);
-      }
+      setSelectedPattern((prevPattern) => ({
+        ...prevPattern,
+        attack_slides: toggleSlide(prevPattern.attack_slides, [row, col]),
+      }));
     }
-    console.log(attack_jumps);
+    if (isProgrammingTranslateSlides) {
+      setSelectedPattern((prevPattern) => ({
+        ...prevPattern,
+        translate_slides: toggleSlide(prevPattern.translate_slides, [row, col]),
+      }));
+    }
   };
 
   return (
@@ -425,24 +319,24 @@ function App() {
           <PieceCustomizer
             size={size}
             piece={String(selectedPiece.piece)}
-            attack_north={attack_north}
-            attack_east={attack_east}
-            attack_south={attack_south}
-            attack_west={attack_west}
-            attack_southEast={attack_southEast}
-            attack_southWest={attack_southWest}
-            attack_northEast={attack_northEast}
-            attack_northWest={attack_northWest}
-            translate_north={translate_north}
-            translate_east={translate_east}
-            translate_south={translate_south}
-            translate_west={translate_west}
-            translate_southEast={translate_southEast}
-            translate_southWest={translate_southWest}
-            translate_northEast={translate_northEast}
-            translate_northWest={translate_northWest}
-            attack_jumps={attack_jumps}
-            translate_jumps={translate_jumps}
+            attack_north={selectedPattern.attack_north}
+            attack_east={selectedPattern.attack_east}
+            attack_west={selectedPattern.attack_west}
+            attack_south={selectedPattern.attack_south}
+            attack_southEast={selectedPattern.attack_southEast}
+            attack_southWest={selectedPattern.attack_southWest}
+            attack_northEast={selectedPattern.attack_northEast}
+            attack_northWest={selectedPattern.attack_northWest}
+            translate_north={selectedPattern.translate_north}
+            translate_east={selectedPattern.translate_east}
+            translate_south={selectedPattern.translate_south}
+            translate_west={selectedPattern.translate_west}
+            translate_southEast={selectedPattern.translate_southEast}
+            translate_southWest={selectedPattern.translate_southWest}
+            translate_northEast={selectedPattern.translate_northEast}
+            translate_northWest={selectedPattern.translate_northWest}
+            attack_jumps={selectedPattern.attack_jumps}
+            translate_jumps={selectedPattern.translate_jumps}
             attack_slides={[[]]}
             translate_slides={[[]]}
             onSquareClick={handleSquareClick}
@@ -451,22 +345,22 @@ function App() {
         </div>
         <PiecePanel
           size={size}
-          attack_north={attack_north}
-          attack_east={attack_east}
-          attack_south={attack_south}
-          attack_west={attack_west}
-          attack_southEast={attack_southEast}
-          attack_southWest={attack_southWest}
-          attack_northEast={attack_northEast}
-          attack_northWest={attack_northWest}
-          translate_north={translate_north}
-          translate_east={translate_east}
-          translate_south={translate_south}
-          translate_west={translate_west}
-          translate_southEast={translate_southEast}
-          translate_southWest={translate_southWest}
-          translate_northEast={translate_northEast}
-          translate_northWest={translate_northWest}
+          attack_north={selectedPattern.attack_north}
+          attack_east={selectedPattern.attack_east}
+          attack_west={selectedPattern.attack_west}
+          attack_south={selectedPattern.attack_south}
+          attack_southEast={selectedPattern.attack_southEast}
+          attack_southWest={selectedPattern.attack_southWest}
+          attack_northEast={selectedPattern.attack_northEast}
+          attack_northWest={selectedPattern.attack_northWest}
+          translate_north={selectedPattern.translate_north}
+          translate_east={selectedPattern.translate_east}
+          translate_south={selectedPattern.translate_south}
+          translate_west={selectedPattern.translate_west}
+          translate_southEast={selectedPattern.translate_southEast}
+          translate_southWest={selectedPattern.translate_southWest}
+          translate_northEast={selectedPattern.translate_northEast}
+          translate_northWest={selectedPattern.translate_northWest}
           onDirectionChange={handleDirectionChange}
           onSizeChange={handleSizeChange}
           isProgrammingAttackJumps={isProgrammingAttackJumps}
@@ -485,3 +379,4 @@ function App() {
 }
 
 export default App;
+

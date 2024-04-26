@@ -138,6 +138,10 @@ label {
   border-radius: 10px;
   cursor: pointer;
   outline: none;
-  transition: background-color 0.3s, transform 0.5s; /* Smooth background and press 
-  effect */
+  transition: background-color 0.3s, transform 0.5s;
+  justify-self: center;
+}
+
+.save-piece:hover {
+  background-color: #a3e0ac; /* Lighter shade on hover */
 }
