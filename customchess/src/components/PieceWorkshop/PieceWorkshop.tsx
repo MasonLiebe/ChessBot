@@ -185,7 +185,7 @@ export function PieceWorkshop() {
 
   const [selectedPattern, setSelectedPattern] = useState<MovementPattern>(patternA);
 
-  let activePatternIndex = 0;
+  let [activePatternIndex, setActivePatternIndex] = useState(0);
 
   const handleDirectionChange = (direction: string, isAttack: boolean) => {
     setSelectedPattern((prevPattern) => ({
@@ -203,21 +203,27 @@ export function PieceWorkshop() {
     setSelectedPiece({ piece, color });
     if (piece === 'a') {
       setSelectedPattern(movementPatterns[0]);
+      setActivePatternIndex(0);
     }
     if (piece === 'c') {
       setSelectedPattern(movementPatterns[1]);
+      setActivePatternIndex(1);
     }
     if (piece === 'd') {
       setSelectedPattern(movementPatterns[2]);
+      setActivePatternIndex(2);
     }
     if (piece === 'e') {
       setSelectedPattern(movementPatterns[3]);
+      setActivePatternIndex(3);
     }
     if (piece === 'f') {
       setSelectedPattern(movementPatterns[4]);
+      setActivePatternIndex(4);
     }
     if (piece === 'g') {
       setSelectedPattern(movementPatterns[5]);
+      setActivePatternIndex(5);
     }
   };
 
@@ -299,33 +305,35 @@ export function PieceWorkshop() {
     <div className="app">
       <h1 className="app-title">Custom Piece Workshop</h1>
       <div className="main-container">
-        <div className="piece-customizer-container">
-          <PieceCustomizer
-            size={size}
-            piece={String(selectedPiece.piece)}
-            attack_north={selectedPattern.attack_north}
-            attack_east={selectedPattern.attack_east}
-            attack_west={selectedPattern.attack_west}
-            attack_south={selectedPattern.attack_south}
-            attack_southEast={selectedPattern.attack_southEast}
-            attack_southWest={selectedPattern.attack_southWest}
-            attack_northEast={selectedPattern.attack_northEast}
-            attack_northWest={selectedPattern.attack_northWest}
-            translate_north={selectedPattern.translate_north}
-            translate_east={selectedPattern.translate_east}
-            translate_south={selectedPattern.translate_south}
-            translate_west={selectedPattern.translate_west}
-            translate_southEast={selectedPattern.translate_southEast}
-            translate_southWest={selectedPattern.translate_southWest}
-            translate_northEast={selectedPattern.translate_northEast}
-            translate_northWest={selectedPattern.translate_northWest}
-            attack_jumps={selectedPattern.attack_jumps}
-            translate_jumps={selectedPattern.translate_jumps}
-            attack_slides={[[]]}
-            translate_slides={[[]]}
-            onSquareClick={handleSquareClick}
-          />
-          <CustomPieceSet selectedPiece={selectedPiece} onPieceSelect={handlePieceSelect} />
+        <div className='chessboard-wrapper'>
+          <div className="piece-customizer-container">
+            <PieceCustomizer
+              size={size}
+              piece={String(selectedPiece.piece)}
+              attack_north={selectedPattern.attack_north}
+              attack_east={selectedPattern.attack_east}
+              attack_west={selectedPattern.attack_west}
+              attack_south={selectedPattern.attack_south}
+              attack_southEast={selectedPattern.attack_southEast}
+              attack_southWest={selectedPattern.attack_southWest}
+              attack_northEast={selectedPattern.attack_northEast}
+              attack_northWest={selectedPattern.attack_northWest}
+              translate_north={selectedPattern.translate_north}
+              translate_east={selectedPattern.translate_east}
+              translate_south={selectedPattern.translate_south}
+              translate_west={selectedPattern.translate_west}
+              translate_southEast={selectedPattern.translate_southEast}
+              translate_southWest={selectedPattern.translate_southWest}
+              translate_northEast={selectedPattern.translate_northEast}
+              translate_northWest={selectedPattern.translate_northWest}
+              attack_jumps={selectedPattern.attack_jumps}
+              translate_jumps={selectedPattern.translate_jumps}
+              attack_slides={[[]]}
+              translate_slides={[[]]}
+              onSquareClick={handleSquareClick}
+            />
+            <CustomPieceSet selectedPiece={selectedPiece} onPieceSelect={handlePieceSelect} />
+          </div>
         </div>
         <PiecePanel
           size={size}
