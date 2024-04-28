@@ -305,8 +305,8 @@ export function PieceWorkshop() {
     <div className="app">
       <h1 className="app-title">Custom Piece Workshop</h1>
       <div className="main-container">
-        <div className='chessboard-wrapper'>
-          <div className="piece-customizer-container">
+        <div className="chessboard-wrapper">
+          <div className="chessboard-container">
             <PieceCustomizer
               size={size}
               piece={String(selectedPiece.piece)}

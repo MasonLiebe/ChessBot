@@ -84,7 +84,7 @@ function PieceCustomizer({
   translate_slides,
   onSquareClick,
 }: PieceCustomizerProps) {
-  const squareSize = Math.floor(600 / size);
+  const squareSize = Math.floor(690 / size);
   const boardWidth = size * squareSize;
   const boardHeight = size * squareSize;
 
