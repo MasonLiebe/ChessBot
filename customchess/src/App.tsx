@@ -13,24 +13,28 @@ function App() {
   return (
     <div className="app">
       <nav className="navbar">
-        <div className="navbar-brand">Custom Chess</div>
         <ul className="navbar-nav">
           <li
             className={`nav-item ${activeWorkshop === 'piece' ? 'active' : ''}`}
             onClick={() => handleWorkshopChange('piece')}
           >
-            Piece Workshop
+            Customize Pieces
           </li>
           <li
             className={`nav-item ${activeWorkshop === 'game' ? 'active' : ''}`}
             onClick={() => handleWorkshopChange('game')}
           >
-            Game Workshop
+            Customize Game
           </li>
         </ul>
       </nav>
       <div className="workshop-container">
-        {activeWorkshop === 'piece' ? <PieceWorkshop /> : <GameWorkshop />}
+        <div style={{ display: activeWorkshop === 'piece' ? 'block' : 'none' }}>
+          <PieceWorkshop />
+        </div>
+        <div style={{ display: activeWorkshop === 'game' ? 'block' : 'none' }}>
+          <GameWorkshop />
+        </div>
       </div>
     </div>
   );
