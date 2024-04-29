@@ -239,10 +239,51 @@ export function PieceWorkshop() {
     setIsProgrammingTranslateJumps(!isProgrammingTranslateJumps);
   }
 
-  const handleProgramAttackSlidesClick = () => {
-    setIsProgrammingAttackJumps(false);
-    setIsProgrammingTranslateJumps(false);
-    setIsProgrammingAttackSlides(!isProgrammingAttackSlides);
+  const handleClearPatternClick = () => {
+    setSelectedPattern({
+      attack_north: false,
+      attack_east: false,
+      attack_south: false,
+      attack_west: false,
+      attack_southEast: false,
+      attack_southWest: false,
+      attack_northEast: false,
+      attack_northWest: false,
+      translate_north: false,
+      translate_east: false,
+      translate_south: false,
+      translate_west: false,
+      translate_southEast: false,
+      translate_southWest: false,
+      translate_northEast: false,
+      translate_northWest: false,
+      attack_jumps: [],
+      translate_jumps: [],
+      attack_slides: [],
+      translate_slides: [],
+    });
+  }
+
+  const handleDefaultPatternClick = () => {
+    // sets the default pattern for the selected piece
+    if (selectedPiece.piece === 'a') {
+      setSelectedPattern(patternA);
+    }
+    if (selectedPiece.piece === 'c') {
+      setSelectedPattern(patternB);
+    }
+    if (selectedPiece.piece === 'd') {
+      setSelectedPattern(patternC);
+    }
+    if (selectedPiece.piece === 'e') {
+      setSelectedPattern(patternD);
+    }
+    if (selectedPiece.piece === 'f') {
+      setSelectedPattern(patternE);
+    }
+    if (selectedPiece.piece === 'g') {
+      setSelectedPattern(patternF);
+    }
   }
 
   const handleProgramTranslateSlidesClick = () => {
@@ -361,8 +402,8 @@ export function PieceWorkshop() {
           isProgrammingTranslateSlides={isProgrammingTranslateSlides}
           onProgramAttackJumpsClick={handleProgramAttackJumpsClick}
           onProgramTranslateJumpsClick={handleProgramTranslateJumpsClick}
-          onProgramAttackSlidesClick={handleProgramAttackSlidesClick}
-          onProgramTranslateSlidesClick={handleProgramTranslateSlidesClick}
+          onClearPatternClick={handleClearPatternClick}
+          onDefaultPatternClick={handleDefaultPatternClick}
           onSavePieceClick={handleSavePieceClick}
         />
       </div>

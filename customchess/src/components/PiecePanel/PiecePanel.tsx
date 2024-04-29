@@ -29,8 +29,8 @@ interface PiecePanelProps {
   isProgrammingTranslateSlides: boolean;
   onProgramAttackJumpsClick: () => void;
   onProgramTranslateJumpsClick: () => void;
-  onProgramAttackSlidesClick: () => void;
-  onProgramTranslateSlidesClick: () => void;
+  onClearPatternClick: () => void;
+  onDefaultPatternClick: () => void;
   onSavePieceClick: () => void;
 }
 
@@ -60,8 +60,8 @@ function PiecePanel({
   isProgrammingTranslateSlides,
   onProgramAttackJumpsClick,
   onProgramTranslateJumpsClick,
-  onProgramAttackSlidesClick,
-  onProgramTranslateSlidesClick,
+  onClearPatternClick,
+  onDefaultPatternClick,
   onSavePieceClick,
 }: PiecePanelProps) {
   const handleDirectionClick = (direction: string, isAttack: boolean) => {
@@ -190,16 +190,14 @@ function PiecePanel({
           Program Translate Jumps
         </button>
         <button
-          className={isProgrammingAttackSlides ? 'active-attack' : ''}
-          onClick={onProgramAttackSlidesClick}
+          onClick={onClearPatternClick}
         >
-          Program Attack Slides
+          Clear Pattern
         </button>
         <button
-          className={isProgrammingTranslateSlides ? 'active-translate' : ''}
-          onClick={onProgramTranslateSlidesClick}
+          onClick={onDefaultPatternClick}
         >
-          Program Translate Slides
+          Set to Default Pattern
         </button>
       </div>
       <button className="save-piece" onClick={onSavePieceClick}>

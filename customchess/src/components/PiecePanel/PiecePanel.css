@@ -127,7 +127,7 @@ label {
 }
 
 .save-piece {
-  font-family: "Raleway", sans-serif;;
+  font-family: "Raleway", sans-serif;
   font-optical-sizing: auto;
   font-size: 1.2rem;
   color: #000;
@@ -139,7 +139,7 @@ label {
   cursor: pointer;
   outline: none;
   transition: background-color 0.3s, transform 0.5s;
-  justify-self: center;
+  align-self: center;
 }
 
 .save-piece:hover {
