@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './BoardCustomizer.css';
 
 interface BoardCustomizerProps {
@@ -41,14 +41,58 @@ const piece_to_image: PieceToImageMap = {
 };
 
 
-export default function BoardCustomizer({ rows, columns, pieces, selected, onSquareClick }: BoardCustomizerProps) {
+export default function BoardCustomizer({ rows, columns, pieces, selected, onSquareClick}: BoardCustomizerProps) {
   const squareSize = Math.floor(690 / Math.max(rows, columns));
   const boardWidth = columns * squareSize;
   const boardHeight = rows * squareSize;
+  const [isDragging, setIsDragging] = useState(false);
+  const [startIndex, setStartIndex] = useState<number | null>(null);
+  const [isMouseUp, setIsMouseUp] = useState(false);
+  const boardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleMouseLeave = () => {
+      setIsDragging(false);
+    };
+
+    const boardElement = boardRef.current;
+    if (boardElement) {
+      boardElement.addEventListener('mouseleave', handleMouseLeave);
+    }
+
+    return () => {
+      if (boardElement) {
+        boardElement.removeEventListener('mouseleave', handleMouseLeave);
+      }
+    };
+  }, []);
+
+  const handleMouseEnter = (index: number) => {
+    if (isDragging && startIndex !== null && startIndex !== index) {
+      onSquareClick(index);
+    }
+  };
+
+  const handleMouseDown = (index: number) => {
+    setIsDragging(true);
+    setStartIndex(index);
+    setIsMouseUp(false);
+    onSquareClick(index);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setIsMouseUp(true);
+  };
+
+  const handleClick = (index: number) => {
+    if (startIndex === index && isMouseUp) {
+      onSquareClick(index);
+    }
+  };
 
   const renderSquares = () => {
     const squares = [];
-
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < columns; col++) {
         const squareColor = (row + col) % 2 === 0 ? 'white' : 'black';
@@ -63,7 +107,9 @@ export default function BoardCustomizer({ rows, columns, pieces, selected, onSqu
               width: `${squareSize}px`,
               height: `${squareSize}px`,
             }}
-            onClick={() => onSquareClick(index)}
+            onMouseEnter={() => handleMouseEnter(index)}
+            onMouseDown={() => handleMouseDown(index)}
+            onMouseUp={handleMouseUp}
           >
             {piece !== '.' && piece_to_image[piece] && (
               <img

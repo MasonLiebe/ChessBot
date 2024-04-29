@@ -76,7 +76,7 @@ export function GameWorkshop() {
       }
     }
   }
-  
+
   useEffect(() => {
     if (isSquare) {
       setColumns(rows);

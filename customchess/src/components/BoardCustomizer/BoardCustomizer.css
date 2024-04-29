@@ -4,6 +4,10 @@
   justify-content: center;
   align-items: center;
   position: relative;
+  user-select: none;
+  -webkit-user-select: none; /* For Safari */
+  -moz-user-select: none; /* For Firefox */
+  -ms-user-select: none; /* For Internet Explorer/Edge */
 }
 
 .square.selected {
@@ -24,4 +28,8 @@
   object-fit: contain;
   cursor: pointer;
   transition: transform 0.2s;
+  user-select: none;
+  -webkit-user-select: none; /* For Safari */
+  -moz-user-select: none; /* For Firefox */
+  -ms-user-select: none; /* For Internet Explorer/Edge */
 }
