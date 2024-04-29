@@ -80,7 +80,6 @@ export function PlayBot() {
       <div className="main-container">
         <div className="chessboard-wrapper">
           <div className="chessboard-container">
-            <PieceSet color="black" selectedPiece={selectedPieceType} onPieceSelect={handlePieceSelect} />
             <BoardCustomizer
               rows={rows}
               columns={columns}
@@ -88,7 +87,6 @@ export function PlayBot() {
               selected={selectedBoardPiece}
               onSquareClick={handleBoardClick}
             />
-            <PieceSet color="white" selectedPiece={selectedPieceType} onPieceSelect={handlePieceSelect}/>
           </div>
         </div>
         <BoardPanel

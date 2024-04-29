@@ -1,225 +1,115 @@
-import React, { useState } from 'react';
-import './PiecePanel.css';
-import { on } from 'events';
+import React from 'react';
+import './BoardPanel.css';
 
-
-interface PiecePanelProps {
-  size: number;
-  attack_north: boolean;
-  attack_east: boolean;
-  attack_south: boolean;
-  attack_west: boolean;
-  attack_southEast: boolean;
-  attack_southWest: boolean;
-  attack_northEast: boolean;
-  attack_northWest: boolean;
-  translate_north: boolean;
-  translate_east: boolean;
-  translate_south: boolean;
-  translate_west: boolean;
-  translate_southEast: boolean;
-  translate_southWest: boolean;
-  translate_northEast: boolean;
-  translate_northWest: boolean;
-  onDirectionChange: (direction: string, isAttack: boolean) => void;
-  onSizeChange: (size: number) => void;
-  isProgrammingAttackJumps: boolean;
-  isProgrammingTranslateJumps: boolean;
-  isProgrammingAttackSlides: boolean;
-  isProgrammingTranslateSlides: boolean;
-  onProgramAttackJumpsClick: () => void;
-  onProgramTranslateJumpsClick: () => void;
-  onProgramAttackSlidesClick: () => void;
-  onProgramTranslateSlidesClick: () => void;
-  onSavePieceClick: () => void;
+interface PieceToImageMap {
+  [key: string]: string;
 }
 
-function PiecePanel({
-  size,
-  attack_north,
-  attack_east,
-  attack_south,
-  attack_west,
-  attack_southEast,
-  attack_southWest,
-  attack_northEast,
-  attack_northWest,
-  translate_north,
-  translate_east,
-  translate_south,
-  translate_west,
-  translate_southEast,
-  translate_southWest,
-  translate_northEast,
-  translate_northWest,
-  onDirectionChange,
-  onSizeChange,
-  isProgrammingAttackJumps,
-  isProgrammingTranslateJumps,
-  isProgrammingAttackSlides,
-  isProgrammingTranslateSlides,
-  onProgramAttackJumpsClick,
-  onProgramTranslateJumpsClick,
-  onProgramAttackSlidesClick,
-  onProgramTranslateSlidesClick,
-  onSavePieceClick,
-}: PiecePanelProps) {
-  const handleDirectionClick = (direction: string, isAttack: boolean) => {
-    onDirectionChange(direction, isAttack);
-  };
+const piece_to_image: PieceToImageMap = {
+  'p': 'black-pawn',
+  'n': 'black-knight',
+  'b': 'black-bishop',
+  'r': 'black-rook',
+  'q': 'black-queen',
+  'k': 'black-king',
+  'a': 'black-custom1',
+  'c': 'black-custom2',
+  'd': 'black-custom3',
+  'e': 'black-custom4',
+  'f': 'black-custom5',
+  'g': 'black-custom6',
+  'P': 'white-pawn',
+  'N': 'white-knight',
+  'B': 'white-bishop',
+  'R': 'white-rook',
+  'Q': 'white-queen',
+  'K': 'white-king',
+  'A': 'white-custom1',
+  'C': 'white-custom2',
+  'D': 'white-custom3',
+  'E': 'white-custom4',
+  'F': 'white-custom5',
+  'G': 'white-custom6'
+};
 
-  const handleSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newSize = parseInt(event.target.value);
-    onSizeChange(newSize);
-  };
+interface GamePanelProps {
+  rows: number;
+  columns: number;
+  isSquare: boolean;
+  onRowsChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onColumnsChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onSquareToggle: () => void;
+  onClearBoard: () => void;
+  onResetBoard: () => void;
+  onProgramPiece: () => void;
+  selected: { piece: string; color: string } | null;
+}
 
+function GamePanel({
+  rows,
+  columns,
+  isSquare,
+  onRowsChange,
+  onColumnsChange,
+  onSquareToggle,
+  onClearBoard,
+  onResetBoard,
+  onProgramPiece,
+  selected,
+}: GamePanelProps) {
   return (
-    <div className="piece-panel">
-      <div className="direction-grid">
-      <div className="row">
-        <div className="row-label"></div>
-        <div className="column-labels">
-          <div>Attack</div>
-        </div>
-        <div className="column-labels">
-          <div>Translate</div>
-        </div>
-      </div>
-        <div className="direction-rows">
-          <div className="row">
-            <div className="row-label">North</div>
-            <button
-              className={attack_north ? 'active' : ''}
-              onClick={() => handleDirectionClick('north', true)}
-            ></button>
-            <button
-              className={translate_north ? 'active' : ''}
-              onClick={() => handleDirectionClick('north', false)}
-            ></button>
-          </div>
-          <div className="row">
-            <div className="row-label">East</div>
-            <button
-              className={attack_east ? 'active' : ''}
-              onClick={() => handleDirectionClick('east', true)}
-            ></button>
-            <button
-              className={translate_east ? 'active' : ''}
-              onClick={() => handleDirectionClick('east', false)}
-            ></button>
-          </div>
-          <div className="row">
-            <div className="row-label">South</div>
-            <button
-              className={attack_south ? 'active' : ''}
-              onClick={() => handleDirectionClick('south', true)}
-            ></button>
-            <button
-              className={translate_south ? 'active' : ''}
-              onClick={() => handleDirectionClick('south', false)}
-            ></button>
-          </div>
-          <div className="row">
-            <div className="row-label">West</div>
-            <button
-              className={attack_west ? 'active' : ''}
-              onClick={() => handleDirectionClick('west', true)}
-            ></button>
-            <button
-              className={translate_west ? 'active' : ''}
-              onClick={() => handleDirectionClick('west', false)}
-            ></button>
-          </div>
-          <div className="row">
-            <div className="row-label">South-East</div>
-            <button
-              className={attack_southEast ? 'active' : ''}
-              onClick={() => handleDirectionClick('southEast', true)}
-            ></button>
-            <button
-              className={translate_southEast ? 'active' : ''}
-              onClick={() => handleDirectionClick('southEast', false)}
-            ></button>
-          </div>
-          <div className="row">
-            <div className="row-label">South-West</div>
-            <button
-              className={attack_southWest ? 'active' : ''}
-              onClick={() => handleDirectionClick('southWest', true)}
-            ></button>
-            <button
-              className={translate_southWest ? 'active' : ''}
-              onClick={() => handleDirectionClick('southWest', false)}
-            ></button>
-          </div>
-          <div className="row">
-            <div className="row-label">North-East</div>
-            <button
-              className={attack_northEast ? 'active' : ''}
-              onClick={() => handleDirectionClick('northEast', true)}
-            ></button>
-            <button
-              className={translate_northEast ? 'active' : ''}
-              onClick={() => handleDirectionClick('northEast', false)}
-            ></button>
-          </div>
-          <div className="row">
-            <div className="row-label">North-West</div>
-            <button
-              className={attack_northWest ? 'active' : ''}
-              onClick={() => handleDirectionClick('northWest', true)}
-            ></button>
-            <button
-              className={translate_northWest ? 'active' : ''}
-              onClick={() => handleDirectionClick('northWest', false)}
-            ></button>
-          </div>
-        </div>
-      </div>
-      <div className="program-buttons">
-        <button
-          className={isProgrammingAttackJumps ? 'active-attack' : ''}
-          onClick={onProgramAttackJumpsClick}
-        >
-          Program Attack Jumps
-        </button>
-        <button
-          className={isProgrammingTranslateJumps ? 'active-translate' : ''}
-          onClick={onProgramTranslateJumpsClick}
-        >
-          Program Translate Jumps
-        </button>
-        <button
-          className={isProgrammingAttackSlides ? 'active-attack' : ''}
-          onClick={onProgramAttackSlidesClick}
-        >
-          Program Attack Slides
-        </button>
-        <button
-          className={isProgrammingTranslateSlides ? 'active-translate' : ''}
-          onClick={onProgramTranslateSlidesClick}
-        >
-          Program Translate Slides
-        </button>
-      </div>
-      <button className="save-piece" onClick={onSavePieceClick}>
-        Save Piece
-      </button>
-      <div className="size-slider">
-        <label htmlFor="size">Board Size: {size}</label>
+    <div className="board-panel">
+      <div className="board-panel-title">Board Properties</div>
+      <div className="slider">
+        <label htmlFor="rows-slider">Rows: {rows}</label>
         <input
-          id="size"
+          id="rows-slider"
           type="range"
-          min="5"
-          max="31"
-          step="2"
-          value={size}
-          onChange={handleSizeChange}
+          min="3"
+          max="16"
+          value={rows}
+          onChange={onRowsChange}
         />
       </div>
+      <div className="slider">
+        <label htmlFor="columns-slider">Columns: {columns}</label>
+        <input
+          id="columns-slider"
+          type="range"
+          min="3"
+          max="16"
+          value={columns}
+          onChange={onColumnsChange}
+        />
+      </div>
+      <div className="toggle-container">
+        <label htmlFor="square-toggle">Lock as Square:</label>
+        <input
+          id="square-toggle"
+          type="checkbox"
+          checked={isSquare}
+          onChange={onSquareToggle}
+        />
+      </div>
+      <button className="board-button" onClick={onClearBoard}>Clear Board</button>
+      <button className="board-button" onClick={onResetBoard}>Reset Board</button>
+      <button className="start-button" onClick={onResetBoard}>Start Game!</button>
+      <div className="selected-piece-box">
+        {selected && selected.piece ? (
+          <img
+            src={`/assets/pieces/${piece_to_image[selected.piece]}.png`}
+            alt={`${selected.color} ${selected.piece}`}
+            className="selected-piece"
+          />
+        ) : (
+          <div className="empty-box"></div>
+        )}
+      </div>
+      <div className="selected-piece-title">Selected Piece</div>
+      <button className="board-button program-piece-btn" onClick={onProgramPiece}>Program Selected Piece</button>
 
     </div>
   );
 }
 
-export default PiecePanel;
+export default GamePanel;
