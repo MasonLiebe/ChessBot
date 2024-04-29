@@ -56,19 +56,27 @@ export function GameWorkshop() {
       setPieces(updatedPieces);
       setSelectedBoardPiece(null);
     } else if (selectedPieceType) {
-      // Place the selected piece type on the clicked square
-      const updatedPieces = [...pieces];
-      console.log(selectedPieceType.piece);
-      updatedPieces[index] = selectedPieceType.piece;
-      setPieces(updatedPieces);
+      // Check if the clicked square already has the selected piece
+      if (pieces[index] === selectedPieceType.piece) {
+        // Remove the piece from the board
+        const updatedPieces = [...pieces];
+        updatedPieces[index] = '.';
+        setPieces(updatedPieces);
+      } else {
+        // Place the selected piece type on the clicked square
+        const updatedPieces = [...pieces];
+        console.log(selectedPieceType.piece);
+        updatedPieces[index] = selectedPieceType.piece;
+        setPieces(updatedPieces);
+      }
     } else {
       // Select the clicked board piece
       if (pieces[index] !== '.') {
         setSelectedBoardPiece(index);
       }
     }
-  };
-
+  }
+  
   useEffect(() => {
     if (isSquare) {
       setColumns(rows);
@@ -77,7 +85,7 @@ export function GameWorkshop() {
 
   return (
     <div className="app">
-      <h1 className="app-title">Custom Chess Workshop</h1>
+      <h1 className="app-title">Custom Board Workshop</h1>
       <div className="main-container">
         <div className="chessboard-wrapper">
           <div className="chessboard-container">

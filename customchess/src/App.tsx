@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 import { PieceWorkshop } from './components/PieceWorkshop/PieceWorkshop';
 import { GameWorkshop } from './components/GameWorkshop/GameWorkshop';
+import { PlayBot } from './components/PlayBot/PlayBot';
 
 function App() {
   const [activeWorkshop, setActiveWorkshop] = useState('piece');
@@ -26,6 +27,12 @@ function App() {
           >
             Customize Game
           </li>
+          <li
+            className={`nav-item ${activeWorkshop === 'play' ? 'active' : ''}`}
+            onClick={() => handleWorkshopChange('play')}
+          >
+            Play Against Bot
+          </li>
         </ul>
       </nav>
       <div className="workshop-container">
@@ -35,6 +42,19 @@ function App() {
         <div style={{ display: activeWorkshop === 'game' ? 'block' : 'none' }}>
           <GameWorkshop />
         </div>
+        <div style={{ display: activeWorkshop === 'play' ? 'block' : 'none' }}>
+          <PlayBot />
+        </div>
+      </div>
+      <div className="footer">
+        <p>
+          Made for fun by Mason Liebe
+          <a
+            href="https://github.com/MasonLiebe?tab=overview&from=2024-04-01&to=2024-04-29"
+            target="_blank"
+            color='white'
+          >Mason Liebe</a>
+        </p>
       </div>
     </div>
   );

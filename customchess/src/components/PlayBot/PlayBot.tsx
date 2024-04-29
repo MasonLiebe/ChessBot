@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import './GameWorkshop.css';
 import BoardCustomizer from '../BoardCustomizer/BoardCustomizer';
 import BoardPanel from '../BoardPanel/BoardPanel';
 import PieceSet from '../PieceSet/PieceSet';
 import { standardBoard } from '../../constants';
 
-export function GameWorkshop() {
+export function PlayBot() {
   const [rows, setRows] = useState(8);
   const [columns, setColumns] = useState(8);
   const [isSquare, setIsSquare] = useState(true);
