@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BoardCustomizer from '../BoardCustomizer/BoardCustomizer';
-import BoardPanel from '../BoardPanel/BoardPanel';
+import PlayPanel from '../PlayPanel/PlayPanel';
 import PieceSet from '../PieceSet/PieceSet';
 import { standardBoard } from '../../constants';
 
@@ -89,7 +89,7 @@ export function PlayBot() {
             />
           </div>
         </div>
-        <BoardPanel
+        <PlayPanel
           rows={rows}
           columns={columns}
           isSquare={isSquare}

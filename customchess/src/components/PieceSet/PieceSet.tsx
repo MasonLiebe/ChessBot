@@ -60,6 +60,7 @@ function PieceSet({ color, selectedPiece, onPieceSelect }: PieceSetProps) {
         />
       ))}
     </div>
+    
   );
 }
 

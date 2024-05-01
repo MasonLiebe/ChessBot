@@ -1,5 +1,5 @@
 import React from 'react';
-import './BoardPanel.css';
+import './PlayPanel.css';
 
 interface PieceToImageMap {
   [key: string]: string;
@@ -32,7 +32,7 @@ const piece_to_image: PieceToImageMap = {
   'G': 'white-custom6'
 };
 
-interface GamePanelProps {
+interface PlayPanelProps {
   rows: number;
   columns: number;
   isSquare: boolean;
@@ -45,7 +45,7 @@ interface GamePanelProps {
   selected: { piece: string; color: string } | null;
 }
 
-function GamePanel({
+function PlayPanel({
   rows,
   columns,
   isSquare,
@@ -56,7 +56,7 @@ function GamePanel({
   onResetBoard,
   onProgramPiece,
   selected,
-}: GamePanelProps) {
+}: PlayPanelProps) {
   return (
     <div className="board-panel">
       <div className="board-panel-title">Board Properties</div>
@@ -112,4 +112,4 @@ function GamePanel({
   );
 }
 
-export default GamePanel;
+export default PlayPanel;
