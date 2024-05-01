@@ -1,7 +1,7 @@
 import React from 'react';
 import './CustomGameBoard.css';
 
-interface CustomGameBoardProps {
+interface BoardCustomizerProps {
   rows: number;
   columns: number;
   pieces: string[]; // 256 character string representing the board
@@ -41,7 +41,7 @@ const piece_to_image: PieceToImageMap = {
 };
 
 
-export default function CustomGameBoard({ rows, columns, pieces, selected, onSquareClick }: CustomGameBoardProps) {
+export default function GameBoard({ rows, columns, pieces, selected, onSquareClick }: BoardCustomizerProps) {
   const squareSize = Math.floor(690 / Math.max(rows, columns));
   const boardWidth = columns * squareSize;
   const boardHeight = rows * squareSize;

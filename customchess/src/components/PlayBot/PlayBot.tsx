@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import BoardCustomizer from '../BoardCustomizer/BoardCustomizer';
-import PlayPanel from '../PlayPanel/PlayPanel';
+import './PlayBot.css';
+import CustomGameBoard from '../CustomGameBoard/CustomGameBoard';
+import BoardPanel from '../BoardPanel/BoardPanel';
 import PieceSet from '../PieceSet/PieceSet';
 import { standardBoard } from '../../constants';
 
@@ -76,20 +77,22 @@ export function PlayBot() {
 
   return (
     <div className="app">
-      <h1 className="app-title">Custom Chess Workshop</h1>
+      <h1 className="app-title">Custom Game</h1>
       <div className="main-container">
         <div className="chessboard-wrapper">
           <div className="chessboard-container">
-            <BoardCustomizer
+            <PieceSet color="black" selectedPiece={selectedPieceType} onPieceSelect={handlePieceSelect} />
+            <CustomGameBoard
               rows={rows}
               columns={columns}
               pieces={pieces}
               selected={selectedBoardPiece}
               onSquareClick={handleBoardClick}
             />
+            <PieceSet color="white" selectedPiece={selectedPieceType} onPieceSelect={handlePieceSelect}/>
           </div>
         </div>
-        <PlayPanel
+        <BoardPanel
           rows={rows}
           columns={columns}
           isSquare={isSquare}

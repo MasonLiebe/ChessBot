@@ -31,7 +31,7 @@ function App() {
             className={`nav-item ${activeWorkshop === 'play' ? 'active' : ''}`}
             onClick={() => handleWorkshopChange('play')}
           >
-            Play Against Bot
+            Play Vs. Bot
           </li>
         </ul>
       </nav>
