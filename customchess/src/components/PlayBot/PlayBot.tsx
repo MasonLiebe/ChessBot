@@ -77,7 +77,6 @@ export function PlayBot() {
 
   return (
     <div className="app">
-      <h1 className="app-title">Custom Game</h1>
       <div className="main-container">
         <div className="chessboard-wrapper">
           <div className="chessboard-container">

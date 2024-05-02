@@ -58,7 +58,7 @@ function PlayPanel({
   selected,
 }: PlayPanelProps) {
   return (
-    <div className="board-panel">
+    <div className="game-panel">
       <div className="board-panel-title">Board Properties</div>
       <div className="slider">
         <label htmlFor="rows-slider">Rows: {rows}</label>

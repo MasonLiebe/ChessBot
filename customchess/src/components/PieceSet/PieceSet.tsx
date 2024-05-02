@@ -53,7 +53,7 @@ function PieceSet({ color, selectedPiece, onPieceSelect }: PieceSetProps) {
           key={piece}
           src={`/assets/pieces/${color}-${piece}.png`}
           alt={`${color} ${piece}`}
-          className={`piece ${
+          className={`set-piece ${
             selectedPiece?.piece === piece_to_letter[piece] && selectedPiece?.color === color ? 'selected' : ''
           }`}
           onClick={() => handlePieceClick(piece)}

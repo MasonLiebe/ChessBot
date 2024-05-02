@@ -85,7 +85,6 @@ export function GameWorkshop() {
 
   return (
     <div className="app">
-      <h1 className="app-title">Custom Board Workshop</h1>
       <div className="main-container">
         <div className="chessboard-wrapper">
           <div className="chessboard-container">

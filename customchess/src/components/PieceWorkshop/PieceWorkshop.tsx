@@ -344,7 +344,6 @@ export function PieceWorkshop() {
 
   return (
     <div className="app">
-      <h1 className="app-title">Custom Piece Workshop</h1>
       <div className="main-container">
         <div className="chessboard-wrapper">
           <div className="chessboard-container">
