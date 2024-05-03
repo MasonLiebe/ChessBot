@@ -298,9 +298,6 @@ function PiecePanel({
           Set to Default Pattern
         </button>
       </div>
-      <button className="save-piece" onClick={onSavePieceClick}>
-        Save Piece
-      </button>
       <div className="size-slider">
         <label htmlFor="size">Board Size: {size}</label>
         <input
@@ -313,6 +310,10 @@ function PiecePanel({
           onChange={handleSizeChange}
         />
       </div>
+      <button className="save-piece" onClick={onSavePieceClick}>
+        Save Piece
+      </button>
+
 
     </div>
   );

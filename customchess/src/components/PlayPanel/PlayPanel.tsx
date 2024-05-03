@@ -58,15 +58,15 @@ function PlayPanel({
   selected,
 }: PlayPanelProps) {
   return (
-    <div className="game-panel">
-      <div className="board-panel-title">Board Properties</div>
+    <div className="play-panel">
+      <div className="board-panel-title">Game Control</div>
       <div className="slider">
-        <label htmlFor="rows-slider">Rows: {rows}</label>
+        <label htmlFor="rows-slider">Bot Think Time (s): {rows}</label>
         <input
           id="rows-slider"
           type="range"
-          min="3"
-          max="16"
+          min="1"
+          max="100"
           value={rows}
           onChange={onRowsChange}
         />

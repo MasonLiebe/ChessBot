@@ -186,12 +186,15 @@ export function PieceWorkshop() {
   const [selectedPattern, setSelectedPattern] = useState<MovementPattern>(patternA);
 
   let [activePatternIndex, setActivePatternIndex] = useState(0);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
 
   const handleDirectionChange = (direction: string, isAttack: boolean) => {
     setSelectedPattern((prevPattern) => ({
       ...prevPattern,
       [`${isAttack ? 'attack' : 'translate'}_${direction}`]: !prevPattern[`${isAttack ? 'attack' : 'translate'}_${direction}` as keyof MovementPattern],
     }));
+    setHasUnsavedChanges(true);
   };
 
   const handleSizeChange = (newSize: number) => {
@@ -225,6 +228,7 @@ export function PieceWorkshop() {
       setSelectedPattern(movementPatterns[5]);
       setActivePatternIndex(5);
     }
+    setHasUnsavedChanges(false);
   };
 
   const handleProgramAttackJumpsClick = () => {
@@ -262,6 +266,7 @@ export function PieceWorkshop() {
       attack_slides: [],
       translate_slides: [],
     });
+    setHasUnsavedChanges(true);
   }
 
   const handleDefaultPatternClick = () => {
@@ -284,6 +289,7 @@ export function PieceWorkshop() {
     if (selectedPiece.piece === 'g') {
       setSelectedPattern(patternF);
     }
+    setHasUnsavedChanges(true);
   }
 
   const handleProgramTranslateSlidesClick = () => {
@@ -297,13 +303,14 @@ export function PieceWorkshop() {
     updatedMovementPatterns[activePatternIndex] = selectedPattern;
     setMovementPatterns(updatedMovementPatterns);
     console.log(movementPatterns[activePatternIndex]);
+    setHasUnsavedChanges(false);
   };
 
   const toggleJump = (jumps: [number, number][], jumpCoord: [number, number]): [number, number][] => {
     const index = jumps.findIndex(
       (jump) => jump[0] === jumpCoord[0] && jump[1] === jumpCoord[1]
     );
-  
+    setHasUnsavedChanges(true);
     if (index !== -1) {
       return jumps.filter((_, i) => i !== index);
     } else {
@@ -345,8 +352,11 @@ export function PieceWorkshop() {
   return (
     <div className="app">
       <div className="main-container-piece">
-        <div className="chessboard-wrapper-piece">
+        <div className="chessboard-wrapper-piece">`
           <div className="chessboard-container-piece">
+          <div className={`changes-message`}>
+              {hasUnsavedChanges ? 'Warning! Unsaved Changes' : 'Piece Saved!'}
+          </div>
             <PieceCustomizer
               size={size}
               piece={String(selectedPiece.piece)}

@@ -1,7 +1,14 @@
-.game-panel {
-    width: 200px;
-    height: 800px;
-  }
+.play-panel {
+  width: 230px;
+  height: 800px;
+  background-color: #2c2e31;
+  padding: 12px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  border-radius: 25px;
+}
     
   .slider {
     display: flex;
