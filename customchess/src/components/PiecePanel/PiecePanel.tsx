@@ -73,109 +73,207 @@ function PiecePanel({
     onSizeChange(newSize);
   };
 
+  function getIconClass(direction: string) {
+    let attackActive = false;
+    let translateActive = false;
+  
+    switch (direction) {
+      case 'north':
+        attackActive = attack_north;
+        translateActive = translate_north;
+        break;
+      case 'east':
+        attackActive = attack_east;
+        translateActive = translate_east;
+        break;
+      case 'south':
+        attackActive = attack_south;
+        translateActive = translate_south;
+        break;
+      case 'west':
+        attackActive = attack_west;
+        translateActive = translate_west;
+        break;
+      case 'southEast':
+        attackActive = attack_southEast;
+        translateActive = translate_southEast;
+        break;
+      case 'southWest':
+        attackActive = attack_southWest;
+        translateActive = translate_southWest;
+        break;
+      case 'northEast':
+        attackActive = attack_northEast;
+        translateActive = translate_northEast;
+        break;
+      case 'northWest':
+        attackActive = attack_northWest;
+        translateActive = translate_northWest;
+        break;
+      default:
+        break;
+    }
+  
+    if (attackActive && translateActive) {
+      return 'both';
+    } else if (attackActive) {
+      return 'attack';
+    } else if (translateActive) {
+      return 'translate';
+    } else {
+      return 'none';
+    }
+  }
+
   return (
     <div className="piece-panel">
-      <div className="direction-grid">
-      <div className="row">
-        <div className="row-label"></div>
-        <div className="column-labels">
-          <div>Attack</div>
-        </div>
-        <div className="column-labels">
-          <div>Translate</div>
-        </div>
-      </div>
-        <div className="direction-rows">
-          <div className="row">
-            <div className="row-label">North</div>
-            <button
-              className={attack_north ? 'active' : ''}
-              onClick={() => handleDirectionClick('north', true)}
-            ></button>
-            <button
-              className={translate_north ? 'active' : ''}
-              onClick={() => handleDirectionClick('north', false)}
-            ></button>
-          </div>
-          <div className="row">
-            <div className="row-label">East</div>
-            <button
-              className={attack_east ? 'active' : ''}
-              onClick={() => handleDirectionClick('east', true)}
-            ></button>
-            <button
-              className={translate_east ? 'active' : ''}
-              onClick={() => handleDirectionClick('east', false)}
-            ></button>
-          </div>
-          <div className="row">
-            <div className="row-label">South</div>
-            <button
-              className={attack_south ? 'active' : ''}
-              onClick={() => handleDirectionClick('south', true)}
-            ></button>
-            <button
-              className={translate_south ? 'active' : ''}
-              onClick={() => handleDirectionClick('south', false)}
-            ></button>
-          </div>
-          <div className="row">
-            <div className="row-label">West</div>
-            <button
-              className={attack_west ? 'active' : ''}
-              onClick={() => handleDirectionClick('west', true)}
-            ></button>
-            <button
-              className={translate_west ? 'active' : ''}
-              onClick={() => handleDirectionClick('west', false)}
-            ></button>
-          </div>
-          <div className="row">
-            <div className="row-label">South-East</div>
-            <button
-              className={attack_southEast ? 'active' : ''}
-              onClick={() => handleDirectionClick('southEast', true)}
-            ></button>
-            <button
-              className={translate_southEast ? 'active' : ''}
-              onClick={() => handleDirectionClick('southEast', false)}
-            ></button>
-          </div>
-          <div className="row">
-            <div className="row-label">South-West</div>
-            <button
-              className={attack_southWest ? 'active' : ''}
-              onClick={() => handleDirectionClick('southWest', true)}
-            ></button>
-            <button
-              className={translate_southWest ? 'active' : ''}
-              onClick={() => handleDirectionClick('southWest', false)}
-            ></button>
-          </div>
-          <div className="row">
-            <div className="row-label">North-East</div>
-            <button
-              className={attack_northEast ? 'active' : ''}
-              onClick={() => handleDirectionClick('northEast', true)}
-            ></button>
-            <button
-              className={translate_northEast ? 'active' : ''}
-              onClick={() => handleDirectionClick('northEast', false)}
-            ></button>
-          </div>
-          <div className="row">
-            <div className="row-label">North-West</div>
-            <button
-              className={attack_northWest ? 'active' : ''}
-              onClick={() => handleDirectionClick('northWest', true)}
-            ></button>
-            <button
-              className={translate_northWest ? 'active' : ''}
-              onClick={() => handleDirectionClick('northWest', false)}
-            ></button>
-          </div>
-        </div>
-      </div>
+      <table className="direction-grid">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Attack</th>
+            <th>Translate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td className="row-label">
+              <img src="/assets/arrows/up-gold.svg" alt='up' className={getIconClass('north')} />
+            </td>
+            <td>
+              <button
+                className={attack_north ? 'active' : ''}
+                onClick={() => handleDirectionClick('north', true)}
+              ></button>
+            </td>
+            <td>
+              <button
+                className={translate_north ? 'active' : ''}
+                onClick={() => handleDirectionClick('north', false)}
+              ></button>
+            </td>
+          </tr>
+          <tr>
+            <td className="row-label">
+              <img src="/assets/arrows/right-gold.svg" alt="Right" className={getIconClass('east')} />
+            </td>
+            <td>
+              <button
+                className={attack_east ? 'active' : ''}
+                onClick={() => handleDirectionClick('east', true)}
+              ></button>
+            </td>
+            <td>
+              <button
+                className={translate_east ? 'active' : ''}
+                onClick={() => handleDirectionClick('east', false)}
+              ></button>
+            </td>
+          </tr>
+          <tr>
+            <td className="row-label">
+              <img src="/assets/arrows/down-gold.svg" alt="Down" className={getIconClass('south')} />
+            </td>
+            <td>
+              <button
+                className={attack_south ? 'active' : ''}
+                onClick={() => handleDirectionClick('south', true)}
+              ></button>
+            </td>
+            <td>
+              <button
+                className={translate_south ? 'active' : ''}
+                onClick={() => handleDirectionClick('south', false)}
+              ></button>
+            </td>
+          </tr>
+          <tr>
+            <td className="row-label">
+              <img src="/assets/arrows/left-gold.svg" alt="Left" className={getIconClass('west')} />
+            </td>
+            <td>
+              <button
+                className={attack_west ? 'active' : ''}
+                onClick={() => handleDirectionClick('west', true)}
+              ></button>
+            </td>
+            <td>
+              <button
+                className={translate_west ? 'active' : ''}
+                onClick={() => handleDirectionClick('west', false)}
+              ></button>
+            </td>
+          </tr>
+          <tr>
+            <td className="row-label">
+              <img src="/assets/arrows/down-right-gold.svg" alt="Down-Right" className={getIconClass('southEast')} />
+            </td>
+            <td>
+              <button
+                className={attack_southEast ? 'active' : ''}
+                onClick={() => handleDirectionClick('southEast', true) }
+              ></button>
+            </td>
+            <td>
+              <button
+                className={translate_southEast ? 'active' : ''}
+                onClick={() => handleDirectionClick('southEast', false)}
+              ></button>
+            </td>
+          </tr>
+          <tr>
+            <td className="row-label">
+              <img src="/assets/arrows/down-left-gold.svg" alt="Down-Left" className={getIconClass('southWest')} />
+            </td>
+            <td>
+              <button
+                className={attack_southWest ? 'active' : ''}
+                onClick={() => handleDirectionClick('southWest', true)}
+              ></button>
+            </td>
+            <td>
+              <button
+                className={translate_southWest ? 'active' : ''}
+                onClick={() => handleDirectionClick('southWest', false)}
+              ></button>
+            </td>
+          </tr>
+          <tr>
+            <td className="row-label">
+              <img src="/assets/arrows/up-right-gold.svg" alt="Up-Right" className={getIconClass('northEast')} />
+            </td>
+            <td>
+              <button
+                className={attack_northEast ? 'active' : ''}
+                onClick={() => handleDirectionClick('northEast', true)}
+              ></button>
+            </td>
+            <td>
+              <button
+                className={translate_northEast ? 'active' : ''}
+                onClick={() => handleDirectionClick('northEast', false)}
+              ></button>
+            </td>
+          </tr>
+          <tr>
+            <td className="row-label">
+              <img src="/assets/arrows/up-left-gold.svg" alt="Up-Left" className={getIconClass('northWest')} />
+            </td>
+            <td>
+              <button
+                className={attack_northWest ? 'active' : ''}
+                onClick={() => handleDirectionClick('northWest', true)}
+              ></button>
+            </td>
+            <td>
+              <button
+                className={translate_northWest ? 'active' : ''}
+                onClick={() => handleDirectionClick('northWest', false)}
+              ></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
       <div className="program-buttons">
         <button
           className={isProgrammingAttackJumps ? 'active-attack' : ''}

@@ -83,8 +83,8 @@ body {
   align-items: center;
 }
 
-.chessboard-container {
-  width: 830px;
+.chessboard-container-piece {
+  width: 640px;
   height: 760px;
   display: flex;
   justify-content: center;
@@ -110,7 +110,7 @@ body {
   align-items: center;
 }
 
-.main-container {
+.main-container-piece {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -118,7 +118,7 @@ body {
   gap: 0px;
 }
 
-.chessboard-container {
+.chessboard-container-piece {
   display: flex;
   justify-content: center;
   align-items: center;

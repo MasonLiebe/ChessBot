@@ -1,5 +1,5 @@
 .piece-panel {
-  width: 260px;
+  width: 280px;
   height: 800px;
   background-color: #2c2e31;
   padding: 12px;
@@ -11,67 +11,65 @@
 }
 
 .direction-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;;
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.column-labels {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.direction-grid th,
+.direction-grid td {
+  padding: 4px;
   text-align: center;
+}
+
+.direction-grid th {
   font-weight: bold;
-  font-family: "Raleway", sans-serif;
-  font-optical-sizing: auto;
-  color: #e2b714;
-  justify-self: center;
-}
-
-.direction-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.row {
-  display: grid;
-  grid-template-columns: 95px 90px 90px;
-  align-items: center;
-  justify-content: center;
-}
-
-.row-label {
-  text-align: center;
-  font-weight: bold;
-  font-family: "Raleway", sans-serif;
-  font-optical-sizing: auto;
-  font-size: small;
   color: #e2b714;
 }
 
-button {
-  font-family: "Raleway", sans-serif;
-  font-optical-sizing: auto;
-  font-size: 0.5rem;
-  color: #fff;
-  background-color: #3a3c3f;
-  border: none;
+.direction-grid .row-label {
+  width: 40px;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.direction-grid .row-label img {
+  width: 45px; /* Adjust the size of the SVG icons */
+  height: 45px;
+  margin-right: 15px;
+  vertical-align: middle;
+}
+
+.direction-grid .row-label img.none {
+  filter: invert(77%) sepia(40%) saturate(5%) hue-rotate(71deg) brightness(94%) contrast(87%);
+}
+
+.direction-grid .row-label img.attack {
+  filter: invert(17%) sepia(100%) saturate(3295%) hue-rotate(338deg) brightness(87%) contrast(100%);
+}
+
+.direction-grid .row-label img.translate {
+  filter: invert(58%) sepia(34%) saturate(3140%) hue-rotate(195deg) brightness(100%) contrast(87%);
+}
+
+.direction-grid .row-label img.both {
+  filter: invert(42%) sepia(94%) saturate(2631%) hue-rotate(228deg) brightness(98%) contrast(91%);
+}
+
+.direction-grid button {
   width: 40px;
   height: 40px;
   border-radius: 10px;
+  border: none;
+  background-color: #3a3c3f;
+  transition: background-color 0.3s;
   cursor: pointer;
-  outline: none;
-  transition: background-color 0.3s, transform 0.5s;
-  justify-self: left;
-  margin-left: 5px;
 }
 
-button.active {
+.direction-grid button.active {
   background-color: #e2b714;
-  color: #000;
 }
 
-button:hover {
+.direction-grid button:hover {
   background-color: #ddd;
 }
 
