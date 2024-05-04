@@ -62,22 +62,6 @@ body {
     }
   }
   
-  .slider-container {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 10px;
-    align-items: center;
-  }
-  
-  .slider {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font: 20px Roboto, sans-serif;
-    color : #fff;
-    margin-bottom: 20px;
-  }
-  
   .toggle-container {
     display: flex;
     align-items: center;

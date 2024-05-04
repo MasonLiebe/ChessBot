@@ -59,14 +59,14 @@ function PlayPanel({
 }: PlayPanelProps) {
   return (
     <div className="play-panel">
-      <div className="board-panel-title">Game Control</div>
+      <div className="board-panel-title">Game Properties</div>
       <div className="slider">
-        <label htmlFor="rows-slider">Bot Think Time (s): {rows}</label>
+        <label htmlFor="rows-slider">Bot Think Time (s) {rows}</label>
         <input
           id="rows-slider"
           type="range"
           min="1"
-          max="100"
+          max="100git "
           value={rows}
           onChange={onRowsChange}
         />
@@ -82,18 +82,9 @@ function PlayPanel({
           onChange={onColumnsChange}
         />
       </div>
-      <div className="toggle-container">
-        <label htmlFor="square-toggle">Lock as Square:</label>
-        <input
-          id="square-toggle"
-          type="checkbox"
-          checked={isSquare}
-          onChange={onSquareToggle}
-        />
-      </div>
-      <button className="board-button" onClick={onClearBoard}>Clear Board</button>
-      <button className="board-button" onClick={onResetBoard}>Reset Board</button>
-      <button className="start-button" onClick={onResetBoard}>Start Game!</button>
+      <button className="game-button" onClick={onClearBoard}>Undo Move</button>
+      <button className="game-button" onClick={onResetBoard}>Get Engine Move</button>
+      <button className="game-button" onClick={onResetBoard}>Resign</button>
       <div className="selected-piece-box">
         {selected && selected.piece ? (
           <img

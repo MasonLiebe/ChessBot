@@ -106,7 +106,7 @@ function BoardPanel({
         )}
       </div>
       <div className="selected-piece-title">Selected Piece</div>
-      <button className="board-button program-piece-btn" onClick={onProgramPiece}>Program Selected Piece</button>
+      <button className="board-button program-piece-btn" onClick={onProgramPiece}>Upload Game Mode</button>
 
     </div>
   );
