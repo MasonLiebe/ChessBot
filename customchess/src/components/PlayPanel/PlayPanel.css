@@ -66,15 +66,15 @@
     background-color: #a3e0ac; /* Lighter shade on hover */
   }
   
-  .board-button:active {
+  .game-button:active {
     transform: scale(0.95); /* Press down effect */
   }
   
-  .board-button:hover {
+  .game-button:hover {
     background-color: #505357; /* Lighter shade on hover */
   }
   
-  .board-button:active {
+  .game-button:active {
     transform: scale(0.95); /* Press down effect */
   }
   

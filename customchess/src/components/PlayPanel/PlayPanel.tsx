@@ -33,72 +33,39 @@ const piece_to_image: PieceToImageMap = {
 };
 
 interface PlayPanelProps {
-  rows: number;
-  columns: number;
-  isSquare: boolean;
-  onRowsChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onColumnsChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onSquareToggle: () => void;
-  onClearBoard: () => void;
-  onResetBoard: () => void;
-  onProgramPiece: () => void;
-  selected: { piece: string; color: string } | null;
+  botThinkTime: number;
+  onBotThinkTimeChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onUndoMove: () => void;
+  onGetEngineMove: () => void;
+  onFlipBoard: () => void;  
+  onResetGame: () => void;
 }
 
 function PlayPanel({
-  rows,
-  columns,
-  isSquare,
-  onRowsChange,
-  onColumnsChange,
-  onSquareToggle,
-  onClearBoard,
-  onResetBoard,
-  onProgramPiece,
-  selected,
+  botThinkTime,
+  onBotThinkTimeChange,
+  onUndoMove,
+  onGetEngineMove,
+  onFlipBoard,
+  onResetGame
 }: PlayPanelProps) {
   return (
     <div className="play-panel">
       <div className="board-panel-title">Game Properties</div>
       <div className="slider">
-        <label htmlFor="rows-slider">Bot Think Time (s) {rows}</label>
+        <label htmlFor="rows-slider">Bot Think Time (s) {botThinkTime}</label>
         <input
           id="rows-slider"
           type="range"
           min="1"
           max="100git "
-          value={rows}
-          onChange={onRowsChange}
+          value={botThinkTime}
+          onChange={onBotThinkTimeChange}
         />
       </div>
-      <div className="slider">
-        <label htmlFor="columns-slider">Columns: {columns}</label>
-        <input
-          id="columns-slider"
-          type="range"
-          min="3"
-          max="16"
-          value={columns}
-          onChange={onColumnsChange}
-        />
-      </div>
-      <button className="game-button" onClick={onClearBoard}>Undo Move</button>
-      <button className="game-button" onClick={onResetBoard}>Get Engine Move</button>
-      <button className="game-button" onClick={onResetBoard}>Resign</button>
-      <div className="selected-piece-box">
-        {selected && selected.piece ? (
-          <img
-            src={`/assets/pieces/${piece_to_image[selected.piece]}.png`}
-            alt={`${selected.color} ${selected.piece}`}
-            className="selected-piece"
-          />
-        ) : (
-          <div className="empty-box"></div>
-        )}
-      </div>
-      <div className="selected-piece-title">Selected Piece</div>
-      <button className="board-button program-piece-btn" onClick={onProgramPiece}>Program Selected Piece</button>
-
+      <button className="game-button" onClick={onUndoMove}>Undo Move</button>
+      <button className="game-button" onClick={onGetEngineMove}>Get Engine Move</button>
+      <button className="game-button" onClick={onFlipBoard}>Flip Board</button>
     </div>
   );
 }
