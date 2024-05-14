@@ -4,10 +4,16 @@ import CustomGameBoard from '../CustomGameBoard/CustomGameBoard';
 import PlayPanel from '../PlayPanel/PlayPanel';
 import { standardBoard } from '../../constants';
 
-export function PlayBot() {
-  const [rows, setRows] = useState(8);
-  const [columns, setColumns] = useState(8);
-  const [pieces, setPieces] = useState<string[]>(standardBoard.split(''));
+interface playBotProps {
+  init_rows: number;
+  init_columns: number;
+  init_pieces: string[];
+}
+
+export function PlayBot({ init_rows, init_columns, init_pieces }: playBotProps) {
+  const [rows, setRows] = useState(init_rows);
+  const [columns, setColumns] = useState(init_columns);
+  const [pieces, setPieces] = useState<string[]>(init_pieces);
   const [selectedBoardPiece, setSelectedBoardPiece] = useState<number | null>(null);
   const [botThinkTime, setBotThinkTime] = useState(5);
 

@@ -4,8 +4,13 @@ import BoardCustomizer from '../BoardCustomizer/BoardCustomizer';
 import BoardPanel from '../BoardPanel/BoardPanel';
 import PieceSet from '../PieceSet/PieceSet';
 import { standardBoard } from '../../constants';
+import { start } from 'repl';
 
-export function GameWorkshop() {
+interface GameWorkshopProps {
+  startGame: () => void;
+}
+
+export function GameWorkshop({startGame}: GameWorkshopProps) {
   const [rows, setRows] = useState(8);
   const [columns, setColumns] = useState(8);
   const [isSquare, setIsSquare] = useState(true);
@@ -101,8 +106,20 @@ export function GameWorkshop() {
         }
       }
     }
+    
+    if (!blackKingFound) {
+      console.log('Black has no king');
+      return;
+    }
+    if (!whiteKingFound) {
+      console.log('White has no king');
+      return;
+    }
+    
+    startGame();
+
   }
-  
+
   const handleUploadGameMode = () => {
     console.log('Upload Game Mode');
   }
@@ -138,7 +155,7 @@ export function GameWorkshop() {
           onSquareToggle={handleSquareToggle}
           onClearBoard={() => setPieces(Array(rows * columns).fill('.'))}
           onResetBoard={() => setPieces(standardBoard.split(''))}
-          onStartGame={() => console.log('Start Game')}
+          onStartGame={startGame}
           onUploadGameMode={handleUploadGameMode}
           selected={selectedPieceType}
         />

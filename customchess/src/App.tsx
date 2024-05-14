@@ -3,12 +3,24 @@ import './App.css';
 import { PieceWorkshop } from './components/PieceWorkshop/PieceWorkshop';
 import { GameWorkshop } from './components/GameWorkshop/GameWorkshop';
 import { PlayBot } from './components/PlayBot/PlayBot';
+import { standardBoard } from './constants';
 
 function App() {
   const [activeWorkshop, setActiveWorkshop] = useState('piece');
+  const [game_rows, setGameRows] = useState(8);
+  const [game_cols, setGameCols] = useState(8);
+  const [game_pieces, setGamePieces] = useState<string[]>(standardBoard.split(''));
+  const [movement_patterns, setMovementPatterns] = useState<string[]>(['']);
 
   const handleWorkshopChange = (workshop: React.SetStateAction<string>) => {
     setActiveWorkshop(workshop);
+  };
+
+  const startGame = () => {
+    setGameRows(8);
+    setGameCols(8);
+    setGamePieces(standardBoard.split(''));
+    setActiveWorkshop('play');
   };
 
   return (
@@ -40,10 +52,15 @@ function App() {
           <PieceWorkshop />
         </div>
         <div style={{ display: activeWorkshop === 'game' ? 'block' : 'none' }}>
-          <GameWorkshop />
+          <GameWorkshop
+            startGame={startGame}
+          />
         </div>
         <div style={{ display: activeWorkshop === 'play' ? 'block' : 'none' }}>
-          <PlayBot />
+          <PlayBot
+           init_rows = {game_rows}
+           init_columns = {game_cols}
+           init_pieces={game_pieces}/>
         </div>
       </div>
       <div className="footer">
