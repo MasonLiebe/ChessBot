@@ -41,7 +41,8 @@ interface BoardPanelProps {
   onSquareToggle: () => void;
   onClearBoard: () => void;
   onResetBoard: () => void;
-  onProgramPiece: () => void;
+  onUploadGameMode: () => void;
+  onStartGame: () => void;
   selected: { piece: string; color: string } | null;
 }
 
@@ -54,7 +55,8 @@ function BoardPanel({
   onSquareToggle,
   onClearBoard,
   onResetBoard,
-  onProgramPiece,
+  onUploadGameMode,
+  onStartGame,
   selected,
 }: BoardPanelProps) {
   return (
@@ -93,7 +95,7 @@ function BoardPanel({
       </div>
       <button className="board-button" onClick={onClearBoard}>Clear Board</button>
       <button className="board-button" onClick={onResetBoard}>Reset Board</button>
-      <button className="start-button" onClick={onResetBoard}>Start Game!</button>
+      <button className="start-button" onClick={onStartGame}>Start Game!</button>
       <div className="selected-piece-box">
         {selected && selected.piece ? (
           <img
@@ -106,7 +108,7 @@ function BoardPanel({
         )}
       </div>
       <div className="selected-piece-title">Selected Piece</div>
-      <button className="board-button program-piece-btn" onClick={onProgramPiece}>Upload Game Mode</button>
+      <button className="board-button program-piece-btn" onClick={onUploadGameMode}>Upload Game Mode</button>
 
     </div>
   );

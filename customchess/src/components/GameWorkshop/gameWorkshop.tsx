@@ -77,6 +77,36 @@ export function GameWorkshop() {
     }
   }
 
+  const handleStartGame = () => {
+    // Check if each player has exactly one king on the board
+    let blackKingFound = false;
+    let whiteKingFound = false;
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+        const index = (rows - row - 1) * 16 + columns - col - 1;
+        if (pieces[index] === 'k') {
+          if (blackKingFound) {
+            console.log('Black has more than one king');
+            return;
+          }
+          blackKingFound = true;
+        }
+        if (pieces[index] === 'K') {
+          if (whiteKingFound) {
+            console.log('White has more than one king');
+            return;
+          }
+          whiteKingFound = true;
+        }
+      }
+    }
+  }
+  
+  const handleUploadGameMode = () => {
+    console.log('Upload Game Mode');
+  }
+
   useEffect(() => {
     if (isSquare) {
       setColumns(rows);
@@ -108,7 +138,8 @@ export function GameWorkshop() {
           onSquareToggle={handleSquareToggle}
           onClearBoard={() => setPieces(Array(rows * columns).fill('.'))}
           onResetBoard={() => setPieces(standardBoard.split(''))}
-          onProgramPiece={() => setSelectedPieceType(null)}
+          onStartGame={() => console.log('Start Game')}
+          onUploadGameMode={handleUploadGameMode}
           selected={selectedPieceType}
         />
       </div>
