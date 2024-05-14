@@ -7,42 +7,23 @@ import { standardBoard } from '../../constants';
 export function PlayBot() {
   const [rows, setRows] = useState(8);
   const [columns, setColumns] = useState(8);
-  const [isSquare, setIsSquare] = useState(true);
   const [pieces, setPieces] = useState<string[]>(standardBoard.split(''));
-  const [selectedPieceType, setSelectedPieceType] = useState<{ piece: string; color: string } | null>(null);
   const [selectedBoardPiece, setSelectedBoardPiece] = useState<number | null>(null);
+  const [botThinkTime, setBotThinkTime] = useState(5);
 
-  const handlePieceSelect = (piece: string | null, color: string) => {
-    if (piece) {
-      setSelectedBoardPiece(null);
-      setSelectedPieceType({ piece, color });
-    } else {
-      setSelectedPieceType(null);
-    }
-  };
+  const initalizeBoard = (
+    rows: number,
+    columns: number,
+    pieces: string[]
+    ) => {
+      setRows(rows);
+      setColumns(columns);
+      setPieces(pieces);
+    };
 
-  const handleRowsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newRows = parseInt(event.target.value);
-    setRows(newRows);
-    if (isSquare) {
-      setColumns(newRows);
-    }
-  };
-
-  const handleColumnsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newColumns = parseInt(event.target.value);
-    setColumns(newColumns);
-    if (isSquare) {
-      setRows(newColumns);
-    }
-  };
-
-  const handleSquareToggle = () => {
-    setIsSquare(!isSquare);
-    if (!isSquare) {
-      setRows(8);
-      setColumns(8);
-    }
+  const handleBotThinkTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newBotThinkTime = parseInt(event.target.value);
+    setBotThinkTime(newBotThinkTime);
   };
 
   const handleBoardClick = (index: number) => {
@@ -54,12 +35,6 @@ export function PlayBot() {
       updatedPieces[selectedBoardPiece] = '.';
       setPieces(updatedPieces);
       setSelectedBoardPiece(null);
-    } else if (selectedPieceType) {
-      // Place the selected piece type on the clicked square
-      const updatedPieces = [...pieces];
-      console.log(selectedPieceType.piece);
-      updatedPieces[index] = selectedPieceType.piece;
-      setPieces(updatedPieces);
     } else {
       // Select the clicked board piece
       if (pieces[index] !== '.') {
@@ -68,11 +43,21 @@ export function PlayBot() {
     }
   };
 
-  useEffect(() => {
-    if (isSquare) {
-      setColumns(rows);
-    }
-  }, [isSquare, rows]);
+  const handleUndoMove = () => {
+    // Undo the last move
+  }
+
+  const handleGetEngineMove = () => {
+    // Get the engine move
+  }
+
+  const handleFlipBoard = () => {
+    // Flip the board
+  }
+
+  const handleResetGame = () => {
+    // Reset the game
+  }
 
   return (
     <div className="app">
@@ -88,18 +73,16 @@ export function PlayBot() {
             />
           </div>
         </div>
-        <PlayPanel
-          rows={rows}
-          columns={columns}
-          isSquare={isSquare}
-          onRowsChange={handleRowsChange}
-          onColumnsChange={handleColumnsChange}
-          onSquareToggle={handleSquareToggle}
-          onClearBoard={() => setPieces(Array(rows * columns).fill('.'))}
-          onResetBoard={() => setPieces(standardBoard.split(''))}
-          onProgramPiece={() => setSelectedPieceType(null)}
-          selected={selectedPieceType}
-        />
+        <div>
+          <PlayPanel
+            botThinkTime = {botThinkTime}
+            onBotThinkTimeChange = {handleBotThinkTimeChange}
+            onUndoMove = {handleUndoMove}
+            onGetEngineMove = {handleGetEngineMove}
+            onFlipBoard = {handleFlipBoard}
+            onResetGame = {handleResetGame}
+          />
+        </div>
       </div>
     </div>
   );

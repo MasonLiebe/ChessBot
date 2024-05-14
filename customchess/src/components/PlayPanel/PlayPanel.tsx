@@ -53,7 +53,7 @@ function PlayPanel({
     <div className="play-panel">
       <div className="board-panel-title">Game Properties</div>
       <div className="slider">
-        <label htmlFor="rows-slider">Bot Think Time (s) {botThinkTime}</label>
+        <label htmlFor="rows-slider">Think Time (s) {botThinkTime}</label>
         <input
           id="rows-slider"
           type="range"
