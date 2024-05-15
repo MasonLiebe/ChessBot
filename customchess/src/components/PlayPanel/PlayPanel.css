@@ -18,14 +18,6 @@
     font-optical-sizing: auto;
     text-align: center;
   }
-  
-  .toggle-container {
-    display: flex;
-    align-items: center;
-    color : #fff;
-    font-family: "Raleway", sans-serif;
-    font-optical-sizing: auto;
-  }
     
     /* Button styling */
   .game-button {
