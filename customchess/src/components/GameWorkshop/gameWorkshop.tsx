@@ -9,7 +9,7 @@ import { start } from 'repl';
 interface GameWorkshopProps {
   gameRows: number;
   gameColumns: number;
-  gamePieces: String[];
+  gamePieces: string[];
   updateGameRows: (rows : number) => void;
   updateGameColumns: (cols : number) => void;
   updateGamePieces: (pieces : string[]) => void;
@@ -20,7 +20,7 @@ export function GameWorkshop({ gameRows, gameColumns, gamePieces, updateGameRows
   const [rows, setRows] = useState(gameRows);
   const [columns, setColumns] = useState(gameColumns);
   const [isSquare, setIsSquare] = useState(true);
-  const [pieces, setPieces] = useState<string[]>(standardBoard.split(''));
+  const [pieces, setPieces] = useState<string[]>(gamePieces);
   const [selectedPieceType, setSelectedPieceType] = useState<{ piece: string; color: string } | null>(null);
   const [selectedBoardPiece, setSelectedBoardPiece] = useState<number | null>(null);
 

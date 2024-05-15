@@ -66,6 +66,7 @@ function PlayPanel({
       <button className="game-button" onClick={onUndoMove}>Undo Move</button>
       <button className="game-button" onClick={onGetEngineMove}>Get Engine Move</button>
       <button className="game-button" onClick={onFlipBoard}>Flip Board</button>
+      <button className="game-button" onClick={onResetGame}>Reset Game</button>
     </div>
   );
 }
