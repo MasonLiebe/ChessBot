@@ -11,7 +11,7 @@ function App() {
   const [game_rows, setGameRows] = useState(8);
   const [game_cols, setGameCols] = useState(8);
   const [game_pieces, setGamePieces] = useState<string[]>(standardBoard.split(''));
-  const [moveMentPatterns, setMovementPatterns] = useState<MovementPattern[]>(DefaultCustomPatterns);
+  const [movementPatterns, setMovementPatterns] = useState<MovementPattern[]>(DefaultCustomPatterns);
 
   const handleWorkshopChange = (workshop: React.SetStateAction<string>) => {
     setActiveWorkshop(workshop);
@@ -24,9 +24,10 @@ function App() {
     setActiveWorkshop('play');
   };
 
-  const handleSendPiece = () => {
-    console.log('sendpiece')
+  const updateMovementPatterns = ( updatedPatterns :  MovementPattern[] ) => {
+    setMovementPatterns(updatedPatterns)
   }
+
   return (
     <div className="app">
       <nav className="navbar">
@@ -59,7 +60,7 @@ function App() {
               updateMovementPatterns={updateMovementPatterns}
             />
           </div>
-          <div style={{ display: activeWorkshop === 'game' ? 'block' : 'none' }}>
+          {/* <div style={{ display: activeWorkshop === 'game' ? 'block' : 'none' }}>
             <GameWorkshop
               gameRows={gameRows}
               gameColumns={gameColumns}
@@ -77,7 +78,7 @@ function App() {
               gamePieces={gamePieces}
               movementPatterns={movementPatterns}
             />
-          </div>
+          </div> */}
         </div>
       </div>
       <div className="footer">

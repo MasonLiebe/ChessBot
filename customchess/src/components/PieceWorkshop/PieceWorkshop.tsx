@@ -6,10 +6,11 @@ import CustomPieceSet from '../CustomPIeceSet/CustomPieceSet';
 import { DefaultCustomPatterns, MovementPattern } from '../MovementPattern';
 
 interface PieceWorkshopProps {
-  sendPiece: () => void;
+  movementPatterns: MovementPattern[];
+  updateMovementPatterns: (updatedMovemntPatterns : MovementPattern[]) => void;
 }
 
-function PieceWorkshop({sendPiece}: PieceWorkshopProps) {
+function PieceWorkshop({ movementPatterns, updateMovementPatterns}: PieceWorkshopProps) {
   
   const [size, setSize] = useState(15);
   const [isProgrammingAttackJumps, setIsProgrammingAttackJumps] = useState(false);
@@ -17,8 +18,6 @@ function PieceWorkshop({sendPiece}: PieceWorkshopProps) {
   const [isProgrammingAttackSlides, setIsProgrammingAttackSlides] = useState(false);
   const [isProgrammingTranslateSlides, setIsProgrammingTranslateSlides] = useState(false);
   const [selectedPiece, setSelectedPiece] = useState<{ piece: string | null; color: string }>({piece: 'a', color: 'black'});
-
-  const [movementPatterns, setMovementPatterns] = useState<MovementPattern[]>(DefaultCustomPatterns);
 
   const [selectedPattern, setSelectedPattern] = useState<MovementPattern>(movementPatterns[0]);
 
@@ -138,7 +137,7 @@ function PieceWorkshop({sendPiece}: PieceWorkshopProps) {
   const handleSavePieceClick = () => {
     const updatedMovementPatterns = [...movementPatterns];
     updatedMovementPatterns[activePatternIndex] = selectedPattern;
-    setMovementPatterns(updatedMovementPatterns);
+    updateMovementPatterns(updatedMovementPatterns);
     console.log(movementPatterns[activePatternIndex]);
     setHasUnsavedChanges(false);
   };
