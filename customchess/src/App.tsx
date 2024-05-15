@@ -8,9 +8,9 @@ import { MovementPattern, DefaultCustomPatterns } from './components/MovementPat
 
 function App() {
   const [activeWorkshop, setActiveWorkshop] = useState('piece');
-  const [game_rows, setGameRows] = useState(8);
-  const [game_cols, setGameCols] = useState(8);
-  const [game_pieces, setGamePieces] = useState<string[]>(standardBoard.split(''));
+  const [gameRows, setGameRows] = useState<number>(8);
+  const [gameColumns, setGameCols] = useState<number>(8);
+  const [gamePieces, setGamePieces] = useState<string[]>(standardBoard.split(''));
   const [movementPatterns, setMovementPatterns] = useState<MovementPattern[]>(DefaultCustomPatterns);
 
   const handleWorkshopChange = (workshop: React.SetStateAction<string>) => {
@@ -24,9 +24,6 @@ function App() {
     setActiveWorkshop('play');
   };
 
-  const updateMovementPatterns = ( updatedPatterns :  MovementPattern[] ) => {
-    setMovementPatterns(updatedPatterns)
-  }
 
   return (
     <div className="app">
@@ -57,21 +54,21 @@ function App() {
           <div style={{ display: activeWorkshop === 'piece' ? 'block' : 'none' }}>
             <PieceWorkshop
               movementPatterns={movementPatterns}
-              updateMovementPatterns={updateMovementPatterns}
+              updateMovementPatterns={setMovementPatterns}
             />
           </div>
-          {/* <div style={{ display: activeWorkshop === 'game' ? 'block' : 'none' }}>
+          <div style={{ display: activeWorkshop === 'game' ? 'block' : 'none' }}>
             <GameWorkshop
               gameRows={gameRows}
               gameColumns={gameColumns}
               gamePieces={gamePieces}
-              updateGameRows={updateGameRows}
-              updateGameColumns={updateGameColumns}
-              updateGamePieces={updateGamePieces}
+              updateGameRows={setGameRows}
+              updateGameColumns={setGameCols}
+              updateGamePieces={setGamePieces}
               startGame={startGame}
             />
           </div>
-          <div style={{ display: activeWorkshop === 'play' ? 'block' : 'none' }}>
+          {/* <div style={{ display: activeWorkshop === 'play' ? 'block' : 'none' }}>
             <PlayBot
               gameRows={gameRows}
               gameColumns={gameColumns}

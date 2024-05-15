@@ -7,12 +7,18 @@ import { standardBoard } from '../../constants';
 import { start } from 'repl';
 
 interface GameWorkshopProps {
+  gameRows: number;
+  gameColumns: number;
+  gamePieces: String[];
+  updateGameRows: (rows : number) => void;
+  updateGameColumns: (cols : number) => void;
+  updateGamePieces: (pieces : string[]) => void;
   startGame: () => void;
 }
 
-export function GameWorkshop({startGame}: GameWorkshopProps) {
-  const [rows, setRows] = useState(8);
-  const [columns, setColumns] = useState(8);
+export function GameWorkshop({ gameRows, gameColumns, gamePieces, updateGameRows, updateGameColumns, updateGamePieces, startGame }: GameWorkshopProps) {
+  const [rows, setRows] = useState(gameRows);
+  const [columns, setColumns] = useState(gameColumns);
   const [isSquare, setIsSquare] = useState(true);
   const [pieces, setPieces] = useState<string[]>(standardBoard.split(''));
   const [selectedPieceType, setSelectedPieceType] = useState<{ piece: string; color: string } | null>(null);
@@ -29,25 +35,31 @@ export function GameWorkshop({startGame}: GameWorkshopProps) {
 
   const handleRowsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newRows = parseInt(event.target.value);
-    setRows(newRows);
     if (isSquare) {
-      setColumns(newRows);
+      setColumns(newRows)
+      updateGameColumns(newRows);
     }
+    setRows(newRows)
+    updateGameRows(newRows)
   };
 
   const handleColumnsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newColumns = parseInt(event.target.value);
-    setColumns(newColumns);
+    setColumns(newColumns)
+    updateGameColumns(newColumns);
     if (isSquare) {
-      setRows(newColumns);
+      setRows(newColumns)
+      updateGameRows(newColumns);
     }
   };
 
   const handleSquareToggle = () => {
     setIsSquare(!isSquare);
     if (!isSquare) {
-      setRows(8);
-      setColumns(8);
+      updateGameColumns(8);
+      updateGameRows(8);
+      setRows(8)
+      setColumns(8)
     }
   };
 
@@ -59,6 +71,7 @@ export function GameWorkshop({startGame}: GameWorkshopProps) {
       updatedPieces[index] = pieces[selectedBoardPiece];
       updatedPieces[selectedBoardPiece] = '.';
       setPieces(updatedPieces);
+      updateGamePieces(updatedPieces)
       setSelectedBoardPiece(null);
     } else if (selectedPieceType) {
       // Check if the clicked square already has the selected piece
@@ -67,12 +80,14 @@ export function GameWorkshop({startGame}: GameWorkshopProps) {
         const updatedPieces = [...pieces];
         updatedPieces[index] = '.';
         setPieces(updatedPieces);
+        updateGamePieces(updatedPieces);
       } else {
         // Place the selected piece type on the clicked square
         const updatedPieces = [...pieces];
         console.log(selectedPieceType.piece);
         updatedPieces[index] = selectedPieceType.piece;
         setPieces(updatedPieces);
+        updateGamePieces(updatedPieces);
       }
     } else {
       // Select the clicked board piece
@@ -124,12 +139,6 @@ export function GameWorkshop({startGame}: GameWorkshopProps) {
     console.log('Upload Game Mode');
   }
 
-  useEffect(() => {
-    if (isSquare) {
-      setColumns(rows);
-    }
-  }, [isSquare, rows]);
-
   return (
     <div className="app">
       <div className="main-container">
@@ -155,7 +164,7 @@ export function GameWorkshop({startGame}: GameWorkshopProps) {
           onSquareToggle={handleSquareToggle}
           onClearBoard={() => setPieces(Array(rows * columns).fill('.'))}
           onResetBoard={() => setPieces(standardBoard.split(''))}
-          onStartGame={startGame}
+          onStartGame={handleStartGame}
           onUploadGameMode={handleUploadGameMode}
           selected={selectedPieceType}
         />
