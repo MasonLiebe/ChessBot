@@ -68,14 +68,14 @@ function App() {
               startGame={startGame}
             />
           </div>
-          {/* <div style={{ display: activeWorkshop === 'play' ? 'block' : 'none' }}>
+          <div style={{ display: activeWorkshop === 'play' ? 'block' : 'none' }}>
             <PlayBot
               gameRows={gameRows}
               gameColumns={gameColumns}
               gamePieces={gamePieces}
-              movementPatterns={movementPatterns}
+              gameMovementPatterns={movementPatterns}
             />
-          </div> */}
+          </div>
         </div>
       </div>
       <div className="footer">

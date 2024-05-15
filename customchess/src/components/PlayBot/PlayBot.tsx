@@ -6,29 +6,19 @@ import { standardBoard } from '../../constants';
 import { MovementPattern } from '../MovementPattern';
 
 interface playBotProps {
-  GameRows: number;
-  GameColumns: number;
-  GamePieces: string[];
-  GameMovementPatterns: MovementPattern[]
+  gameRows: number;
+  gameColumns: number;
+  gamePieces: string[];
+  gameMovementPatterns: MovementPattern[]
 }
 
-export function PlayBot({ GameRows, GameColumns, GamePieces, GameMovementPatterns }: playBotProps) {
-  const [rows, setRows] = useState(GameRows);
-  const [columns, setColumns] = useState(GameColumns);
-  const [pieces, setPieces] = useState<string[]>(GamePieces);
-  const [movementPatterns, setMovementPatterns] = useState<MovementPattern[]>(GameMovementPatterns)
+export function PlayBot({ gameRows, gameColumns, gamePieces, gameMovementPatterns }: playBotProps) {
+  const [rows, setRows] = useState(gameRows);
+  const [columns, setColumns] = useState(gameColumns);
+  const [pieces, setPieces] = useState<string[]>(gamePieces);
+  const [movementPatterns, setMovementPatterns] = useState<MovementPattern[]>(gameMovementPatterns)
   const [selectedBoardPiece, setSelectedBoardPiece] = useState<number | null>(null);
   const [botThinkTime, setBotThinkTime] = useState(5);
-
-  const initalizeBoard = (
-    rows: number,
-    columns: number,
-    pieces: string[]
-    ) => {
-      setRows(rows);
-      setColumns(columns);
-      setPieces(pieces);
-    };
 
   const handleBotThinkTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newBotThinkTime = parseInt(event.target.value);
@@ -67,6 +57,13 @@ export function PlayBot({ GameRows, GameColumns, GamePieces, GameMovementPattern
   const handleResetGame = () => {
     // Reset the game
   }
+
+  useEffect(() => {
+    setRows(gameRows);
+    setColumns(gameColumns);
+    setPieces(gamePieces);
+    setMovementPatterns(gameMovementPatterns);
+  }, [gameRows, gameColumns, gamePieces, gameMovementPatterns]);
 
   return (
     <div className="app">
