@@ -1,8 +1,7 @@
 .app {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 20px;
+  min-height: 80vh;
 }
 
 .navbar {
@@ -35,10 +34,34 @@
   color: #e2b714;
 }
 
+.content-container {
+  flex: 1;
+  margin-top: 80px;
+}
+
 .workshop-container {
   margin-top: 20px;
 }
 
 .footer {
   color: #e2b714;
+  margin-top: auto;
+  align-self: center;
+}
+
+.footer p {
+  display: flex;
+  align-items: center;
+}
+
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.github-logo {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
 }

@@ -84,7 +84,7 @@ body {
 }
 
 .chessboard-container-piece {
-  width: 830px;
+  width: 760px;
   height: 760px;
   display: flex;
   justify-content: center;

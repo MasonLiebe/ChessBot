@@ -3,17 +3,20 @@ import './PlayBot.css';
 import CustomGameBoard from '../CustomGameBoard/CustomGameBoard';
 import PlayPanel from '../PlayPanel/PlayPanel';
 import { standardBoard } from '../../constants';
+import { MovementPattern } from '../MovementPattern';
 
 interface playBotProps {
-  init_rows: number;
-  init_columns: number;
-  init_pieces: string[];
+  GameRows: number;
+  GameColumns: number;
+  GamePieces: string[];
+  GameMovementPatterns: MovementPattern[]
 }
 
-export function PlayBot({ init_rows, init_columns, init_pieces }: playBotProps) {
-  const [rows, setRows] = useState(init_rows);
-  const [columns, setColumns] = useState(init_columns);
-  const [pieces, setPieces] = useState<string[]>(init_pieces);
+export function PlayBot({ GameRows, GameColumns, GamePieces, GameMovementPatterns }: playBotProps) {
+  const [rows, setRows] = useState(GameRows);
+  const [columns, setColumns] = useState(GameColumns);
+  const [pieces, setPieces] = useState<string[]>(GamePieces);
+  const [movementPatterns, setMovementPatterns] = useState<MovementPattern[]>(GameMovementPatterns)
   const [selectedBoardPiece, setSelectedBoardPiece] = useState<number | null>(null);
   const [botThinkTime, setBotThinkTime] = useState(5);
 

@@ -68,7 +68,7 @@ body {
   }
   
   .chessboard-container-game {
-    width: 830px;
+    width: 780px;
     height: 760px;
     display: flex;
     justify-content: center;

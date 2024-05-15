@@ -4,13 +4,14 @@ import { PieceWorkshop } from './components/PieceWorkshop/PieceWorkshop';
 import { GameWorkshop } from './components/GameWorkshop/GameWorkshop';
 import { PlayBot } from './components/PlayBot/PlayBot';
 import { standardBoard } from './constants';
+import { MovementPattern, DefaultCustomPatterns } from './components/MovementPattern';
 
 function App() {
   const [activeWorkshop, setActiveWorkshop] = useState('piece');
   const [game_rows, setGameRows] = useState(8);
   const [game_cols, setGameCols] = useState(8);
   const [game_pieces, setGamePieces] = useState<string[]>(standardBoard.split(''));
-  const [movement_patterns, setMovementPatterns] = useState<string[]>(['']);
+  const [moveMentPatterns, setMovementPatterns] = useState<MovementPattern[]>(DefaultCustomPatterns);
 
   const handleWorkshopChange = (workshop: React.SetStateAction<string>) => {
     setActiveWorkshop(workshop);
@@ -23,6 +24,9 @@ function App() {
     setActiveWorkshop('play');
   };
 
+  const handleSendPiece = () => {
+    console.log('sendpiece')
+  }
   return (
     <div className="app">
       <nav className="navbar">
@@ -47,30 +51,49 @@ function App() {
           </li>
         </ul>
       </nav>
-      <div className="workshop-container">
-        <div style={{ display: activeWorkshop === 'piece' ? 'block' : 'none' }}>
-          <PieceWorkshop />
-        </div>
-        <div style={{ display: activeWorkshop === 'game' ? 'block' : 'none' }}>
-          <GameWorkshop
-            startGame={startGame}
-          />
-        </div>
-        <div style={{ display: activeWorkshop === 'play' ? 'block' : 'none' }}>
-          <PlayBot
-           init_rows = {game_rows}
-           init_columns = {game_cols}
-           init_pieces={game_pieces}/>
+      <div className="content-container">
+        <div className="workshop-container">
+          <div style={{ display: activeWorkshop === 'piece' ? 'block' : 'none' }}>
+            <PieceWorkshop
+              movementPatterns={movementPatterns}
+              updateMovementPatterns={updateMovementPatterns}
+            />
+          </div>
+          <div style={{ display: activeWorkshop === 'game' ? 'block' : 'none' }}>
+            <GameWorkshop
+              gameRows={gameRows}
+              gameColumns={gameColumns}
+              gamePieces={gamePieces}
+              updateGameRows={updateGameRows}
+              updateGameColumns={updateGameColumns}
+              updateGamePieces={updateGamePieces}
+              startGame={startGame}
+            />
+          </div>
+          <div style={{ display: activeWorkshop === 'play' ? 'block' : 'none' }}>
+            <PlayBot
+              gameRows={gameRows}
+              gameColumns={gameColumns}
+              gamePieces={gamePieces}
+              movementPatterns={movementPatterns}
+            />
+          </div>
         </div>
       </div>
       <div className="footer">
         <p>
-          Made for fun by Mason Liebe
+          Made for fun by Mason Liebe&nbsp;
           <a
-            href="https://github.com/MasonLiebe?tab=overview&from=2024-04-01&to=2024-04-29"
+            href="https://github.com/MasonLiebe/ChessBot"
             target="_blank"
-            color='white'
-          >Mason Liebe</a>
+            className="github-link"
+          >
+            <img
+              src={`assets/github.png`}
+              alt="githublogo"
+              className="github-logo"
+            />
+          </a>
         </p>
       </div>
     </div>
