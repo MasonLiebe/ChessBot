@@ -19,6 +19,8 @@ export function PlayBot({ gameRows, gameColumns, gamePieces, gameMovementPattern
   const [movementPatterns, setMovementPatterns] = useState<MovementPattern[]>(gameMovementPatterns)
   const [selectedBoardPiece, setSelectedBoardPiece] = useState<number | null>(null);
   const [botThinkTime, setBotThinkTime] = useState(5);
+  const [isWhiteTurn, setIsWhiteTurn] = useState(true);
+  const [isGameOver, setIsGameOver] = useState(false);
 
   const handleBotThinkTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newBotThinkTime = parseInt(event.target.value);
@@ -56,6 +58,18 @@ export function PlayBot({ gameRows, gameColumns, gamePieces, gameMovementPattern
 
   const handleResetGame = () => {
     // Reset the game
+  }
+
+  const getLegalMoves = (piece: string, index: number) => {
+    // Get the legal moves for the selected piece from the engine
+  }
+
+  const makeUserMove = (index: number) => {
+    // Make the user move
+  }
+
+  const makeEngineMove = () => {
+    // Make the engine move
   }
 
   useEffect(() => {

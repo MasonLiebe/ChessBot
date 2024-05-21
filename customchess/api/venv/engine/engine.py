@@ -182,7 +182,7 @@ class Engine:
                     color = 'white' if owner == 0 else 'black'
                     pieces.append((color, x, y, piece.piece_type.name))
         return pieces
-
+    
 
 # def play_test(engine):
 #     while True:
