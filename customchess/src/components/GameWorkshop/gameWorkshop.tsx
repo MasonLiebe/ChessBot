@@ -14,6 +14,7 @@ interface GameWorkshopProps {
   updateGameColumns: (cols : number) => void;
   updateGamePieces: (pieces : string[]) => void;
   startGame: () => void;
+
 }
 
 export function GameWorkshop({ gameRows, gameColumns, gamePieces, updateGameRows, updateGameColumns, updateGamePieces, startGame }: GameWorkshopProps) {
@@ -139,6 +140,11 @@ export function GameWorkshop({ gameRows, gameColumns, gamePieces, updateGameRows
     console.log('Upload Game Mode');
   }
 
+  const handleResetBoard = () => {
+    setPieces(standardBoard.split(''));
+    updateGamePieces(standardBoard.split(''));
+  }
+
   return (
     <div className="app">
       <div className="main-container">
@@ -163,7 +169,7 @@ export function GameWorkshop({ gameRows, gameColumns, gamePieces, updateGameRows
           onColumnsChange={handleColumnsChange}
           onSquareToggle={handleSquareToggle}
           onClearBoard={() => setPieces(Array(rows * columns).fill('.'))}
-          onResetBoard={() => setPieces(standardBoard.split(''))}
+          onResetBoard={handleResetBoard}
           onStartGame={handleStartGame}
           onUploadGameMode={handleUploadGameMode}
           selected={selectedPieceType}

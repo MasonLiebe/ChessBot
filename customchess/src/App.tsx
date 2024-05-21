@@ -18,9 +18,8 @@ function App() {
   };
 
   const startGame = () => {
-    setGameRows(8);
-    setGameCols(8);
-    setGamePieces(standardBoard.split(''));
+    // iterate through unshown pieces and remove them from the board string
+    
     setActiveWorkshop('play');
   };
 
@@ -29,6 +28,12 @@ function App() {
     <div className="app">
       <nav className="navbar">
         <ul className="navbar-nav">
+          <li
+            className={`nav-item ${activeWorkshop === 'published' ? 'active' : ''}`}
+            onClick={() => handleWorkshopChange('published')}
+          >
+            Game Ideas
+          </li>
           <li
             className={`nav-item ${activeWorkshop === 'piece' ? 'active' : ''}`}
             onClick={() => handleWorkshopChange('piece')}
@@ -65,8 +70,7 @@ function App() {
               updateGameRows={setGameRows}
               updateGameColumns={setGameCols}
               updateGamePieces={setGamePieces}
-              startGame={startGame}
-            />
+              startGame={startGame}/>
           </div>
           <div style={{ display: activeWorkshop === 'play' ? 'block' : 'none' }}>
             <PlayBot
